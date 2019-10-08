@@ -1,0 +1,24 @@
+{
+  "name": "narrator",
+  "version": "0.1.0",
+  "main": "index.js",
+  "scripts": {
+    "watch-server": "nodemon --watch src -e ts,tsx --exec ts-node src/server.ts",
+    "build": "tsc",
+    "format": "prettier --write 'src/**/*.{ts,js}'"
+  },
+  "dependencies": {
+    "koa": "^2.8.2",
+    "koa-send": "^5.0.0",
+    "koa-static": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/koa": "^2.0.50",
+    "@types/koa-send": "^4.1.2",
+    "@types/koa-static": "^4.0.1",
+    "nodemon": "^1.19.3",
+    "prettier": "^1.18.2",
+    "ts-node": "^8.4.1",
+    "typescript": "^3.6.3"
+  }
+}
