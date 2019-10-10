@@ -4,9 +4,9 @@ import send from 'koa-send'
 
 const app = new Koa()
 
-app.use(koaStatic('public'))
+app.use(koaStatic(`${__dirname}/public`))
 app.use(async (ctx: Koa.Context) => {
-  await send(ctx, 'index.html', {root: './public'})
+  await send(ctx, 'index.html', {root: `${__dirname}/public`})
 })
 
 app.listen(3000)
