@@ -2,11 +2,21 @@
   "compilerOptions": {
     "module": "commonjs",
     "target": "es2017",
+    "outDir": "build",
+    "sourceMap": true,
+    "strict": true,
+    "esModuleInterop": true,
     "noImplicitAny": true,
-    "outDir": "./dist",
-    "sourceMap": true
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "jsx": "react"
   },
   "include": [
-    "src/**/*"
+    "src/server.ts"
+  ],
+  "exclude": [
+    "node_modules"
   ]
 }
