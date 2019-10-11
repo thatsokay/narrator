@@ -1,5 +1,6 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const path = require('path')
+const fs = require('fs')
 
 const commonConfig = {
   resolve: {
@@ -30,6 +31,13 @@ const serverConfig = {
     console: false,
     __dirname: false,
   },
+  externals: fs
+    .readdirSync('node_modules')
+    .filter(module => ['.bin'].indexOf(module) === -1)
+    .reduce((acc, module) => {
+      acc[module] = `commonjs ${module}`
+      return acc
+    }, {}),
   entry: {
     server: './src/server.ts',
   },
