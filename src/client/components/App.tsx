@@ -16,28 +16,38 @@ const App = () => {
   // @ts-ignore
   const [socket, setSocket] = useState<SocketIOClient.Socket | null>(null)
 
-  const handleCreateSubmit = (playerName: string) => {
+  const handleSubmit = (playerName: string, roomId?: string) => (
+    event: React.FormEvent,
+  ) => {
+    event.preventDefault()
     const socket = socketIO()
     socket.once('connect', () => {
       console.log('connected')
-      socket.emit(EVENTS.CREATE_ROOM, playerName, (roomId: string) => {
-        console.log(`room created ${roomId}`)
-        setRoomId(roomId)
-      })
+      if (roomId === undefined) {
+        socket.emit(EVENTS.CREATE_ROOM, playerName, (roomId: string) => {
+          console.log(`room created ${roomId}`)
+          setPlayerName(playerName)
+          setRoomId(roomId)
+        })
+      } else {
+        socket.emit(EVENTS.JOIN_ROOM, playerName, roomId, () => {
+          console.log(`joined room ${roomId}`)
+          setPlayerName(playerName)
+          setRoomId(roomId)
+        })
+      }
     })
-    setPlayerName(playerName)
+    socket.on('disconnect', () => {
+      console.log('disconnected')
+      setSocket(null)
+    })
     setSocket(socket)
-  }
-
-  const handleJoinSubmit = (roomId: string, playerName: string) => {
-    setRoomId(roomId)
-    setPlayerName(playerName)
   }
 
   return (
     <>
-      <CreateForm handleSubmit={handleCreateSubmit} />
-      <JoinForm handleSubmit={handleJoinSubmit} />
+      <CreateForm handleSubmit={handleSubmit} />
+      <JoinForm handleSubmit={handleSubmit} />
     </>
   )
 }

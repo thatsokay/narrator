@@ -1,19 +1,17 @@
-import React, {useState, FormEvent} from 'react'
+import React, {useState} from 'react'
 
 interface Props {
-  handleSubmit: (playerName: string) => void
+  handleSubmit: (
+    playerName: string,
+    roomId?: string,
+  ) => (event: React.FormEvent) => void
 }
 
 const CreateForm = (props: Props) => {
   const [playerName, setPlayerName] = useState('')
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    props.handleSubmit(playerName)
-  }
-
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={props.handleSubmit(playerName)}>
       <label htmlFor="create-player-name">Player name</label>
       <input
         value={playerName}

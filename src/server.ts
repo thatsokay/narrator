@@ -21,8 +21,15 @@ io.on('connection', (socket) => {
   socket.on(
     EVENTS.CREATE_ROOM,
     (playerName: string, ack: (roomId: string) => void) => {
-      console.log(playerName, ' created a room')
+      console.log(playerName, 'created a room')
       ack('ASDF')
+    },
+  )
+  socket.on(
+    EVENTS.JOIN_ROOM,
+    (playerName: string, roomId: string, ack: () => void) => {
+      console.log(playerName, 'joined room', roomId)
+      ack()
     },
   )
 })
