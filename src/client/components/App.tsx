@@ -3,7 +3,8 @@ import socketIO from 'socket.io-client'
 
 import CreateForm from './CreateForm'
 import JoinForm from './JoinForm'
-import {EVENTS} from '../../constants'
+import {EVENTS} from '../../shared/constants'
+import {EventResponse} from '../../shared/types'
 
 const App = () => {
   // TODO: Remove
@@ -24,17 +25,30 @@ const App = () => {
     socket.once('connect', () => {
       console.log('connected')
       if (roomId === undefined) {
-        socket.emit(EVENTS.CREATE_ROOM, playerName, (roomId: string) => {
-          console.log(`room created ${roomId}`)
-          setPlayerName(playerName)
-          setRoomId(roomId)
-        })
+        socket.emit(
+          EVENTS.CREATE_ROOM,
+          playerName,
+          (response: EventResponse<{roomId: string}>) => {
+            if (response.success) {
+              console.log('room created', response.roomId)
+              setPlayerName(playerName)
+              setRoomId(response.roomId)
+            }
+          },
+        )
       } else {
-        socket.emit(EVENTS.JOIN_ROOM, playerName, roomId, () => {
-          console.log(`joined room ${roomId}`)
-          setPlayerName(playerName)
-          setRoomId(roomId)
-        })
+        socket.emit(
+          EVENTS.JOIN_ROOM,
+          playerName,
+          roomId,
+          (response: EventResponse<{}>) => {
+            if (response.success) {
+              console.log('joined room', roomId)
+              setPlayerName(playerName)
+              setRoomId(roomId)
+            }
+          },
+        )
       }
     })
     socket.on('disconnect', () => {
