@@ -39,7 +39,7 @@ const serverConfig = {
       return acc
     }, {}),
   entry: {
-    server: './src/server.ts',
+    server: './src/server/server.ts',
   },
   output: {
     path: path.resolve(__dirname, 'build'),

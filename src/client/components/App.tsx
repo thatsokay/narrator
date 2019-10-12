@@ -20,6 +20,10 @@ const App = () => {
   const handleSubmit = (playerName: string, roomId?: string) => (
     event: React.FormEvent,
   ) => {
+    /* Takes a player name and optionally a room id and returns an event
+     * handler. Creates a socket that emits an event on connection depending on
+     * whether a room id was provided.
+     */
     event.preventDefault()
     const socket = socketIO()
     socket.once('connect', () => {
@@ -30,9 +34,13 @@ const App = () => {
           playerName,
           (response: EventResponse<{roomId: string}>) => {
             if (response.success) {
-              console.log('room created', response.roomId)
+              console.log('Created room', response.roomId)
               setPlayerName(playerName)
               setRoomId(response.roomId)
+            } else {
+              console.log('Failed to create room due to', response.reason)
+              socket.close()
+              setSocket(null)
             }
           },
         )
@@ -43,9 +51,18 @@ const App = () => {
           roomId,
           (response: EventResponse<{}>) => {
             if (response.success) {
-              console.log('joined room', roomId)
+              console.log('Joined room', roomId)
               setPlayerName(playerName)
               setRoomId(roomId)
+            } else {
+              console.log(
+                'Failed to join room',
+                roomId,
+                'because',
+                response.reason,
+              )
+              socket.close()
+              setSocket(null)
             }
           },
         )

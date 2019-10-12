@@ -3,8 +3,9 @@ import koaStatic from 'koa-static'
 import send from 'koa-send'
 import socketIO from 'socket.io'
 
-import {EVENTS} from './shared/constants'
-import {EventResponse} from './shared/types'
+import {createRoom, joinRoom} from './registry'
+import {EVENTS} from '../shared/constants'
+import {EventResponse} from '../shared/types'
 
 const app = new Koa()
 const io = socketIO()
@@ -25,8 +26,7 @@ io.on('connection', socket => {
       playerName: string,
       ack: (response: EventResponse<{roomId: string}>) => void,
     ) => {
-      console.log(playerName, 'created a room')
-      ack({success: true, roomId: 'ASDF'})
+      createRoom(playerName, ack)
     },
   )
   socket.on(
@@ -36,8 +36,7 @@ io.on('connection', socket => {
       roomId: string,
       ack: (response: EventResponse<{}>) => void,
     ) => {
-      console.log(playerName, 'joined room', roomId)
-      ack({success: true})
+      joinRoom(playerName, roomId, ack)
     },
   )
 })
