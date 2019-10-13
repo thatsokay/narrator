@@ -3,7 +3,7 @@ import koaStatic from 'koa-static'
 import send from 'koa-send'
 import socketIO from 'socket.io'
 
-import {createRoom, joinRoom} from './registry'
+import {createRoom, joinRoom, disconnect} from './registry'
 import {EVENTS} from '../shared/constants'
 import {EventResponse} from '../shared/types'
 
@@ -19,24 +19,25 @@ io.on('connection', socket => {
   console.log('Socket connected')
   socket.on('disconnect', (reason: string) => {
     console.log(`Socket disconnected due to ${reason}`)
+    disconnect(socket.id)
   })
-  socket.on(
+  socket.once(
     EVENTS.CREATE_ROOM,
     (
       playerName: string,
       ack: (response: EventResponse<{roomId: string}>) => void,
     ) => {
-      createRoom(playerName, ack)
+      createRoom(socket.id, playerName, ack)
     },
   )
-  socket.on(
+  socket.once(
     EVENTS.JOIN_ROOM,
     (
       playerName: string,
       roomId: string,
       ack: (response: EventResponse<{}>) => void,
     ) => {
-      joinRoom(playerName, roomId, ack)
+      joinRoom(socket.id, playerName, roomId, ack)
     },
   )
 })
