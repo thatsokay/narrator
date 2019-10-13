@@ -1,24 +1,38 @@
-import {createRoom, joinRoom, disconnect} from './registry'
+import {
+  Registry,
+  newRegistry,
+  createRoom,
+  joinRoom,
+  disconnect,
+} from './registry'
 
-test('creating and joining a room', () => {
-  const roomId = createRoom('foo', 'foo', response => {
+let registry: Registry
+
+beforeEach(() => {
+  registry = newRegistry()
+})
+
+test('creating, joining, and leaving a room', () => {
+  let roomId: string = ''
+  createRoom(registry, 'foo', 'foo', response => {
     expect(response.success).toBe(true)
-    if (!response.success) {
-      return ''
+    if (response.success) {
+      roomId = response.roomId
     }
-    return response.roomId
   })
+  expect(roomId).toBeTruthy()
 
-  joinRoom('bar', 'bar', roomId, response => {
+  joinRoom(registry, 'bar', 'bar', roomId, response => {
     expect(response.success).toBe(true)
   })
 
-  expect(disconnect('foo')).toBe(true)
-  expect(disconnect('bar')).toBe(true)
+  expect(disconnect(registry, 'foo')).toBe(true)
+  expect(disconnect(registry, 'bar')).toBe(true)
+  expect(registry).toEqual(newRegistry())
 })
 
 test('joining non-existent room', () => {
-  joinRoom('foo', 'foo', 'foo', response => {
+  joinRoom(registry, 'foo', 'foo', 'foo', response => {
     expect(response.success).toBe(false)
     if (response.success === true) {
       return

@@ -3,12 +3,13 @@ import koaStatic from 'koa-static'
 import send from 'koa-send'
 import socketIO from 'socket.io'
 
-import {createRoom, joinRoom, disconnect} from './registry'
+import {newRegistry, createRoom, joinRoom, disconnect} from './registry'
 import {EVENTS} from '../shared/constants'
 import {EventResponse} from '../shared/types'
 
 const app = new Koa()
 const io = socketIO()
+const registry = newRegistry()
 
 app.use(koaStatic(`${__dirname}/public`))
 app.use(async (ctx: Koa.Context) => {
@@ -16,6 +17,9 @@ app.use(async (ctx: Koa.Context) => {
 })
 
 io.on('connection', socket => {
+  socket.on('disconnect', (reason: string) => {
+    console.log(`Socket disconnected due to ${reason}`)
+  })
   console.log('Socket connected')
   socket.once(
     EVENTS.CREATE_ROOM,
@@ -23,10 +27,9 @@ io.on('connection', socket => {
       playerName: string,
       ack: (response: EventResponse<{roomId: string}>) => void,
     ) => {
-      createRoom(socket.id, playerName, ack)
-      socket.on('disconnect', (reason: string) => {
-        console.log(`Socket disconnected due to ${reason}`)
-        disconnect(socket.id)
+      createRoom(registry, socket.id, playerName, ack)
+      socket.on('disconnect', () => {
+        disconnect(registry, socket.id)
       })
     },
   )
@@ -37,10 +40,9 @@ io.on('connection', socket => {
       roomId: string,
       ack: (response: EventResponse<{}>) => void,
     ) => {
-      joinRoom(socket.id, playerName, roomId, ack)
-      socket.on('disconnect', (reason: string) => {
-        console.log(`Socket disconnected due to ${reason}`)
-        disconnect(socket.id)
+      joinRoom(registry, socket.id, playerName, roomId, ack)
+      socket.on('disconnect', () => {
+        disconnect(registry, socket.id)
       })
     },
   )

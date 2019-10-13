@@ -1,10 +1,5 @@
 import {EventResponse} from '../shared/types'
 
-const socketRegistry: {[socketId: string]: string} = {}
-const roomRegistry: {
-  [roomId: string]: {socketId: string; playerName: string}[]
-} = {}
-
 const randomRoomId = (length: number) => {
   /* Generates a random string of capital letters of given length.
    */
@@ -15,44 +10,53 @@ const randomRoomId = (length: number) => {
   return chars.join('')
 }
 
-export const createRoom = <T>(
+export interface Registry {
+  sockets: {[socketId: string]: string}
+  rooms: {[roomId: string]: {socketId: string; playerName: string}[]}
+}
+
+export const newRegistry = (): Registry => ({sockets: {}, rooms: {}})
+
+export const createRoom = (
+  registry: Registry,
   socketId: string,
   playerName: string,
-  ack: (response: EventResponse<{roomId: string}>) => T,
-): T => {
+  ack: (response: EventResponse<{roomId: string}>) => void,
+) => {
   /* Create a new room with a single player. Generates random room ids until an
    * available id is found.
    */
-  if (socketRegistry[socketId] !== undefined) {
+  if (registry.sockets[socketId] !== undefined) {
     console.error(socketId, 'attempted to create room when already registered')
     return ack({success: false, reason: 'Already in a room'})
   }
 
   let roomId = randomRoomId(4)
-  while (roomRegistry[roomId] !== undefined) {
+  while (registry.rooms[roomId] !== undefined) {
     roomId = randomRoomId(4)
   }
-  socketRegistry[socketId] = roomId
-  roomRegistry[roomId] = [{socketId, playerName}]
+  registry.sockets[socketId] = roomId
+  registry.rooms[roomId] = [{socketId, playerName}]
   console.log(playerName, 'created room', roomId)
   return ack({success: true, roomId})
 }
 
-export const joinRoom = <T>(
+export const joinRoom = (
+  registry: Registry,
   socketId: string,
   playerName: string,
   roomId: string,
-  ack: (response: EventResponse<{}>) => T,
-): T => {
+  ack: (response: EventResponse<{}>) => void,
+) => {
   /* Adds a player to the room with a given room id if it exists.
    */
-  if (socketRegistry[socketId] !== undefined) {
+  if (registry.sockets[socketId] !== undefined) {
     console.error(socketId, 'attempted to join room when already registered')
     return ack({success: false, reason: 'Already in a room'})
   }
 
   roomId = roomId.toUpperCase()
-  const room = roomRegistry[roomId]
+  const room = registry.rooms[roomId]
   if (!room) {
     console.log(playerName, 'failed to join non-existent room', roomId)
     return ack({
@@ -62,32 +66,31 @@ export const joinRoom = <T>(
   }
 
   // TODO: Check if player name already exists in room
-  socketRegistry[socketId] = roomId
+  registry.sockets[socketId] = roomId
   room.push({socketId, playerName})
   console.log(playerName, 'joined room', roomId)
   return ack({success: true})
 }
 
-export const disconnect = (socketId: string) => {
-  const roomId = socketRegistry[socketId]
+export const disconnect = (registry: Registry, socketId: string) => {
+  const roomId = registry.sockets[socketId]
   if (roomId === undefined) {
     return false
   }
-  delete socketRegistry[socketId]
+  delete registry.sockets[socketId]
+  console.log(socketId, 'removed from registry')
 
-  let room = roomRegistry[roomId]
+  let room = registry.rooms[roomId]
   if (room === undefined) {
     console.error(roomId, 'was in socket registry but not in registry')
     return false
   }
   room = room.filter(({socketId: sid}) => sid !== socketId)
-  if (room === []) {
-    delete roomRegistry[roomId]
+  if (room.length === 0) {
+    delete registry.rooms[roomId]
+    console.log('Removed room', roomId, 'from registry')
   } else {
-    roomRegistry[roomId] = room
+    registry.rooms[roomId] = room
   }
-  console.log(socketId, 'removed from registry')
   return true
 }
-
-export default roomRegistry
