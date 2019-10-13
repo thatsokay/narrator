@@ -28,7 +28,7 @@ test('creating, joining, and leaving a room', () => {
 
   expect(disconnect(registry, 'foo')).toBe(true)
   expect(disconnect(registry, 'bar')).toBe(true)
-  expect(registry).toEqual(newRegistry())
+  expect(registry).toStrictEqual(newRegistry())
 })
 
 test('joining non-existent room', () => {
