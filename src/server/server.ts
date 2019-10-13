@@ -17,10 +17,6 @@ app.use(async (ctx: Koa.Context) => {
 
 io.on('connection', socket => {
   console.log('Socket connected')
-  socket.on('disconnect', (reason: string) => {
-    console.log(`Socket disconnected due to ${reason}`)
-    disconnect(socket.id)
-  })
   socket.once(
     EVENTS.CREATE_ROOM,
     (
@@ -28,6 +24,10 @@ io.on('connection', socket => {
       ack: (response: EventResponse<{roomId: string}>) => void,
     ) => {
       createRoom(socket.id, playerName, ack)
+      socket.on('disconnect', (reason: string) => {
+        console.log(`Socket disconnected due to ${reason}`)
+        disconnect(socket.id)
+      })
     },
   )
   socket.once(
@@ -38,6 +38,10 @@ io.on('connection', socket => {
       ack: (response: EventResponse<{}>) => void,
     ) => {
       joinRoom(socket.id, playerName, roomId, ack)
+      socket.on('disconnect', (reason: string) => {
+        console.log(`Socket disconnected due to ${reason}`)
+        disconnect(socket.id)
+      })
     },
   )
 })
