@@ -77,7 +77,7 @@ export const joinRoom = (
   return
 }
 
-export const disconnect = (registry: Registry, socketId: string) => {
+export const leave = (registry: Registry, socketId: string) => {
   const roomId = registry.sockets[socketId]
   if (roomId === undefined) {
     return false

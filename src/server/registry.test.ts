@@ -3,7 +3,7 @@ import {
   newRegistry,
   createRoom,
   joinRoom,
-  disconnect,
+  leave,
 } from './registry'
 
 let registry: Registry
@@ -26,8 +26,8 @@ test('creating, joining, and leaving a room', () => {
     expect(response.success).toBe(true)
   })
 
-  expect(disconnect(registry, 'foo')).toBe(true)
-  expect(disconnect(registry, 'bar')).toBe(true)
+  expect(leave(registry, 'foo')).toBe(true)
+  expect(leave(registry, 'bar')).toBe(true)
   expect(registry).toStrictEqual(newRegistry())
 })
 
