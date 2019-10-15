@@ -1,10 +1,4 @@
-import {
-  Registry,
-  newRegistry,
-  createRoom,
-  joinRoom,
-  leave,
-} from './registry'
+import {Registry, newRegistry, createRoom, joinRoom, leave} from './registry'
 
 let registry: Registry
 

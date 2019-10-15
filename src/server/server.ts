@@ -1,3 +1,4 @@
+import http from 'http'
 import Koa from 'koa'
 import koaStatic from 'koa-static'
 import send from 'koa-send'
@@ -16,7 +17,7 @@ app.use(async (ctx: Koa.Context) => {
   await send(ctx, 'index.html', {root: `${__dirname}/public`})
 })
 
-io.on('connection', socket => {
+io.on('connect', socket => {
   socket.on('disconnect', (reason: string) => {
     console.log(`Socket disconnected due to ${reason}`)
   })
@@ -48,6 +49,7 @@ io.on('connection', socket => {
   )
 })
 
-io.attach(app.listen(3000))
+const server = http.createServer(app.callback())
+io.attach(server)
 
-console.log('Server running on port 3000')
+export default server

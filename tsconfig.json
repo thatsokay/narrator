@@ -15,7 +15,7 @@
   },
   "include": [
     "src/client/index.tsx",
-    "src/server/server.ts"
+    "src/server/index.ts"
   ],
   "exclude": [
     "node_modules"
