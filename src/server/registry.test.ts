@@ -1,4 +1,4 @@
-import {Registry, newRegistry, createRoom, joinRoom, leave} from './registry'
+import {Registry, newRegistry} from './registry'
 
 let registry: Registry
 
@@ -8,7 +8,7 @@ beforeEach(() => {
 
 test('creating, joining, and leaving a room', () => {
   let roomId: string = ''
-  createRoom(registry, 'foo', 'foo', response => {
+  registry.createRoom('foo', 'foo', response => {
     expect(response.success).toBe(true)
     if (response.success) {
       roomId = response.roomId
@@ -16,17 +16,16 @@ test('creating, joining, and leaving a room', () => {
   })
   expect(roomId).toBeTruthy()
 
-  joinRoom(registry, 'bar', 'bar', roomId, response => {
+  registry.joinRoom('bar', 'bar', roomId, response => {
     expect(response.success).toBe(true)
   })
 
-  expect(leave(registry, 'foo')).toBe(true)
-  expect(leave(registry, 'bar')).toBe(true)
-  expect(registry).toStrictEqual(newRegistry())
+  expect(registry.leave('foo')).toBe(true)
+  expect(registry.leave('bar')).toBe(true)
 })
 
 test('joining non-existent room', () => {
-  joinRoom(registry, 'foo', 'foo', 'foo', response => {
+  registry.joinRoom('foo', 'foo', 'foo', response => {
     expect(response.success).toBe(false)
     if (response.success === true) {
       return

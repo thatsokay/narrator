@@ -4,7 +4,7 @@ import koaStatic from 'koa-static'
 import send from 'koa-send'
 import socketIO from 'socket.io'
 
-import {newRegistry, createRoom, joinRoom, leave} from './registry'
+import {newRegistry} from './registry'
 import {EVENTS} from '../shared/constants'
 import {EventResponse} from '../shared/types'
 
@@ -28,9 +28,9 @@ io.on('connect', socket => {
       playerName: string,
       ack: (response: EventResponse<{roomId: string}>) => void,
     ) => {
-      createRoom(registry, socket.id, playerName, ack)
+      registry.createRoom(socket.id, playerName, ack)
       socket.on('disconnect', () => {
-        leave(registry, socket.id)
+        registry.leave(socket.id)
       })
     },
   )
@@ -41,9 +41,9 @@ io.on('connect', socket => {
       roomId: string,
       ack: (response: EventResponse<{}>) => void,
     ) => {
-      joinRoom(registry, socket.id, playerName, roomId, ack)
+      registry.joinRoom(socket.id, playerName, roomId, ack)
       socket.on('disconnect', () => {
-        leave(registry, socket.id)
+        registry.leave(socket.id)
       })
     },
   )
