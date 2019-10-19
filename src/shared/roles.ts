@@ -1,4 +1,4 @@
-interface Role {
+export interface Role {
   description: string
   side: 'mafia' | 'village' // Which side they win with
   appearsAs: 'mafia' | 'village' // Side revealed on 'see' actions
@@ -9,7 +9,7 @@ interface Role {
   }
 }
 
-type ActionType =
+export type ActionType =
   | 'inform' // Reveal role to others at night
   | 'lynch' // Vote to lynch target at day
   | 'kill' // Vote to kill target at night

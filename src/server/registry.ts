@@ -1,3 +1,4 @@
+import {newRoom, Room} from './room'
 import {EventResponse} from '../shared/types'
 
 const randomRoomId = (length: number) => {
@@ -26,8 +27,8 @@ export interface Registry {
 }
 
 export const newRegistry = (): Registry => {
-  let sockets: {[socketId: string]: string} = {}
-  let rooms: {[roomId: string]: {socketId: string; playerName: string}[]} = {}
+  const sockets: {[socketId: string]: string} = {}
+  const rooms: {[roomId: string]: Room} = {}
 
   const createRoom = (
     socketId: string,
@@ -51,7 +52,7 @@ export const newRegistry = (): Registry => {
       roomId = randomRoomId(4)
     }
     sockets[socketId] = roomId
-    rooms[roomId] = [{socketId, playerName}]
+    rooms[roomId] = newRoom(socketId, playerName)
     console.log(playerName, 'created room', roomId)
     ack({success: true, roomId})
   }
@@ -82,8 +83,14 @@ export const newRegistry = (): Registry => {
     }
 
     // TODO: Check if player name already exists in room
+    try {
+      room.join(socketId, playerName)
+    } catch (error) {
+      console.error(error)
+      ack({success: false, reason: error})
+      return
+    }
     sockets[socketId] = roomId
-    room.push({socketId, playerName})
     console.log(playerName, 'joined room', roomId)
     ack({success: true})
     return
@@ -102,8 +109,13 @@ export const newRegistry = (): Registry => {
       console.error(roomId, 'was in socket registry but not in registry')
       return false
     }
-    room = room.filter(({socketId: sid}) => sid !== socketId)
-    if (room.length === 0) {
+    try {
+      room.leave(socketId)
+    } catch (error) {
+      console.error(error)
+      return false
+    }
+    if (room.isEmpty()) {
       delete rooms[roomId]
       console.log('Removed room', roomId, 'from registry')
     } else {

@@ -27,9 +27,22 @@ test('creating, joining, and leaving a room', () => {
 test('joining non-existent room', () => {
   registry.joinRoom('foo', 'foo', 'foo', response => {
     expect(response.success).toBe(false)
-    if (response.success === true) {
-      return
+    if (response.success === false) {
+      expect(response.reason).toBe('Room with id FOO does not exist')
     }
-    expect(response.reason).toBe('Room with id FOO does not exist')
   })
+})
+
+test('joining room with existing player name', () => {
+  registry.createRoom('foo', 'foo', response => {
+    if (response.success) {
+      registry.joinRoom('bar', 'foo', response.roomId, response => {
+        expect(response.success).toBe(false)
+      })
+    }
+  })
+})
+
+test('non-existent socket leaving', () => {
+  expect(registry.leave('foo')).toBe(false)
 })
