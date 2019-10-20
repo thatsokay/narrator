@@ -33,11 +33,29 @@ test('joining non-existent room', () => {
   })
 })
 
+test('joining room with existing socket id', () => {
+  registry.createRoom('foo', 'foo', response => {
+    expect(response.success).toBe(true)
+    if (response.success) {
+      registry.joinRoom('foo', 'foo', response.roomId, response => {
+        expect(response.success).toBe(false)
+        if (response.success === false) {
+          expect(response.reason).toBe('Already in a room')
+        }
+      })
+    }
+  })
+})
+
 test('joining room with existing player name', () => {
   registry.createRoom('foo', 'foo', response => {
+    expect(response.success).toBe(true)
     if (response.success) {
       registry.joinRoom('bar', 'foo', response.roomId, response => {
         expect(response.success).toBe(false)
+        if (response.success === false) {
+          expect(response.reason).toBe('Player name foo is already taken')
+        }
       })
     }
   })
