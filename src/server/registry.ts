@@ -82,7 +82,6 @@ export const newRegistry = (): Registry => {
       return
     }
 
-    // TODO: Check if player name already exists in room
     try {
       room.join(socketId, playerName)
     } catch (error) {
