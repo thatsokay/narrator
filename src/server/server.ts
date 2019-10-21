@@ -22,7 +22,7 @@ io.on('connect', socket => {
     console.log(`Socket disconnected due to ${reason}`)
   })
   console.log('Socket connected')
-  socket.once(
+  socket.on(
     EVENTS.CREATE_ROOM,
     (
       playerName: string,
@@ -34,7 +34,7 @@ io.on('connect', socket => {
       })
     },
   )
-  socket.once(
+  socket.on(
     EVENTS.JOIN_ROOM,
     (
       playerName: string,
