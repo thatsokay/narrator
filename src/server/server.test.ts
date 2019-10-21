@@ -32,24 +32,21 @@ test('creating room', done => {
   })
 })
 
-test('joining non-existent room', async done => {
-  const reason = await new Promise<EventResponse<{}>>(resolve => {
-    client.once('connect', () => {
-      client.emit(
-        EVENTS.JOIN_ROOM,
-        'foo',
-        'foo',
-        (response: EventResponse<{}>) => {
-          resolve(response)
-        },
-      )
-    })
+test('joining non-existent room', done => {
+  client.once('connect', () => {
+    client.emit(
+      EVENTS.JOIN_ROOM,
+      'foo',
+      'foo',
+      (response: EventResponse<{}>) => {
+        expect(response).toStrictEqual({
+          success: false,
+          reason: 'Room with id FOO does not exist',
+        })
+        done()
+      },
+    )
   })
-  expect(reason).toStrictEqual({
-    success: false,
-    reason: 'Room with id FOO does not exist',
-  })
-  done()
 })
 
 test('creating multiple rooms', async done => {
