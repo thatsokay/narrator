@@ -61,7 +61,7 @@ test('creating multiple rooms', async done => {
           },
         )
       })
-    }
+    },
   )
   expect(response1.success).toBe(true)
 
@@ -74,7 +74,7 @@ test('creating multiple rooms', async done => {
           resolve(response)
         },
       )
-    }
+    },
   )
   expect(response2).toStrictEqual({success: false, reason: 'Already in a room'})
   done()
@@ -89,10 +89,10 @@ test('creating and joining room', async done => {
           'foo',
           (response: EventResponse<{roomId: string}>) => {
             resolve(response)
-          }
+          },
         )
       })
-    }
+    },
   )
   expect(response1.success).toBe(true)
   if (!response1.success) {
@@ -100,18 +100,16 @@ test('creating and joining room', async done => {
     return
   }
 
-  const response2 = await new Promise<EventResponse<{}>>(
-    resolve => {
-      client.emit(
-        EVENTS.JOIN_ROOM,
-        'foo',
-        response1.roomId,
-        (response: EventResponse<{}>) => {
-          resolve(response)
-        }
-      )
-    }
-  )
+  const response2 = await new Promise<EventResponse<{}>>(resolve => {
+    client.emit(
+      EVENTS.JOIN_ROOM,
+      'foo',
+      response1.roomId,
+      (response: EventResponse<{}>) => {
+        resolve(response)
+      },
+    )
+  })
   expect(response2).toStrictEqual({success: false, reason: 'Already in a room'})
   done()
 })
