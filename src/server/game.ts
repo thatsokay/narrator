@@ -23,7 +23,7 @@ export const newGame = (playerName: string): Game => {
         role: null,
       },
     },
-    status: 'waiting'
+    status: 'waiting',
   }
 
   const join = (playerName: string) => {
