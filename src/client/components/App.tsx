@@ -3,19 +3,23 @@ import socketIO from 'socket.io-client'
 
 import CreateForm from './CreateForm'
 import JoinForm from './JoinForm'
+import Game from './Game'
 import {EVENTS} from '../../shared/constants'
 import {EventResponse} from '../../shared/types'
 
 const App = () => {
   // TODO: Remove
   // @ts-ignore
-  const [roomId, setRoomId] = useState('')
-  // TODO: Remove
-  // @ts-ignore
   const [playerName, setPlayerName] = useState('')
   // TODO: Remove
   // @ts-ignore
+  const [roomId, setRoomId] = useState('')
+  // TODO: Remove
+  // @ts-ignore
   const [socket, setSocket] = useState<SocketIOClient.Socket | null>(null)
+  // TODO: Remove
+  // @ts-ignore
+  const [inRoom, setInRoom] = useState(false)
 
   const handleSubmit = (playerName: string, roomId?: string) => (
     event: React.FormEvent,
@@ -37,10 +41,10 @@ const App = () => {
               console.log('Created room', response.roomId)
               setPlayerName(playerName)
               setRoomId(response.roomId)
+              setInRoom(true)
             } else {
               console.log('Failed to create room due to', response.reason)
               socket.close()
-              setSocket(null)
             }
           },
         )
@@ -54,6 +58,7 @@ const App = () => {
               console.log('Joined room', roomId)
               setPlayerName(playerName)
               setRoomId(roomId)
+              setInRoom(true)
             } else {
               console.log(
                 'Failed to join room',
@@ -62,7 +67,6 @@ const App = () => {
                 response.reason,
               )
               socket.close()
-              setSocket(null)
             }
           },
         )
@@ -77,8 +81,14 @@ const App = () => {
 
   return (
     <>
-      <CreateForm handleSubmit={handleSubmit} />
-      <JoinForm handleSubmit={handleSubmit} />
+      {inRoom && socket ? (
+        <Game {...{playerName, roomId, socket}} />
+      ) : (
+        <>
+          <CreateForm handleSubmit={handleSubmit} />
+          <JoinForm handleSubmit={handleSubmit} />
+        </>
+      )}
     </>
   )
 }
