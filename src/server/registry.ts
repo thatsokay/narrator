@@ -1,5 +1,4 @@
 import {newRoom, Room} from './room'
-import {EventResponse} from '../shared/types'
 
 const randomRoomId = (length: number) => {
   /* Generates a random string of capital letters of given length.
@@ -12,17 +11,12 @@ const randomRoomId = (length: number) => {
 }
 
 export interface Registry {
-  createRoom: (
-    socketId: string,
-    playerName: string,
-    ack: (response: EventResponse<{roomId: string}>) => void,
-  ) => void
+  createRoom: () => string
   joinRoom: (
     socketId: string,
     playerName: string,
     roomId: string,
-    ack: (response: EventResponse<{}>) => void,
-  ) => void
+  ) => (socket: SocketIO.Socket) => (event: any) => void
   leave: (socketId: string) => void
 }
 
@@ -30,69 +24,37 @@ export const newRegistry = (): Registry => {
   const sockets: {[socketId: string]: string} = {}
   const rooms: {[roomId: string]: Room} = {}
 
-  const createRoom = (
-    socketId: string,
-    playerName: string,
-    ack: (response: EventResponse<{roomId: string}>) => void,
-  ) => {
-    /* Create a new room with a single player. Generates random room ids until
-     * an available id is found.
+  const createRoom = () => {
+    /* Create a new empty room and returns its room id. Generates random room
+     * ids until an available id is found.
      */
-    if (sockets[socketId] !== undefined) {
-      console.error(
-        socketId,
-        'attempted to create room when already registered',
-      )
-      ack({success: false, reason: 'Already in a room'})
-      return
-    }
-
     let roomId = randomRoomId(4)
     while (rooms[roomId] !== undefined) {
       roomId = randomRoomId(4)
     }
-    sockets[socketId] = roomId
-    rooms[roomId] = newRoom(socketId, playerName)
-    console.log(playerName, 'created room', roomId)
-    ack({success: true, roomId})
+    rooms[roomId] = newRoom()
+    return roomId
   }
 
-  const joinRoom = (
-    socketId: string,
-    playerName: string,
-    roomId: string,
-    ack: (response: EventResponse<{}>) => void,
-  ) => {
+  const joinRoom = (socketId: string, playerName: string, roomId: string) => {
     /* Adds a player to the room with a given room id if it exists.
      */
     if (sockets[socketId] !== undefined) {
       console.error(socketId, 'attempted to join room when already registered')
-      ack({success: false, reason: 'Already in a room'})
-      return
+      throw 'Already in a room'
     }
 
     roomId = roomId.toUpperCase()
     const room = rooms[roomId]
     if (!room) {
       console.log(playerName, 'failed to join non-existent room', roomId)
-      ack({
-        success: false,
-        reason: `Room with id ${roomId} does not exist`,
-      })
-      return
+      throw `Room with id ${roomId} does not exist`
     }
 
-    try {
-      room.join(socketId, playerName)
-    } catch (error) {
-      console.error(error)
-      ack({success: false, reason: error})
-      return
-    }
+    const eventHandler = room.join(socketId, playerName)
     sockets[socketId] = roomId
     console.log(playerName, 'joined room', roomId)
-    ack({success: true})
-    return
+    return eventHandler(roomId)
   }
 
   const leave = (socketId: string) => {

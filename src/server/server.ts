@@ -28,7 +28,17 @@ io.on('connect', socket => {
       playerName: string,
       ack: (response: EventResponse<{roomId: string}>) => void,
     ) => {
-      registry.createRoom(socket.id, playerName, ack)
+      let roomId = registry.createRoom()
+      let handleEvent
+      try {
+        handleEvent = registry.joinRoom(socket.id, playerName, roomId)
+      } catch (error) {
+        ack({success: false, reason: error})
+        socket.disconnect()
+        return
+      }
+      ack({success: true, roomId: roomId})
+      socket.on('gameEvent', handleEvent(socket))
       socket.on('disconnect', () => {
         registry.leave(socket.id)
       })
@@ -41,7 +51,15 @@ io.on('connect', socket => {
       roomId: string,
       ack: (response: EventResponse<{}>) => void,
     ) => {
-      registry.joinRoom(socket.id, playerName, roomId, ack)
+      let handleEvent
+      try {
+        handleEvent = registry.joinRoom(socket.id, playerName, roomId)
+      } catch (error) {
+        ack({success: false, reason: error})
+        socket.disconnect()
+        return
+      }
+      socket.on('gameEvent', handleEvent(socket))
       socket.on('disconnect', () => {
         registry.leave(socket.id)
       })

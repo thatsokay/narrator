@@ -11,18 +11,15 @@ interface GameState {
 }
 
 interface Game {
-  join: (playerName: string) => void
+  join: (
+    playerName: string,
+  ) => (roomId: string) => (socket: SocketIO.Socket) => (event: any) => void
   leave: (playerName: string) => void
 }
 
-export const newGame = (playerName: string): Game => {
+export const newGame = (): Game => {
   const gameState: GameState = {
-    players: {
-      [playerName]: {
-        alive: true,
-        role: null,
-      },
-    },
+    players: {},
     status: 'waiting',
   }
 
@@ -34,6 +31,10 @@ export const newGame = (playerName: string): Game => {
     gameState.players[playerName] = {
       alive: true,
       role: null,
+    }
+    // @ts-ignore
+    return (roomId: string) => (socket: SocketIO.Socket) => (event: any) => {
+      console.log(event)
     }
   }
 
