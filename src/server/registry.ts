@@ -16,7 +16,7 @@ export interface Registry {
     socketId: string,
     playerName: string,
     roomId: string,
-  ) => (socket: SocketIO.Socket) => (event: any) => void
+  ) => (socket: SocketIO.Socket, io: SocketIO.Server) => (event: any) => void
   leave: (socketId: string) => void
 }
 

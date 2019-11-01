@@ -80,7 +80,7 @@ test('creating multiple rooms', async done => {
   done()
 })
 
-test('creating and joining room', async done => {
+test('creating and joining room from single socket', async done => {
   const response1 = await new Promise<EventResponse<{roomId: string}>>(
     resolve => {
       client.once('connect', () => {
@@ -111,5 +111,64 @@ test('creating and joining room', async done => {
     )
   })
   expect(response2).toStrictEqual({success: false, reason: 'Already in a room'})
+  done()
+})
+
+test('start game', async done => {
+  const createResponse = await new Promise<EventResponse<{roomId: string}>>(
+    resolve => {
+      client.once('connect', () => {
+        client.emit(
+          EVENTS.CREATE_ROOM,
+          'foo0',
+          (response: EventResponse<{roomId: string}>) => {
+            resolve(response)
+          },
+        )
+      })
+    },
+  )
+  expect(createResponse.success).toBe(true)
+  if (!createResponse.success) {
+    done()
+    return
+  }
+
+  const joinSockets = new Array(5)
+    .fill(null)
+    .map(() => socketIOClient('localhost:3000'))
+  await expect(
+    Promise.all(
+      joinSockets.map(
+        (socket, i) =>
+          new Promise<boolean>(resolve => {
+            socket.emit(
+              EVENTS.JOIN_ROOM,
+              `foo${i + 1}`,
+              createResponse.roomId,
+              (response: EventResponse<{}>) => {
+                resolve(response.success)
+              },
+            )
+          }),
+      ),
+    ),
+  ).resolves.toStrictEqual(new Array(5).fill(true))
+
+  await expect(
+    Promise.all(
+      [client, ...joinSockets].map(
+        socket =>
+          new Promise<void>(resolve => {
+            socket.emit('gameEvent', {type: 'ready'})
+            socket.on('start', () => {
+              resolve()
+            })
+          }),
+      ),
+    ),
+  ).resolves.toStrictEqual(new Array(6).fill(undefined))
+
+  joinSockets.map(socket => socket.close())
   done()
 })

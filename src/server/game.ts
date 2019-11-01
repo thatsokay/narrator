@@ -3,6 +3,7 @@ import {Role} from '../shared/roles'
 interface GameState {
   players: {
     [playerName: string]: {
+      ready: boolean
       alive: boolean
       role: Role | null
     }
@@ -13,7 +14,9 @@ interface GameState {
 interface Game {
   join: (
     playerName: string,
-  ) => (roomId: string) => (socket: SocketIO.Socket) => (event: any) => void
+  ) => (
+    roomId: string,
+  ) => (socket: SocketIO.Socket, io: SocketIO.Server) => (event: any) => void
   leave: (playerName: string) => void
 }
 
@@ -29,12 +32,25 @@ export const newGame = (): Game => {
     }
 
     gameState.players[playerName] = {
+      ready: false,
       alive: true,
       role: null,
     }
-    // @ts-ignore
-    return (roomId: string) => (socket: SocketIO.Socket) => (event: any) => {
-      console.log(event)
+    return (roomId: string) => (
+      // @ts-ignore
+      socket: SocketIO.Socket,
+      io: SocketIO.Server,
+    ) => (event: {type: string}) => {
+      if (event.type === 'ready') {
+        gameState.players[playerName].ready = true
+        if (
+          Object.keys(gameState.players).length >= 6 &&
+          !Object.values(gameState.players).filter(({ready}) => !ready).length
+        ) {
+          console.log('start game')
+          io.in(roomId).emit('start')
+        }
+      }
     }
   }
 

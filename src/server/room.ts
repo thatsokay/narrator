@@ -4,7 +4,9 @@ export interface Room {
   join: (
     socketId: string,
     playerName: string,
-  ) => (roomId: string) => (socket: SocketIO.Socket) => (event: any) => void
+  ) => (
+    roomId: string,
+  ) => (socket: SocketIO.Socket, io: SocketIO.Server) => (event: any) => void
   leave: (socketId: string) => void
   isEmpty: () => boolean
 }
