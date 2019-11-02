@@ -177,3 +177,50 @@ test('start game', async done => {
   joinSockets.map(socket => socket.close())
   done()
 })
+
+test('invalid create arguments', async done => {
+  await new Promise(resolve => {
+    client.once('connect', () => {
+      resolve()
+    })
+  })
+  await expect(
+    new Promise((resolve, reject) => {
+      client.emit(
+        EVENTS.CREATE_ROOM,
+        null,
+        (response: EventResponse<{roomId: string}>) => {
+          resolve(response)
+        },
+      )
+      setTimeout(() => {
+        reject('too slow')
+      }, 500)
+    }),
+  ).rejects.toBe('too slow')
+  done()
+})
+
+test('invalid join arguments', async done => {
+  await new Promise(resolve => {
+    client.once('connect', () => {
+      resolve()
+    })
+  })
+  await expect(
+    new Promise((resolve, reject) => {
+      client.emit(
+        EVENTS.JOIN_ROOM,
+        null,
+        null,
+        (response: EventResponse<{roomId: string}>) => {
+          resolve(response)
+        },
+      )
+      setTimeout(() => {
+        reject('too slow')
+      }, 500)
+    }),
+  ).rejects.toBe('too slow')
+  done()
+})

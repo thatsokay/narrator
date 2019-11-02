@@ -6,7 +6,6 @@ import socketIO from 'socket.io'
 
 import {newRegistry} from './registry'
 import {EVENTS} from '../shared/constants'
-import {EventResponse} from '../shared/types'
 
 const app = new Koa()
 const io = socketIO()
@@ -22,53 +21,57 @@ io.on('connect', socket => {
     console.log(`Socket disconnected due to ${reason}`)
   })
   console.log('Socket connected')
-  socket.on(
-    EVENTS.CREATE_ROOM,
-    (
-      playerName: string,
-      respond: (response: EventResponse<{roomId: string}>) => void,
-    ) => {
-      // TODO: Remove room on joinRoom exception
-      let roomId = registry.createRoom()
-      let handleEvent
-      try {
-        handleEvent = registry.joinRoom(socket.id, playerName, roomId)
-      } catch (error) {
-        respond({success: false, reason: error})
-        socket.disconnect()
-        return
-      }
-      respond({success: true, roomId: roomId})
-      socket.join(roomId)
-      socket.on('gameEvent', handleEvent(io))
-      socket.on('disconnect', () => {
-        registry.leave(socket.id)
-      })
-    },
-  )
-  socket.on(
-    EVENTS.JOIN_ROOM,
-    (
-      playerName: string,
-      roomId: string,
-      respond: (response: EventResponse<{}>) => void,
-    ) => {
-      let handleEvent
-      try {
-        handleEvent = registry.joinRoom(socket.id, playerName, roomId)
-      } catch (error) {
-        respond({success: false, reason: error})
-        socket.disconnect()
-        return
-      }
-      respond({success: true})
-      socket.join(roomId)
-      socket.on('gameEvent', handleEvent(io))
-      socket.on('disconnect', () => {
-        registry.leave(socket.id)
-      })
-    },
-  )
+  socket.on(EVENTS.CREATE_ROOM, (...args: unknown[]) => {
+    if (
+      args.length !== 2 ||
+      typeof args[0] !== 'string' ||
+      typeof args[1] !== 'function'
+    ) {
+      return
+    }
+    const [playerName, respond] = args
+    // TODO: Remove room on joinRoom exception
+    let roomId = registry.createRoom()
+    let handleEvent
+    try {
+      handleEvent = registry.joinRoom(socket.id, playerName, roomId)
+    } catch (error) {
+      respond({success: false, reason: error})
+      socket.disconnect()
+      return
+    }
+    respond({success: true, roomId: roomId})
+    socket.join(roomId)
+    socket.on('gameEvent', handleEvent(io))
+    socket.on('disconnect', () => {
+      registry.leave(socket.id)
+    })
+  })
+  socket.on(EVENTS.JOIN_ROOM, (...args: unknown[]) => {
+    if (
+      args.length !== 3 ||
+      typeof args[0] !== 'string' ||
+      typeof args[1] !== 'string' ||
+      typeof args[2] !== 'function'
+    ) {
+      return
+    }
+    const [playerName, roomId, respond] = args
+    let handleEvent
+    try {
+      handleEvent = registry.joinRoom(socket.id, playerName, roomId)
+    } catch (error) {
+      respond({success: false, reason: error})
+      socket.disconnect()
+      return
+    }
+    respond({success: true})
+    socket.join(roomId)
+    socket.on('gameEvent', handleEvent(io))
+    socket.on('disconnect', () => {
+      registry.leave(socket.id)
+    })
+  })
 })
 
 const server = http.createServer(app.callback())
