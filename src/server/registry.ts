@@ -21,7 +21,7 @@ export interface Registry {
     io: SocketIO.Server,
   ) => (
     action: {type: string},
-    ack: <T>(response: EventResponse<T>) => void,
+    respond: <T>(response: EventResponse<T>) => void,
   ) => void
   leave: (socketId: string) => void
 }

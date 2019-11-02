@@ -26,18 +26,18 @@ io.on('connect', socket => {
     EVENTS.CREATE_ROOM,
     (
       playerName: string,
-      ack: (response: EventResponse<{roomId: string}>) => void,
+      respond: (response: EventResponse<{roomId: string}>) => void,
     ) => {
       let roomId = registry.createRoom()
       let handleEvent
       try {
         handleEvent = registry.joinRoom(socket.id, playerName, roomId)
       } catch (error) {
-        ack({success: false, reason: error})
+        respond({success: false, reason: error})
         socket.disconnect()
         return
       }
-      ack({success: true, roomId: roomId})
+      respond({success: true, roomId: roomId})
       socket.join(roomId)
       socket.on('gameEvent', handleEvent(io))
       socket.on('disconnect', () => {
@@ -50,17 +50,17 @@ io.on('connect', socket => {
     (
       playerName: string,
       roomId: string,
-      ack: (response: EventResponse<{}>) => void,
+      respond: (response: EventResponse<{}>) => void,
     ) => {
       let handleEvent
       try {
         handleEvent = registry.joinRoom(socket.id, playerName, roomId)
       } catch (error) {
-        ack({success: false, reason: error})
+        respond({success: false, reason: error})
         socket.disconnect()
         return
       }
-      ack({success: true})
+      respond({success: true})
       socket.join(roomId)
       socket.on('gameEvent', handleEvent(io))
       socket.on('disconnect', () => {

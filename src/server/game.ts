@@ -12,7 +12,7 @@ interface GameState {
   status: 'waiting' | 'firstNight' | 'day' | 'night'
 }
 
-interface Game {
+export interface Game {
   join: (
     playerName: string,
   ) => (
@@ -21,7 +21,7 @@ interface Game {
     io: SocketIO.Server,
   ) => (
     action: {type: string},
-    ack: <T>(response: EventResponse<T>) => void,
+    respond: <T>(response: EventResponse<T>) => void,
   ) => void
   leave: (playerName: string) => void
 }
@@ -44,12 +44,12 @@ export const newGame = (): Game => {
     }
     return (roomId: string) => (io: SocketIO.Server) => (
       action: {type: string},
-      ack: <T>(response: EventResponse<T>) => void,
+      respond: <T>(response: EventResponse<T>) => void,
     ) => {
       switch (action.type) {
         case 'ready':
           gameState.players[playerName].ready = true
-          ack({success: true})
+          respond({success: true})
           if (
             Object.keys(gameState.players).length >= 6 &&
             !Object.values(gameState.players).filter(({ready}) => !ready).length
@@ -59,7 +59,7 @@ export const newGame = (): Game => {
           }
           break
         default:
-          ack({success: false, reason: 'Unrecognised action type'})
+          respond({success: false, reason: 'Unrecognised action type'})
       }
     }
   }
