@@ -39,14 +39,21 @@ test('invalid action', async done => {
 test('start game', async done => {
   const emit = jest.fn() as any
   const server = {in: _ => ({emit})} as SocketIO.Server
-  const callbacks = new Array(6).fill(null).map((_, i) =>
-    game.join(`foo${i}`)('foo')(server)
-  )
-  await expect(Promise.all(callbacks.map(callback =>
-    new Promise(resolve => {
-      callback({type: 'ready'}, response => {resolve(response.success)})
-    })
-  ))).resolves.toStrictEqual(new Array(6).fill(true))
+  const callbacks = new Array(6)
+    .fill(null)
+    .map((_, i) => game.join(`foo${i}`)('foo')(server))
+  await expect(
+    Promise.all(
+      callbacks.map(
+        callback =>
+          new Promise(resolve => {
+            callback({type: 'ready'}, response => {
+              resolve(response.success)
+            })
+          }),
+      ),
+    ),
+  ).resolves.toStrictEqual(new Array(6).fill(true))
   expect(emit).toHaveBeenCalledWith('start')
   done()
 })

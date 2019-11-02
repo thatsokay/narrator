@@ -28,6 +28,7 @@ io.on('connect', socket => {
       playerName: string,
       respond: (response: EventResponse<{roomId: string}>) => void,
     ) => {
+      // TODO: Remove room on joinRoom exception
       let roomId = registry.createRoom()
       let handleEvent
       try {

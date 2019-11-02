@@ -50,23 +50,22 @@ test('joining non-existent room', done => {
 })
 
 test('creating multiple rooms', async done => {
-  const response1 = await new Promise<EventResponse<{roomId: string}>>(
-    resolve => {
+  await expect(
+    new Promise(resolve => {
       client.once('connect', () => {
         client.emit(
           EVENTS.CREATE_ROOM,
           'foo',
           (response: EventResponse<{roomId: string}>) => {
-            resolve(response)
+            resolve(response.success)
           },
         )
       })
-    },
-  )
-  expect(response1.success).toBe(true)
+    }),
+  ).resolves.toBe(true)
 
-  const response2 = await new Promise<EventResponse<{roomId: string}>>(
-    resolve => {
+  await expect(
+    new Promise(resolve => {
       client.emit(
         EVENTS.CREATE_ROOM,
         'foo',
@@ -74,14 +73,13 @@ test('creating multiple rooms', async done => {
           resolve(response)
         },
       )
-    },
-  )
-  expect(response2).toStrictEqual({success: false, reason: 'Already in a room'})
+    }),
+  ).resolves.toStrictEqual({success: false, reason: 'Already in a room'})
   done()
 })
 
 test('creating and joining room from single socket', async done => {
-  const response1 = await new Promise<EventResponse<{roomId: string}>>(
+  const response = await new Promise<EventResponse<{roomId: string}>>(
     resolve => {
       client.once('connect', () => {
         client.emit(
@@ -94,23 +92,24 @@ test('creating and joining room from single socket', async done => {
       })
     },
   )
-  expect(response1.success).toBe(true)
-  if (!response1.success) {
+  expect(response.success).toBe(true)
+  if (!response.success) {
     done()
     return
   }
 
-  const response2 = await new Promise<EventResponse<{}>>(resolve => {
-    client.emit(
-      EVENTS.JOIN_ROOM,
-      'foo',
-      response1.roomId,
-      (response: EventResponse<{}>) => {
-        resolve(response)
-      },
-    )
-  })
-  expect(response2).toStrictEqual({success: false, reason: 'Already in a room'})
+  await expect(
+    new Promise<EventResponse<{}>>(resolve => {
+      client.emit(
+        EVENTS.JOIN_ROOM,
+        'foo',
+        response.roomId,
+        (response: EventResponse<{}>) => {
+          resolve(response)
+        },
+      )
+    }),
+  ).resolves.toStrictEqual({success: false, reason: 'Already in a room'})
   done()
 })
 
