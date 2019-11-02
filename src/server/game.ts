@@ -1,5 +1,4 @@
 import {Role} from '../shared/roles'
-import {EventResponse} from '../shared/types'
 
 interface GameState {
   players: {
@@ -15,14 +14,7 @@ interface GameState {
 export interface Game {
   join: (
     playerName: string,
-  ) => (
-    roomId: string,
-  ) => (
-    io: SocketIO.Server,
-  ) => (
-    action: {type: string},
-    respond: <T>(response: EventResponse<T>) => void,
-  ) => void
+  ) => (roomId: string) => (io: SocketIO.Server) => (...args: unknown[]) => void
   leave: (playerName: string) => void
 }
 
@@ -43,9 +35,18 @@ export const newGame = (): Game => {
       role: null,
     }
     return (roomId: string) => (io: SocketIO.Server) => (
-      action: {type: string},
-      respond: <T>(response: EventResponse<T>) => void,
+      ...args: unknown[]
     ) => {
+      if (
+        args.length !== 2 ||
+        typeof args[0] !== 'object' ||
+        typeof args[1] !== 'function' ||
+        args[0] === null
+      ) {
+        return
+      }
+      const action = args[0] as {[key: string]: unknown}
+      const respond = args[1]
       switch (action.type) {
         case 'ready':
           gameState.players[playerName].ready = true

@@ -1,4 +1,5 @@
 import {newGame, Game} from './game'
+import {EventResponse} from '../shared/types'
 
 let game: Game
 
@@ -28,9 +29,12 @@ test('invalid action', async done => {
   const callback = game.join('foo')
   await expect(
     new Promise(resolve => {
-      callback('foo')({} as SocketIO.Server)({type: 'foo'}, response => {
-        resolve(response)
-      })
+      callback('foo')({} as SocketIO.Server)(
+        {type: 'foo'},
+        (response: EventResponse<{}>) => {
+          resolve(response)
+        },
+      )
     }),
   ).resolves.toStrictEqual({success: false, reason: 'Unrecognised action type'})
   done()
@@ -47,7 +51,7 @@ test('start game', async done => {
       callbacks.map(
         callback =>
           new Promise(resolve => {
-            callback({type: 'ready'}, response => {
+            callback({type: 'ready'}, (response: EventResponse<{}>) => {
               resolve(response.success)
             })
           }),
@@ -55,5 +59,23 @@ test('start game', async done => {
     ),
   ).resolves.toStrictEqual(new Array(6).fill(true))
   expect(emit).toHaveBeenCalledWith('start')
+  done()
+})
+
+test('invalid event arguments', async done => {
+  const callback = game.join('foo')
+  await expect(
+    new Promise((resolve, reject) => {
+      callback('foo')({} as SocketIO.Server)(
+        null,
+        (response: EventResponse<{}>) => {
+          resolve(response)
+        },
+      )
+      setTimeout(() => {
+        reject('too slow')
+      }, 500)
+    }),
+  ).rejects.toBe('too slow')
   done()
 })
