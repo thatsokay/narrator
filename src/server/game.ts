@@ -1,4 +1,5 @@
 import {Role} from '../shared/roles'
+import {EventResponse} from '../shared/types'
 
 interface GameState {
   players: {
@@ -16,7 +17,12 @@ interface Game {
     playerName: string,
   ) => (
     roomId: string,
-  ) => (socket: SocketIO.Socket, io: SocketIO.Server) => (event: any) => void
+  ) => (
+    io: SocketIO.Server,
+  ) => (
+    action: {type: string},
+    ack: <T>(response: EventResponse<T>) => void,
+  ) => void
   leave: (playerName: string) => void
 }
 
@@ -36,20 +42,24 @@ export const newGame = (): Game => {
       alive: true,
       role: null,
     }
-    return (roomId: string) => (
-      // @ts-ignore
-      socket: SocketIO.Socket,
-      io: SocketIO.Server,
-    ) => (event: {type: string}) => {
-      if (event.type === 'ready') {
-        gameState.players[playerName].ready = true
-        if (
-          Object.keys(gameState.players).length >= 6 &&
-          !Object.values(gameState.players).filter(({ready}) => !ready).length
-        ) {
-          console.log('start game')
-          io.in(roomId).emit('start')
-        }
+    return (roomId: string) => (io: SocketIO.Server) => (
+      action: {type: string},
+      ack: <T>(response: EventResponse<T>) => void,
+    ) => {
+      switch (action.type) {
+        case 'ready':
+          gameState.players[playerName].ready = true
+          ack({success: true})
+          if (
+            Object.keys(gameState.players).length >= 6 &&
+            !Object.values(gameState.players).filter(({ready}) => !ready).length
+          ) {
+            console.log('start game')
+            io.in(roomId).emit('start')
+          }
+          break
+        default:
+          ack({success: false, reason: 'Unrecognised action type'})
       }
     }
   }

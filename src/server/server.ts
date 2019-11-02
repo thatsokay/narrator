@@ -39,7 +39,7 @@ io.on('connect', socket => {
       }
       ack({success: true, roomId: roomId})
       socket.join(roomId)
-      socket.on('gameEvent', handleEvent(socket, io))
+      socket.on('gameEvent', handleEvent(io))
       socket.on('disconnect', () => {
         registry.leave(socket.id)
       })
@@ -62,7 +62,7 @@ io.on('connect', socket => {
       }
       ack({success: true})
       socket.join(roomId)
-      socket.on('gameEvent', handleEvent(socket, io))
+      socket.on('gameEvent', handleEvent(io))
       socket.on('disconnect', () => {
         registry.leave(socket.id)
       })

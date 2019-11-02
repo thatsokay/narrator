@@ -1,4 +1,5 @@
 import {newRoom, Room} from './room'
+import {EventResponse} from '../shared/types'
 
 const randomRoomId = (length: number) => {
   /* Generates a random string of capital letters of given length.
@@ -16,7 +17,12 @@ export interface Registry {
     socketId: string,
     playerName: string,
     roomId: string,
-  ) => (socket: SocketIO.Socket, io: SocketIO.Server) => (event: any) => void
+  ) => (
+    io: SocketIO.Server,
+  ) => (
+    action: {type: string},
+    ack: <T>(response: EventResponse<T>) => void,
+  ) => void
   leave: (socketId: string) => void
 }
 

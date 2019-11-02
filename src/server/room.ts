@@ -1,4 +1,5 @@
 import {newGame} from './game'
+import {EventResponse} from '../shared/types'
 
 export interface Room {
   join: (
@@ -6,7 +7,12 @@ export interface Room {
     playerName: string,
   ) => (
     roomId: string,
-  ) => (socket: SocketIO.Socket, io: SocketIO.Server) => (event: any) => void
+  ) => (
+    io: SocketIO.Server,
+  ) => (
+    action: {type: string},
+    ack: <T>(response: EventResponse<T>) => void,
+  ) => void
   leave: (socketId: string) => void
   isEmpty: () => boolean
 }

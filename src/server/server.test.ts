@@ -160,7 +160,13 @@ test('start game', async done => {
       [client, ...joinSockets].map(
         socket =>
           new Promise<void>(resolve => {
-            socket.emit('gameEvent', {type: 'ready'})
+            socket.emit(
+              'gameEvent',
+              {type: 'ready'},
+              (response: EventResponse<{}>) => {
+                expect(response.success).toBe(true)
+              },
+            )
             socket.on('start', () => {
               resolve()
             })
