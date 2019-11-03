@@ -62,20 +62,11 @@ test('start game', async done => {
   done()
 })
 
-test('invalid event arguments', async done => {
-  const callback = game.join('foo')
-  await expect(
-    new Promise((resolve, reject) => {
-      callback('foo')({} as SocketIO.Server)(
-        null,
-        (response: EventResponse<{}>) => {
-          resolve(response)
-        },
-      )
-      setTimeout(() => {
-        reject('too slow')
-      }, 500)
-    }),
-  ).rejects.toBe('too slow')
-  done()
+test('invalid event arguments', () => {
+  expect(() => {
+    game.join('foo')('foo')({} as SocketIO.Server)(
+      null,
+      (_: EventResponse<{}>) => {},
+    )
+  }).not.toThrow()
 })
