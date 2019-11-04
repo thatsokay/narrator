@@ -9,7 +9,7 @@ import {EVENTS} from '../shared/constants'
 
 const app = new Koa()
 const io = socketIO()
-const registry = newRegistry()
+const registry = newRegistry(io)
 
 app.use(koaStatic(`${__dirname}/public`))
 app.use(async (ctx: Koa.Context) => {
@@ -32,9 +32,8 @@ io.on('connect', socket => {
     const [playerName, respond] = args
     // TODO: Remove room on joinRoom exception
     let roomId = registry.createRoom()
-    let handleEvent
     try {
-      handleEvent = registry.joinRoom(socket.id, playerName, roomId)
+      registry.joinRoom(socket, playerName, roomId)
     } catch (error) {
       respond({success: false, reason: error})
       socket.disconnect()
@@ -42,7 +41,6 @@ io.on('connect', socket => {
     }
     respond({success: true, roomId: roomId})
     socket.join(roomId)
-    socket.on('gameEvent', handleEvent(io))
     socket.on('disconnect', () => {
       registry.leave(socket.id)
     })
@@ -57,9 +55,8 @@ io.on('connect', socket => {
       return
     }
     const [playerName, roomId, respond] = args
-    let handleEvent
     try {
-      handleEvent = registry.joinRoom(socket.id, playerName, roomId)
+      registry.joinRoom(socket, playerName, roomId)
     } catch (error) {
       respond({success: false, reason: error})
       socket.disconnect()
@@ -67,7 +64,6 @@ io.on('connect', socket => {
     }
     respond({success: true})
     socket.join(roomId)
-    socket.on('gameEvent', handleEvent(io))
     socket.on('disconnect', () => {
       registry.leave(socket.id)
     })

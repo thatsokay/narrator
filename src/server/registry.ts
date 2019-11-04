@@ -1,5 +1,4 @@
 import {newRoom, Room} from './room'
-import {EventResponse} from '../shared/types'
 
 const randomRoomId = (length: number) => {
   /* Generates a random string of capital letters of given length.
@@ -14,19 +13,14 @@ const randomRoomId = (length: number) => {
 export interface Registry {
   createRoom: () => string
   joinRoom: (
-    socketId: string,
+    socket: SocketIO.Socket,
     playerName: string,
     roomId: string,
-  ) => (
-    io: SocketIO.Server,
-  ) => (
-    action: {type: string},
-    respond: <T>(response: EventResponse<T>) => void,
   ) => void
   leave: (socketId: string) => void
 }
 
-export const newRegistry = (): Registry => {
+export const newRegistry = (io: SocketIO.Server): Registry => {
   const sockets: {[socketId: string]: string} = {}
   const rooms: {[roomId: string]: Room} = {}
 
@@ -38,15 +32,15 @@ export const newRegistry = (): Registry => {
     while (rooms[roomId] !== undefined) {
       roomId = randomRoomId(4)
     }
-    rooms[roomId] = newRoom()
+    rooms[roomId] = newRoom(roomId, io)
     return roomId
   }
 
-  const joinRoom = (socketId: string, playerName: string, roomId: string) => {
+  const joinRoom = (socket: SocketIO.Socket, playerName: string, roomId: string) => {
     /* Adds a player to the room with a given room id if it exists.
      */
-    if (sockets[socketId] !== undefined) {
-      console.error(socketId, 'attempted to join room when already registered')
+    if (sockets[socket.id] !== undefined) {
+      console.error(socket.id, 'attempted to join room when already registered')
       throw 'Already in a room'
     }
 
@@ -57,10 +51,9 @@ export const newRegistry = (): Registry => {
       throw `Room with id ${roomId} does not exist`
     }
 
-    const eventHandler = room.join(socketId, playerName)
-    sockets[socketId] = roomId
+    room.join(socket, playerName)
+    sockets[socket.id] = roomId
     console.log(playerName, 'joined room', roomId)
-    return eventHandler(roomId)
   }
 
   const leave = (socketId: string) => {

@@ -29,7 +29,7 @@ test('invalid action', async done => {
   const callback = game.join('foo')
   await expect(
     new Promise(resolve => {
-      callback('foo')({} as SocketIO.Server)(
+      callback('foo', {} as SocketIO.Server)(
         {type: 'foo'},
         (response: EventResponse<{}>) => {
           resolve(response)
@@ -45,7 +45,7 @@ test('start game', async done => {
   const server = {in: _ => ({emit})} as SocketIO.Server
   const callbacks = new Array(6)
     .fill(null)
-    .map((_, i) => game.join(`foo${i}`)('foo')(server))
+    .map((_, i) => game.join(`foo${i}`)('foo', server))
   await expect(
     Promise.all(
       callbacks.map(
@@ -64,7 +64,7 @@ test('start game', async done => {
 
 test('invalid event arguments', () => {
   expect(() => {
-    game.join('foo')('foo')({} as SocketIO.Server)(
+    game.join('foo')('foo', {} as SocketIO.Server)(
       null,
       (_: EventResponse<{}>) => {},
     )

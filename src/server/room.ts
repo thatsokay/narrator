@@ -1,32 +1,30 @@
 import {newGame} from './game'
-import {EventResponse} from '../shared/types'
 
 export interface Room {
   join: (
-    socketId: string,
+    socket: SocketIO.Socket,
     playerName: string,
-  ) => (
-    roomId: string,
-  ) => (
-    io: SocketIO.Server,
-  ) => (
-    action: {type: string},
-    respond: <T>(response: EventResponse<T>) => void,
   ) => void
   leave: (socketId: string) => void
   isEmpty: () => boolean
 }
 
-export const newRoom = (): Room => {
+export const newRoom = (roomId: string, io: SocketIO.Server): Room => {
   const game = newGame()
   const sockets: {[socketId: string]: string} = {}
+  const players: {[playerName: string]: SocketIO.Socket} = {}
 
-  const join = (socketId: string, playerName: string) => {
-    if (sockets[socketId]) {
+  const join = (socket: SocketIO.Socket, playerName: string) => {
+    if (sockets[socket.id]) {
       throw 'Socket already in room'
     }
-    sockets[socketId] = playerName
-    return game.join(playerName)
+    if (players[playerName]) {
+      throw 'Player name is already taken'
+    }
+    sockets[socket.id] = playerName
+    players[playerName] = socket
+    socket.join(roomId)
+    socket.on('gameEvent', game.join(playerName)(roomId, io))
   }
 
   const leave = (socketId: string) => {
@@ -34,6 +32,7 @@ export const newRoom = (): Room => {
       throw 'Socket not in room'
     }
     game.leave(sockets[socketId])
+    delete players[sockets[socketId]]
     delete sockets[socketId]
   }
 

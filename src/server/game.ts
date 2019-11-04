@@ -14,7 +14,7 @@ interface GameState {
 export interface Game {
   join: (
     playerName: string,
-  ) => (roomId: string) => (io: SocketIO.Server) => (...args: unknown[]) => void
+  ) => (roomId: string, io: SocketIO.Server) => (...args: unknown[]) => void
   leave: (playerName: string) => void
 }
 
@@ -34,7 +34,7 @@ export const newGame = (): Game => {
       alive: true,
       role: null,
     }
-    return (roomId: string) => (io: SocketIO.Server) => (
+    return (roomId: string, io: SocketIO.Server) => (
       ...args: unknown[]
     ) => {
       if (
