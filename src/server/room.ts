@@ -1,10 +1,7 @@
 import {newGame} from './game'
 
 export interface Room {
-  join: (
-    socket: SocketIO.Socket,
-    playerName: string,
-  ) => void
+  join: (socket: SocketIO.Socket, playerName: string) => void
   leave: (socketId: string) => void
   isEmpty: () => boolean
 }
@@ -24,7 +21,7 @@ export const newRoom = (roomId: string, io: SocketIO.Server): Room => {
     sockets[socket.id] = playerName
     players[playerName] = socket
     socket.join(roomId)
-    socket.on('gameEvent', game.join(playerName)(roomId, io))
+    socket.on('gameEvent', game.join(playerName)(roomId, io, getPlayers))
   }
 
   const leave = (socketId: string) => {
@@ -35,6 +32,8 @@ export const newRoom = (roomId: string, io: SocketIO.Server): Room => {
     delete players[sockets[socketId]]
     delete sockets[socketId]
   }
+
+  const getPlayers = () => players
 
   const isEmpty = () => Object.keys(sockets).length === 0
 

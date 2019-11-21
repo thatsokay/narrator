@@ -14,7 +14,11 @@ interface GameState {
 export interface Game {
   join: (
     playerName: string,
-  ) => (roomId: string, io: SocketIO.Server) => (...args: unknown[]) => void
+  ) => (
+    roomId: string,
+    io: SocketIO.Server,
+    getPlayers: () => {[playerName: string]: SocketIO.Socket},
+  ) => (...args: unknown[]) => void
   leave: (playerName: string) => void
 }
 
@@ -34,9 +38,11 @@ export const newGame = (): Game => {
       alive: true,
       role: null,
     }
-    return (roomId: string, io: SocketIO.Server) => (
-      ...args: unknown[]
-    ) => {
+    return (
+      roomId: string,
+      io: SocketIO.Server,
+      getPlayers: () => {[playerName: string]: SocketIO.Socket},
+    ) => (...args: unknown[]) => {
       if (
         args.length !== 2 ||
         typeof args[0] !== 'object' ||
@@ -51,12 +57,15 @@ export const newGame = (): Game => {
         case 'ready':
           gameState.players[playerName].ready = true
           respond({success: true})
+          getPlayers()
+            [playerName].to(roomId)
+            .emit('gameEvent', {type: 'ready', player: playerName})
           if (
             Object.keys(gameState.players).length >= 6 &&
             !Object.values(gameState.players).filter(({ready}) => !ready).length
           ) {
             console.log('start game')
-            io.in(roomId).emit('start')
+            io.in(roomId).emit('gameEvent', {type: 'start'})
           }
           break
         default:

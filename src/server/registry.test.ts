@@ -3,11 +3,12 @@ import {Registry, newRegistry} from './registry'
 let registry: Registry
 let io: SocketIO.Server
 
-const mockSocket = (id: string) => ({
-  id,
-  join: jest.fn(),
-  on: jest.fn()
-} as unknown as SocketIO.Socket)
+const mockSocket = (id: string) =>
+  (({
+    id,
+    join: jest.fn(),
+    on: jest.fn(),
+  } as unknown) as SocketIO.Socket)
 
 beforeEach(() => {
   io = {} as SocketIO.Server

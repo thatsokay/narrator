@@ -36,7 +36,11 @@ export const newRegistry = (io: SocketIO.Server): Registry => {
     return roomId
   }
 
-  const joinRoom = (socket: SocketIO.Socket, playerName: string, roomId: string) => {
+  const joinRoom = (
+    socket: SocketIO.Socket,
+    playerName: string,
+    roomId: string,
+  ) => {
     /* Adds a player to the room with a given room id if it exists.
      */
     if (sockets[socket.id] !== undefined) {

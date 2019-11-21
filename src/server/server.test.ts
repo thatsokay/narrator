@@ -166,8 +166,10 @@ test('start game', async done => {
                 expect(response.success).toBe(true)
               },
             )
-            socket.on('start', () => {
-              resolve()
+            socket.on('gameEvent', (event: any) => {
+              if (event.type === 'start') {
+                resolve()
+              }
             })
           }),
       ),

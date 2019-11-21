@@ -29,7 +29,7 @@ test('invalid action', async done => {
   const callback = game.join('foo')
   await expect(
     new Promise(resolve => {
-      callback('foo', {} as SocketIO.Server)(
+      callback('foo', {} as SocketIO.Server, () => ({}))(
         {type: 'foo'},
         (response: EventResponse<{}>) => {
           resolve(response)
@@ -41,11 +41,16 @@ test('invalid action', async done => {
 })
 
 test('start game', async done => {
-  const emit = jest.fn() as any
-  const server = {in: _ => ({emit})} as SocketIO.Server
+  const playerEmit = jest.fn() as any
+  const playerSockets = new Array(6).fill(null).reduce((acc, _, i) => {
+    acc[`foo${i}`] = {to: (_: string) => ({emit: playerEmit})}
+    return acc
+  }, {})
+  const serverEmit = jest.fn() as any
+  const server = {in: _ => ({emit: serverEmit})} as SocketIO.Server
   const callbacks = new Array(6)
     .fill(null)
-    .map((_, i) => game.join(`foo${i}`)('foo', server))
+    .map((_, i) => game.join(`foo${i}`)('foo', server, () => playerSockets))
   await expect(
     Promise.all(
       callbacks.map(
@@ -58,13 +63,14 @@ test('start game', async done => {
       ),
     ),
   ).resolves.toStrictEqual(new Array(6).fill(true))
-  expect(emit).toHaveBeenCalledWith('start')
+  expect(playerEmit).toHaveBeenCalledTimes(6)
+  expect(serverEmit).toHaveBeenCalledWith('gameEvent', {type: 'start'})
   done()
 })
 
 test('invalid event arguments', () => {
   expect(() => {
-    game.join('foo')('foo', {} as SocketIO.Server)(
+    game.join('foo')('foo', {} as SocketIO.Server, () => ({}))(
       null,
       (_: EventResponse<{}>) => {},
     )
