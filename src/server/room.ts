@@ -20,7 +20,11 @@ export const newRoom = (roomId: string, io: SocketIO.Server): Room => {
     }
     sockets[socket.id] = playerName
     players[playerName] = socket
-    socket.join(roomId)
+    socket.join(roomId, err => {
+      if (!err) {
+        io.in(roomId).emit('roomPlayers', Object.keys(players))
+      }
+    })
     socket.on('gameEvent', game.join(playerName)(roomId, io, getPlayers))
   }
 

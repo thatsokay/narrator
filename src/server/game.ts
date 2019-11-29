@@ -64,6 +64,7 @@ export const newGame = (): Game => {
             Object.keys(gameState.players).length >= 6 &&
             !Object.values(gameState.players).filter(({ready}) => !ready).length
           ) {
+            gameState.status = 'firstNight'
             console.log('start game')
             io.in(roomId).emit('gameEvent', {type: 'start'})
           }

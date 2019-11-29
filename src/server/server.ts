@@ -31,7 +31,7 @@ io.on('connect', socket => {
     }
     const [playerName, respond] = args
     // TODO: Remove room on joinRoom exception
-    let roomId = registry.createRoom()
+    const roomId = registry.createRoom()
     try {
       registry.joinRoom(socket, playerName, roomId)
     } catch (error) {
