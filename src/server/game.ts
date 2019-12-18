@@ -1,15 +1,22 @@
 import {Role} from '../shared/roles'
 
-interface GameState {
+interface Phase<S, P> {
+  status: S
   players: {
-    [playerName: string]: {
-      ready: boolean
-      alive: boolean
-      role: Role | null
-    }
+    [playerName: string]: P
   }
-  status: 'waiting' | 'firstNight' | 'day' | 'night'
 }
+
+type Waiting = Phase<'waiting', {ready: boolean}>
+type Started = Phase<
+  'firstNight' | 'day' | 'night',
+  {
+    alive: boolean
+    role: Role | null
+  }
+>
+
+type GameState = Waiting | Started
 
 export interface Game {
   join: (
@@ -23,7 +30,7 @@ export interface Game {
 }
 
 export const newGame = (): Game => {
-  const gameState: GameState = {
+  let gameState: GameState = {
     players: {},
     status: 'waiting',
   }
@@ -35,8 +42,6 @@ export const newGame = (): Game => {
 
     gameState.players[playerName] = {
       ready: false,
-      alive: true,
-      role: null,
     }
     return (
       roomId: string,
@@ -55,6 +60,10 @@ export const newGame = (): Game => {
       const respond = args[1]
       switch (action.type) {
         case 'ready':
+          if (gameState.status !== 'waiting') {
+            respond({success: false, reason: 'Game has already started'})
+            return
+          }
           gameState.players[playerName].ready = true
           respond({success: true})
           getPlayers()
@@ -64,7 +73,16 @@ export const newGame = (): Game => {
             Object.keys(gameState.players).length >= 6 &&
             !Object.values(gameState.players).filter(({ready}) => !ready).length
           ) {
-            gameState.status = 'firstNight'
+            gameState = {
+              status: 'firstNight',
+              players: Object.keys(gameState).reduce(
+                (acc, key) => ({
+                  ...acc,
+                  [key]: {alive: true, role: null},
+                }),
+                {},
+              ),
+            }
             console.log('start game')
             io.in(roomId).emit('gameEvent', {type: 'start'})
           }
