@@ -1,4 +1,4 @@
-import {Role} from '../shared/roles'
+import {Role, ROLES} from '../shared/roles'
 
 interface Phase<S, P> {
   status: S
@@ -12,7 +12,7 @@ type Started = Phase<
   'firstNight' | 'day' | 'night',
   {
     alive: boolean
-    role: Role | null
+    role: Role
   }
 >
 
@@ -27,6 +27,17 @@ export interface Game {
     getPlayers: () => {[playerName: string]: SocketIO.Socket},
   ) => (...args: unknown[]) => void
   leave: (playerName: string) => void
+}
+
+const shuffle = <T>(xs: T[]) => {
+  /* Fisher-Yates shuffles an array in place.
+   */
+  for (let i = xs.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    const temp = xs[i]
+    xs[i] = xs[j]
+    xs[j] = temp
+  }
 }
 
 export const newGame = (): Game => {
@@ -70,22 +81,31 @@ export const newGame = (): Game => {
             [playerName].to(roomId)
             .emit('gameEvent', {type: 'ready', player: playerName})
           if (
-            Object.keys(gameState.players).length >= 6 &&
-            !Object.values(gameState.players).filter(({ready}) => !ready).length
+            Object.keys(gameState.players).length < 6 ||
+            Object.values(gameState.players).filter(({ready}) => !ready).length
           ) {
-            gameState = {
-              status: 'firstNight',
-              players: Object.keys(gameState).reduce(
-                (acc, key) => ({
-                  ...acc,
-                  [key]: {alive: true, role: null},
-                }),
-                {},
-              ),
-            }
-            console.log('start game')
-            io.in(roomId).emit('gameEvent', {type: 'start'})
+            return
           }
+
+          const numPlayers = Object.keys(gameState.players).length
+          // Gives 2 mafia for 8 players, 3 at 12, and 4 at 18
+          const numMafia = Math.floor(Math.sqrt(numPlayers - 5.75) + 0.5) || 1
+          const availableRoles = [ROLES.detective, ROLES.nurse]
+            .concat(new Array(numMafia).fill(ROLES.mafia))
+            .concat(new Array(numPlayers - numMafia - 2).fill(ROLES.villager))
+          shuffle(availableRoles)
+          gameState = {
+            status: 'firstNight',
+            players: Object.keys(gameState).reduce(
+              (acc, key, i) => ({
+                ...acc,
+                [key]: {alive: true, role: availableRoles[i]},
+              }),
+              {},
+            ),
+          }
+          console.log('start game')
+          io.in(roomId).emit('gameEvent', {type: 'start'})
           break
         default:
           respond({success: false, reason: 'Unrecognised action type'})
