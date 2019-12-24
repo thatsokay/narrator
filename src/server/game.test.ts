@@ -1,78 +1,75 @@
-import {newGame, Game} from './game'
-import {EventResponse} from '../shared/types'
+import R from 'ramda'
 
-let game: Game
+import {reducer} from './game'
 
-beforeEach(() => {
-  game = newGame()
+const initialState = Object.freeze(reducer(undefined, undefined))
+
+test('player joining', () => {
+  const joinState = reducer(initialState, {type: 'JOIN', sender: 'foo'})
+  expect(joinState).toStrictEqual({
+    ...initialState,
+    players: {foo: {ready: false}},
+  })
 })
 
 test('player leaving', () => {
-  game.join('foo')
-  game.leave('foo')
+  const joinState = reducer(initialState, {type: 'JOIN', sender: 'foo'})
+  const leaveState = reducer(joinState, {type: 'LEAVE', sender: 'foo'})
+  expect(leaveState).toStrictEqual(initialState)
 })
 
 test('non-existent player leaving', () => {
-  expect(() => {
-    game.leave('foo')
-  }).toThrow('Player foo does not exist in this game')
+  const newState = reducer(initialState, {type: 'LEAVE', sender: 'foo'})
+  expect(newState).toStrictEqual({
+    ...initialState,
+    error: `Player, foo, does not exist in this game`,
+  })
+  expect(newState.players).toBe(initialState.players)
 })
 
 test('player joining with existing name', () => {
-  game.join('foo')
-  expect(() => {
-    game.join('foo')
-  }).toThrow('Player name foo is already taken')
+  const firstJoinState = reducer(initialState, {type: 'JOIN', sender: 'foo'})
+  const secondJoinState = reducer(firstJoinState, {type: 'JOIN', sender: 'foo'})
+  expect(secondJoinState).toStrictEqual({
+    ...firstJoinState,
+    error: `Player name, foo, is already taken`,
+  })
+  expect(secondJoinState.players).toBe(firstJoinState.players)
 })
 
-test('invalid action', async done => {
-  const callback = game.join('foo')
-  await expect(
-    new Promise(resolve => {
-      callback('foo', {} as SocketIO.Server, () => ({}))(
-        {type: 'foo'},
-        (response: EventResponse<{}>) => {
-          resolve(response)
-        },
-      )
-    }),
-  ).resolves.toStrictEqual({success: false, reason: 'Unrecognised action type'})
-  done()
+test('start game', () => {
+  // For 6 players, apply a join and ready action
+  const startState = R.range(0, 6).reduce(
+    (state, i) =>
+      [
+        {type: 'JOIN', sender: `foo${i}`},
+        {type: 'READY', sender: `foo${i}`},
+      ].reduce((state, action) => reducer(state, action), state),
+    initialState,
+  )
+  expect(startState).toMatchObject({
+    status: 'firstNight',
+    players: R.fromPairs(R.range(0, 6).map(i => [`foo${i}`, {alive: true}])),
+  })
 })
 
-test('start game', async done => {
-  const playerEmit = jest.fn() as any
-  const playerSockets = new Array(6).fill(null).reduce((acc, _, i) => {
-    acc[`foo${i}`] = {to: (_: string) => ({emit: playerEmit})}
-    return acc
-  }, {})
-  const serverEmit = jest.fn() as any
-  const server = {in: _ => ({emit: serverEmit})} as SocketIO.Server
-  const callbacks = new Array(6)
-    .fill(null)
-    .map((_, i) => game.join(`foo${i}`)('foo', server, () => playerSockets))
-  await expect(
-    Promise.all(
-      callbacks.map(
-        callback =>
-          new Promise(resolve => {
-            callback({type: 'ready'}, (response: EventResponse<{}>) => {
-              resolve(response.success)
-            })
-          }),
-      ),
-    ),
-  ).resolves.toStrictEqual(new Array(6).fill(true))
-  expect(playerEmit).toHaveBeenCalledTimes(6)
-  expect(serverEmit).toHaveBeenCalledWith('gameEvent', {type: 'start'})
-  done()
-})
-
-test('invalid event arguments', () => {
-  expect(() => {
-    game.join('foo')('foo', {} as SocketIO.Server, () => ({}))(
-      null,
-      (_: EventResponse<{}>) => {},
-    )
-  }).not.toThrow()
+test('invalid action', () => {
+  const invalidType = reducer(initialState, {type: 1, sender: 'foo'})
+  expect(invalidType).toStrictEqual({
+    ...initialState,
+    error: 'Invalid action',
+  })
+  expect(invalidType.players).toBe(initialState.players)
+  const invalidSender = reducer(initialState, {type: 'JOIN', sender: 1})
+  expect(invalidSender).toStrictEqual({
+    ...initialState,
+    error: 'Invalid action',
+  })
+  expect(invalidSender.players).toBe(initialState.players)
+  const unknownType = reducer(initialState, {type: 'ASDF', sender: 'foo'})
+  expect(unknownType).toStrictEqual({
+    ...initialState,
+    error: 'Unknown action type',
+  })
+  expect(unknownType.players).toBe(initialState.players)
 })

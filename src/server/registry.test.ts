@@ -23,8 +23,6 @@ test('creating, joining, and leaving a room', () => {
   registry.joinRoom(socket2, 'bar', roomId)
   expect(registry.leave(socket1.id)).toBe(true)
   expect(registry.leave(socket2.id)).toBe(true)
-  expect(socket1.join).toBeCalledWith(roomId, expect.any(Function))
-  expect(socket2.join).toBeCalledWith(roomId, expect.any(Function))
   expect(socket1.on).toBeCalled()
   expect(socket2.on).toBeCalled()
 })

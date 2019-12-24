@@ -1,4 +1,4 @@
-import {newGame} from './game'
+import {reducer} from './game'
 
 export interface Room {
   join: (socket: SocketIO.Socket, playerName: string) => void
@@ -6,8 +6,9 @@ export interface Room {
   isEmpty: () => boolean
 }
 
+// @ts-ignore FIXME
 export const newRoom = (roomId: string, io: SocketIO.Server): Room => {
-  const game = newGame()
+  let gameState = reducer(undefined, undefined)
   const sockets: {[socketId: string]: string} = {}
   const players: {[playerName: string]: SocketIO.Socket} = {}
 
@@ -18,26 +19,27 @@ export const newRoom = (roomId: string, io: SocketIO.Server): Room => {
     if (players[playerName]) {
       throw 'Player name is already taken'
     }
+    gameState = reducer(gameState, {type: 'JOIN', sender: playerName})
+    if (gameState.error) {
+      // Should be unreachable
+      throw gameState.error
+    }
     sockets[socket.id] = playerName
     players[playerName] = socket
-    socket.join(roomId, err => {
-      if (!err) {
-        io.in(roomId).emit('roomPlayers', Object.keys(players))
-      }
-    })
-    socket.on('gameEvent', game.join(playerName)(roomId, io, getPlayers))
   }
 
   const leave = (socketId: string) => {
     if (!sockets[socketId]) {
       throw 'Socket not in room'
     }
-    game.leave(sockets[socketId])
+    gameState = reducer(gameState, {type: 'LEAVE', sender: sockets[socketId]})
+    if (gameState.error) {
+      // Should be unreachable
+      throw gameState.error
+    }
     delete players[sockets[socketId]]
     delete sockets[socketId]
   }
-
-  const getPlayers = () => players
 
   const isEmpty = () => Object.keys(sockets).length === 0
 

@@ -1,3 +1,5 @@
+import R from 'ramda'
+
 import {Role, ROLES} from '../shared/roles'
 
 interface Phase<S, P> {
@@ -5,6 +7,7 @@ interface Phase<S, P> {
   players: {
     [playerName: string]: P
   }
+  error: string | null
 }
 
 type Waiting = Phase<'waiting', {ready: boolean}>
@@ -16,18 +19,20 @@ type Started = Phase<
   }
 >
 
-type GameState = Waiting | Started
+export type GameState = Waiting | Started
 
-export interface Game {
-  join: (
-    playerName: string,
-  ) => (
-    roomId: string,
-    io: SocketIO.Server,
-    getPlayers: () => {[playerName: string]: SocketIO.Socket},
-  ) => (...args: unknown[]) => void
-  leave: (playerName: string) => void
+interface Action {
+  type: string
+  sender: string
+  // Other fields carry action payload
+  [key: string]: unknown
 }
+
+const isAction = (action: any): action is Action =>
+  typeof action === 'object' &&
+  action !== null &&
+  typeof action.type === 'string' &&
+  typeof action.sender === 'string'
 
 const shuffle = <T>(xs: T[]) => {
   /* Fisher-Yates shuffles an array in place.
@@ -40,85 +45,89 @@ const shuffle = <T>(xs: T[]) => {
   }
 }
 
-export const newGame = (): Game => {
-  let gameState: GameState = {
-    players: {},
-    status: 'waiting',
+const initialState: GameState = {
+  status: 'waiting',
+  players: {},
+  error: null,
+}
+
+export const reducer = (
+  state: GameState = initialState,
+  action: unknown,
+): GameState => {
+  const cleanState = {...state, error: null}
+  if (action === undefined) {
+    return cleanState
   }
-
-  const join = (playerName: string) => {
-    if (gameState.players[playerName]) {
-      throw `Player name ${playerName} is already taken`
+  if (!isAction(action)) {
+    return {
+      ...cleanState,
+      error: 'Invalid action',
     }
-
-    gameState.players[playerName] = {
-      ready: false,
-    }
-    return (
-      roomId: string,
-      io: SocketIO.Server,
-      getPlayers: () => {[playerName: string]: SocketIO.Socket},
-    ) => (...args: unknown[]) => {
+  }
+  switch (action.type) {
+    case 'JOIN':
+      if (cleanState.players[action.sender]) {
+        return {
+          ...cleanState,
+          error: `Player name, ${action.sender}, is already taken`,
+        }
+      }
+      // XXX: `assocPath` can produce invalid state
+      return R.assocPath(['players', action.sender], {ready: false}, cleanState)
+    case 'LEAVE':
+      if (!cleanState.players[action.sender]) {
+        return {
+          ...cleanState,
+          error: `Player, ${action.sender}, does not exist in this game`,
+        }
+      }
+      // XXX: `dissocPath` can produce invalid state
+      return R.dissocPath(['players', action.sender], cleanState)
+    case 'READY':
+      if (cleanState.status !== 'waiting') {
+        return {
+          ...cleanState,
+          error: 'Game has already started',
+        }
+      }
+      if (cleanState.players[action.sender].ready) {
+        // Don't change player state if already ready
+        return cleanState
+      }
+      // XXX: `assocPath` can produce invalid state
+      const newState = R.assocPath(
+        ['players', action.sender, 'ready'],
+        true,
+        cleanState,
+      )
       if (
-        args.length !== 2 ||
-        typeof args[0] !== 'object' ||
-        typeof args[1] !== 'function' ||
-        args[0] === null
+        Object.keys(newState.players).length < 6 ||
+        Object.values(newState.players).filter(({ready}) => !ready).length
       ) {
-        return
+        return newState
       }
-      const action = args[0] as {[key: string]: unknown}
-      const respond = args[1]
-      switch (action.type) {
-        case 'ready':
-          if (gameState.status !== 'waiting') {
-            respond({success: false, reason: 'Game has already started'})
-            return
-          }
-          gameState.players[playerName].ready = true
-          respond({success: true})
-          getPlayers()
-            [playerName].to(roomId)
-            .emit('gameEvent', {type: 'ready', player: playerName})
-          if (
-            Object.keys(gameState.players).length < 6 ||
-            Object.values(gameState.players).filter(({ready}) => !ready).length
-          ) {
-            return
-          }
 
-          const numPlayers = Object.keys(gameState.players).length
-          // Gives 2 mafia for 8 players, 3 at 12, and 4 at 18
-          const numMafia = Math.floor(Math.sqrt(numPlayers - 5.75) + 0.5) || 1
-          const availableRoles = [ROLES.detective, ROLES.nurse]
-            .concat(new Array(numMafia).fill(ROLES.mafia))
-            .concat(new Array(numPlayers - numMafia - 2).fill(ROLES.villager))
-          shuffle(availableRoles)
-          gameState = {
-            status: 'firstNight',
-            players: Object.keys(gameState).reduce(
-              (acc, key, i) => ({
-                ...acc,
-                [key]: {alive: true, role: availableRoles[i]},
-              }),
-              {},
-            ),
-          }
-          console.log('start game')
-          io.in(roomId).emit('gameEvent', {type: 'start'})
-          break
-        default:
-          respond({success: false, reason: 'Unrecognised action type'})
+      // Everyone's ready. Let's go.
+      const numPlayers = Object.keys(newState.players).length
+      // Gives 1 mafia for 6 players, 2 at 8, 3 at 12, and 4 at 18
+      const numMafia = Math.floor(Math.sqrt(numPlayers - 5.75) + 0.5) || 1
+      // Create array of available roles
+      const playerStates = [ROLES.detective, ROLES.nurse]
+        .concat(new Array(numMafia).fill(ROLES.mafia))
+        .concat(new Array(numPlayers - numMafia - 2).fill(ROLES.villager))
+        // Produce a player state for each available role
+        .map(role => ({alive: true, role}))
+      shuffle(playerStates)
+      return {
+        status: 'firstNight',
+        players: R.zipObj(Object.keys(newState.players), playerStates),
+        error: null,
       }
-    }
+    default:
+      return {
+        ...cleanState,
+        error: 'Unknown action type',
+      }
   }
-
-  const leave = (playerName: string) => {
-    if (!gameState.players[playerName]) {
-      throw `Player ${playerName} does not exist in this game`
-    }
-    delete gameState.players[playerName]
-  }
-
-  return {join, leave}
 }

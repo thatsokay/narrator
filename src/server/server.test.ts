@@ -161,7 +161,7 @@ test('start game', async done => {
           new Promise<void>(resolve => {
             socket.emit(
               'gameEvent',
-              {type: 'ready'},
+              {type: 'READY'},
               (response: EventResponse<{}>) => {
                 expect(response.success).toBe(true)
               },
