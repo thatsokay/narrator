@@ -44,7 +44,7 @@ test('start game', () => {
       [
         {type: 'JOIN', sender: `foo${i}`},
         {type: 'READY', sender: `foo${i}`},
-      ].reduce((state, action) => reducer(state, action), state),
+      ].reduce(reducer, state),
     initialState,
   )
   expect(startState).toMatchObject({

@@ -53,7 +53,7 @@ const initialState: GameState = {
 
 export const reducer = (
   state: GameState = initialState,
-  action: unknown,
+  action?: unknown,
 ): GameState => {
   const cleanState = {...state, error: null}
   if (action === undefined) {

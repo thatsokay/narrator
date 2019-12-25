@@ -8,7 +8,7 @@ export interface Room {
 
 // @ts-ignore FIXME
 export const newRoom = (roomId: string, io: SocketIO.Server): Room => {
-  let gameState = reducer(undefined, undefined)
+  let gameState = reducer(undefined)
   const sockets: {[socketId: string]: string} = {}
   const players: {[playerName: string]: SocketIO.Socket} = {}
 
