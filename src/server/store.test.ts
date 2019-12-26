@@ -38,20 +38,20 @@ afterEach(() => {
 
 test('subscription', () => {
   subscription = store.subscribe(state => states.push(state))
-  expect(states).toEqual([{count: 0}])
+  expect(states).toStrictEqual([{count: 0}])
 })
 
 test('dispatch', () => {
   subscription = store.subscribe(state => states.push(state))
   store.dispatch({type: 'INCREMENT'})
-  expect(states).toEqual([{count: 0}, {count: 1}])
+  expect(states).toStrictEqual([{count: 0}, {count: 1}])
 })
 
 test('dispatch before subscribing', () => {
   store.dispatch({type: 'INCREMENT'})
   subscription = store.subscribe(state => states.push(state))
   store.dispatch({type: 'INCREMENT'})
-  expect(states).toEqual([{count: 1}, {count: 2}])
+  expect(states).toStrictEqual([{count: 1}, {count: 2}])
 })
 
 test('multiple subscriptions', () => {
@@ -67,10 +67,16 @@ test('multiple subscriptions', () => {
   const sub3 = store.subscribe(state => states3.push(state))
   store.dispatch({type: 'INCREMENT'})
 
-  expect(states).toEqual([{count: 0}, {count: 1}, {count: 2}, {count: 3}])
-  expect(states2).toEqual([{count: 1}, {count: 2}, {count: 3}])
-  expect(states3).toEqual([{count: 2}, {count: 3}])
+  expect(states).toStrictEqual([{count: 0}, {count: 1}, {count: 2}, {count: 3}])
+  expect(states2).toStrictEqual([{count: 1}, {count: 2}, {count: 3}])
+  expect(states3).toStrictEqual([{count: 2}, {count: 3}])
 
   sub2.unsubscribe()
   sub3.unsubscribe()
+})
+
+test('get state', () => {
+  expect(store.getState()).toStrictEqual({count: 0})
+  store.dispatch({type: 'INCREMENT'})
+  expect(store.getState()).toStrictEqual({count: 1})
 })
