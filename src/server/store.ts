@@ -19,6 +19,6 @@ export const createStore = <S, A>(
   return {
     dispatch: (action: A) => action$.next(action),
     subscribe: (listener: (state: S) => void) => state$.subscribe(listener),
-    getState: () => state$.getValue()
+    getState: () => state$.getValue(),
   }
 }

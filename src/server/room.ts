@@ -1,14 +1,9 @@
+import {createStore} from './store'
 import {reducer} from './game'
 
-export interface Room {
-  join: (socket: SocketIO.Socket, playerName: string) => void
-  leave: (socketId: string) => void
-  isEmpty: () => boolean
-}
-
 // @ts-ignore FIXME
-export const newRoom = (roomId: string, io: SocketIO.Server): Room => {
-  let gameState = reducer(undefined)
+export const newRoom = (roomId: string, io: SocketIO.Server) => {
+  let store = createStore(reducer)
   const sockets: {[socketId: string]: string} = {}
   const players: {[playerName: string]: SocketIO.Socket} = {}
 
@@ -19,10 +14,11 @@ export const newRoom = (roomId: string, io: SocketIO.Server): Room => {
     if (players[playerName]) {
       throw 'Player name is already taken'
     }
-    gameState = reducer(gameState, {type: 'JOIN', sender: playerName})
-    if (gameState.error) {
+    store.dispatch({type: 'JOIN', sender: playerName})
+    const state = store.getState()
+    if (state.error) {
       // Should be unreachable
-      throw gameState.error
+      throw state.error
     }
     sockets[socket.id] = playerName
     players[playerName] = socket
@@ -32,10 +28,11 @@ export const newRoom = (roomId: string, io: SocketIO.Server): Room => {
     if (!sockets[socketId]) {
       throw 'Socket not in room'
     }
-    gameState = reducer(gameState, {type: 'LEAVE', sender: sockets[socketId]})
-    if (gameState.error) {
+    store.dispatch({type: 'LEAVE', sender: sockets[socketId]})
+    const state = store.getState()
+    if (state.error) {
       // Should be unreachable
-      throw gameState.error
+      throw state.error
     }
     delete players[sockets[socketId]]
     delete sockets[socketId]
@@ -45,3 +42,5 @@ export const newRoom = (roomId: string, io: SocketIO.Server): Room => {
 
   return {join, leave, isEmpty}
 }
+
+export type Room = ReturnType<typeof newRoom>

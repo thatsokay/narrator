@@ -10,17 +10,7 @@ const randomRoomId = (length: number) => {
   return chars.join('')
 }
 
-export interface Registry {
-  createRoom: () => string
-  joinRoom: (
-    socket: SocketIO.Socket,
-    playerName: string,
-    roomId: string,
-  ) => void
-  leave: (socketId: string) => void
-}
-
-export const newRegistry = (io: SocketIO.Server): Registry => {
+export const newRegistry = (io: SocketIO.Server) => {
   const sockets: {[socketId: string]: string} = {}
   const rooms: {[roomId: string]: Room} = {}
 
@@ -90,3 +80,5 @@ export const newRegistry = (io: SocketIO.Server): Registry => {
 
   return {createRoom, joinRoom, leave}
 }
+
+export type Registry = ReturnType<typeof newRegistry>
