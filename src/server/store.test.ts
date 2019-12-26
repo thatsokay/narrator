@@ -1,4 +1,4 @@
-import { Subscription } from 'rxjs'
+import {Subscription} from 'rxjs'
 
 import {createStore, Store} from './store'
 
@@ -12,11 +12,11 @@ const reducer = (state: State = {count: 0}, action?: any) => {
   }
   if (action.type === 'INCREMENT') {
     return {
-      count: state.count + 1
+      count: state.count + 1,
     }
   } else if (action.type === 'DECREMENT') {
     return {
-      count: state.count - 1
+      count: state.count - 1,
     }
   }
   return state
@@ -50,7 +50,8 @@ test('dispatch', () => {
 test('dispatch before subscribing', () => {
   store.dispatch({type: 'INCREMENT'})
   subscription = store.subscribe(state => states.push(state))
-  expect(states).toEqual([{count: 1}])
+  store.dispatch({type: 'INCREMENT'})
+  expect(states).toEqual([{count: 1}, {count: 2}])
 })
 
 test('multiple subscriptions', () => {

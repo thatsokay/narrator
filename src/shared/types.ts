@@ -1,7 +1,7 @@
 export type EventResponse<T> =
-  | {
+  | ({
       success: true
-    } & T
+    } & T)
   | {
       success: false
       reason: string

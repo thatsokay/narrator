@@ -1,5 +1,5 @@
-import {Subject, Subscription} from 'rxjs'
-import {scan, publishBehavior, refCount} from 'rxjs/operators'
+import {Subject, BehaviorSubject, Subscription} from 'rxjs'
+import {scan} from 'rxjs/operators'
 
 export interface Store<S, A> {
   dispatch: (action: A) => void
@@ -10,13 +10,10 @@ export const createStore = <S, A>(
   reducer: (state: S | undefined, action?: A) => S,
   initialState?: S,
 ): Store<S, A> => {
-  const action$ = new Subject<A>()
   const firstState = initialState || reducer(undefined)
-  const state$ = action$.pipe(
-    scan(reducer, firstState),
-    publishBehavior(firstState),
-    refCount(),
-  )
+  const action$ = new Subject<A>()
+  const state$ = new BehaviorSubject<S>(firstState)
+  action$.pipe(scan(reducer, firstState)).subscribe(state$)
 
   return {
     dispatch: (action: A) => action$.next(action),
