@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import socketIO from 'socket.io-client'
 import {BehaviorSubject, fromEvent} from 'rxjs'
 
@@ -10,18 +10,21 @@ import {EventResponse} from '../../shared/types'
 import {GameState, initialState} from '../../shared/game'
 
 const App = () => {
-  // @ts-ignore FIXME
   const [playerName, setPlayerName] = useState('')
-  // @ts-ignore FIXME
   const [roomId, setRoomId] = useState('')
-  // @ts-ignore FIXME
   const [socket, setSocket] = useState<SocketIOClient.Socket | null>(null)
-  // @ts-ignore FIXME
   const [inRoom, setInRoom] = useState(false)
-  // @ts-ignore FIXME
-  const [gameState$, setGameState$] = useState<BehaviorSubject<GameState>>(
-    new BehaviorSubject(initialState),
-  )
+  const [gameState$] = useState(new BehaviorSubject<GameState>(initialState))
+
+  useEffect(() => {
+    if (socket) {
+      const subscription = fromEvent<GameState>(socket, 'gameState').subscribe(
+        gameState$,
+      )
+      return () => subscription.unsubscribe()
+    }
+    return () => {}
+  }, [socket])
 
   const handleSubmit = (playerName: string, roomId?: string) => (
     event: React.FormEvent,
@@ -32,7 +35,6 @@ const App = () => {
      */
     event.preventDefault()
     const socket = socketIO()
-    fromEvent<GameState>(socket, 'gameState').subscribe(gameState$)
     socket.once('connect', () => {
       console.log('connected')
       if (roomId === undefined) {

@@ -22,7 +22,7 @@ const Game = (props: Props) => {
       <h1>{props.roomId}</h1>
       <ul>
         {players.map(player => (
-          <li>{player}</li>
+          <li key={player}>{player}</li>
         ))}
       </ul>
     </>
