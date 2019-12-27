@@ -1,25 +1,27 @@
 import React, {useState} from 'react'
 import socketIO from 'socket.io-client'
+import {BehaviorSubject, fromEvent} from 'rxjs'
 
 import CreateForm from './CreateForm'
 import JoinForm from './JoinForm'
 import Game from './Game'
 import {EVENTS} from '../../shared/constants'
 import {EventResponse} from '../../shared/types'
+import {GameState, initialState} from '../../shared/game'
 
 const App = () => {
-  // TODO: Remove
-  // @ts-ignore
+  // @ts-ignore FIXME
   const [playerName, setPlayerName] = useState('')
-  // TODO: Remove
-  // @ts-ignore
+  // @ts-ignore FIXME
   const [roomId, setRoomId] = useState('')
-  // TODO: Remove
-  // @ts-ignore
+  // @ts-ignore FIXME
   const [socket, setSocket] = useState<SocketIOClient.Socket | null>(null)
-  // TODO: Remove
-  // @ts-ignore
+  // @ts-ignore FIXME
   const [inRoom, setInRoom] = useState(false)
+  // @ts-ignore FIXME
+  const [gameState$, setGameState$] = useState<BehaviorSubject<GameState>>(
+    new BehaviorSubject(initialState),
+  )
 
   const handleSubmit = (playerName: string, roomId?: string) => (
     event: React.FormEvent,
@@ -30,6 +32,7 @@ const App = () => {
      */
     event.preventDefault()
     const socket = socketIO()
+    fromEvent<GameState>(socket, 'gameState').subscribe(gameState$)
     socket.once('connect', () => {
       console.log('connected')
       if (roomId === undefined) {
@@ -82,7 +85,7 @@ const App = () => {
   return (
     <>
       {inRoom && socket ? (
-        <Game {...{playerName, roomId, socket}} />
+        <Game {...{playerName, roomId, gameState$}} />
       ) : (
         <>
           <CreateForm handleSubmit={handleSubmit} />

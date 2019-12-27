@@ -1,6 +1,6 @@
 import R from 'ramda'
 
-import {Role, ROLES} from '../shared/roles'
+import {Role, ROLES} from './roles'
 
 interface Phase<S, P> {
   status: S
@@ -45,7 +45,7 @@ const shuffle = <T>(xs: T[]) => {
   }
 }
 
-const initialState: GameState = {
+export const initialState: GameState = {
   status: 'waiting',
   players: {},
   error: null,

@@ -1,5 +1,5 @@
 import {createStore} from './store'
-import {reducer} from './game'
+import {reducer} from '../shared/game'
 
 // @ts-ignore FIXME
 export const newRoom = (roomId: string, io: SocketIO.Server) => {
@@ -22,6 +22,11 @@ export const newRoom = (roomId: string, io: SocketIO.Server) => {
     }
     sockets[socket.id] = playerName
     players[playerName] = socket
+
+    socket.on('gameAction', (action: unknown) => store.dispatch(action))
+    store.subscribe(state => {
+      socket.emit('gameState', state)
+    })
   }
 
   const leave = (socketId: string) => {
