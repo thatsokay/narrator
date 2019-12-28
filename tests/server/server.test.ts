@@ -1,10 +1,12 @@
 import {Server} from 'http'
 import socketIOClient from 'socket.io-client'
+import R from 'ramda'
 
-import {EVENTS} from '../shared/constants'
-import {EventResponse} from '../shared/types'
+import {EVENTS} from '../../src/shared/constants'
+import {EventResponse} from '../../src/shared/types'
 
-import app from './server'
+import app from '../../src/server/server'
+import { GameState } from '../../src/shared/game'
 
 let server: Server
 let client: SocketIOClient.Socket
@@ -133,9 +135,7 @@ test('start game', async done => {
     return
   }
 
-  const joinSockets = new Array(5)
-    .fill(null)
-    .map(() => socketIOClient('localhost:3000'))
+  const joinSockets = R.range(0, 5).map(() => socketIOClient('localhost:3000'))
   await expect(
     Promise.all(
       joinSockets.map(
@@ -160,21 +160,21 @@ test('start game', async done => {
         socket =>
           new Promise<void>(resolve => {
             socket.emit(
-              'gameEvent',
+              'gameAction',
               {type: 'READY'},
               (response: EventResponse<{}>) => {
                 expect(response.success).toBe(true)
               },
             )
-            socket.on('gameEvent', (event: any) => {
-              if (event.type === 'start') {
+            socket.on('gameState', (state: GameState) => {
+              if (state.status === 'firstNight') {
                 resolve()
               }
             })
           }),
       ),
     ),
-  ).resolves.toStrictEqual(new Array(6).fill(undefined))
+  ).resolves.toMatchObject(new Array(6).fill(undefined))
 
   joinSockets.map(socket => socket.close())
   done()

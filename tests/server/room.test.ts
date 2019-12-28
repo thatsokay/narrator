@@ -1,4 +1,5 @@
-import {newRoom, Room} from './room'
+import {newRoom, Room} from '../../src/server/room'
+import {mockServerSocket} from '../utilities'
 
 let room: Room
 
@@ -11,24 +12,26 @@ test('empty', () => {
 })
 
 test('join', () => {
-  expect(() => room.join({id: 'foo'} as any, 'foo')).not.toThrow()
+  expect(() => room.join(mockServerSocket('foo'), 'foo')).not.toThrow()
 })
 
 test('leave', () => {
-  room.join({id: 'foo'} as any, 'foo')
+  room.join(mockServerSocket('foo'), 'foo')
   expect(() => room.leave('foo')).not.toThrow()
 })
 
 test('join with duplicate socket', () => {
-  room.join({id: 'foo'} as any, 'foo')
-  expect(() => room.join({id: 'foo'} as any, 'bar')).toThrow(
+  const socket = mockServerSocket('foo')
+  room.join(socket, 'foo')
+  expect(() => room.join(socket, 'bar')).toThrow(
     'Socket already in room',
   )
 })
 
 test('join with duplicate name', () => {
-  room.join({id: 'foo'} as any, 'foo')
-  expect(() => room.join({id: 'bar'} as any, 'foo')).toThrow(
+  const playerName = 'foo'
+  room.join(mockServerSocket('foo'), playerName)
+  expect(() => room.join(mockServerSocket('bar'), playerName)).toThrow(
     'Player name is already taken',
   )
 })

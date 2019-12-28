@@ -1,14 +1,8 @@
-import {Registry, newRegistry} from './registry'
+import {Registry, newRegistry} from '../../src/server/registry'
+import {mockServerSocket} from '../utilities'
 
 let registry: Registry
 let io: SocketIO.Server
-
-const mockSocket = (id: string) =>
-  (({
-    id,
-    join: jest.fn(),
-    on: jest.fn(),
-  } as unknown) as SocketIO.Socket)
 
 beforeEach(() => {
   io = {} as SocketIO.Server
@@ -17,8 +11,8 @@ beforeEach(() => {
 
 test('creating, joining, and leaving a room', () => {
   const roomId = registry.createRoom()
-  const socket1 = mockSocket('foo')
-  const socket2 = mockSocket('bar')
+  const socket1 = mockServerSocket('foo')
+  const socket2 = mockServerSocket('bar')
   registry.joinRoom(socket1, 'foo', roomId)
   registry.joinRoom(socket2, 'bar', roomId)
   expect(registry.leave(socket1.id)).toBe(true)
@@ -29,23 +23,23 @@ test('creating, joining, and leaving a room', () => {
 
 test('joining non-existent room', () => {
   expect(() => {
-    registry.joinRoom(mockSocket('foo'), 'foo', 'foo')
+    registry.joinRoom(mockServerSocket('foo'), 'foo', 'foo')
   }).toThrow('Room with id FOO does not exist')
 })
 
 test('joining room with existing socket id', () => {
   const roomId = registry.createRoom()
-  registry.joinRoom(mockSocket('foo'), 'foo', roomId)
+  registry.joinRoom(mockServerSocket('foo'), 'foo', roomId)
   expect(() => {
-    registry.joinRoom(mockSocket('foo'), 'foo', roomId)
+    registry.joinRoom(mockServerSocket('foo'), 'foo', roomId)
   }).toThrow('Already in a room')
 })
 
 test('joining room with existing player name', () => {
   const roomId = registry.createRoom()
-  registry.joinRoom(mockSocket('foo'), 'foo', roomId)
+  registry.joinRoom(mockServerSocket('foo'), 'foo', roomId)
   expect(() => {
-    registry.joinRoom(mockSocket('bar'), 'foo', roomId)
+    registry.joinRoom(mockServerSocket('bar'), 'foo', roomId)
   }).toThrow('Player name is already taken')
 })
 

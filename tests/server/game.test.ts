@@ -1,6 +1,6 @@
 import R from 'ramda'
 
-import {reducer} from './game'
+import {reducer} from '../../src/shared/game'
 
 const initialState = Object.freeze(reducer(undefined, undefined))
 

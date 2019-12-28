@@ -1,6 +1,6 @@
 import {Subscription} from 'rxjs'
 
-import {createStore, Store} from './store'
+import {createStore, Store} from '../../src/server/store'
 
 interface State {
   count: number
