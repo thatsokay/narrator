@@ -116,6 +116,7 @@ test('creating and joining room from single socket', async done => {
 })
 
 test('start game', async done => {
+  // Connect and create room
   const createResponse = await new Promise<EventResponse<{roomId: string}>>(
     resolve => {
       client.once('connect', () => {
@@ -135,6 +136,7 @@ test('start game', async done => {
     return
   }
 
+  // 5 more connection join room
   const joinSockets = R.range(0, 5).map(() => socketIOClient('localhost:3000'))
   await expect(
     Promise.all(
@@ -154,6 +156,7 @@ test('start game', async done => {
     ),
   ).resolves.toStrictEqual(new Array(5).fill(true))
 
+  // Ready all players and start game
   await expect(
     Promise.all(
       [client, ...joinSockets].map(
@@ -174,7 +177,7 @@ test('start game', async done => {
           }),
       ),
     ),
-  ).resolves.toMatchObject(new Array(6).fill(undefined))
+  ).resolves.toStrictEqual(new Array(6).fill(undefined))
 
   joinSockets.map(socket => socket.close())
   done()
