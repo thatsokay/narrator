@@ -21,6 +21,10 @@ type Started = Phase<
 
 export type GameState = Waiting | Started
 
+interface PlainObject {
+  [key: string]: unknown
+}
+
 interface Action {
   type: string
   sender: string
@@ -28,11 +32,22 @@ interface Action {
   [key: string]: unknown
 }
 
-const isAction = (action: any): action is Action =>
-  typeof action === 'object' &&
-  action !== null &&
-  typeof action.type === 'string' &&
-  typeof action.sender === 'string'
+// https://github.com/reduxjs/redux/blob/master/src/types/actions.ts
+export const isPlainObject = (obj: any): obj is PlainObject => {
+  if (typeof obj !== 'object' || obj === null) {
+    return false
+  }
+
+  let proto = obj
+  while (Object.getPrototypeOf(proto) !== null) {
+    proto = Object.getPrototypeOf(proto)
+  }
+
+  return Object.getPrototypeOf(obj) === proto
+}
+
+const isAction = (action: PlainObject): action is Action =>
+  typeof action.type === 'string' && typeof action.sender === 'string'
 
 const shuffle = <T>(xs: T[]) => {
   /* Fisher-Yates shuffles an array in place.
@@ -53,7 +68,7 @@ export const initialState: GameState = {
 
 export const reducer = (
   state: GameState = initialState,
-  action?: unknown,
+  action?: PlainObject,
 ): GameState => {
   const cleanState = {...state, error: null}
   if (action === undefined) {

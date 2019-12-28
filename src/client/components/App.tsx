@@ -87,7 +87,7 @@ const App = () => {
   return (
     <>
       {inRoom && socket ? (
-        <Game {...{playerName, roomId, gameState$}} />
+        <Game {...{playerName, roomId, gameState$, socket}} />
       ) : (
         <>
           <CreateForm handleSubmit={handleSubmit} />

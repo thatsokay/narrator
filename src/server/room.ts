@@ -1,5 +1,5 @@
 import {createStore} from './store'
-import {reducer} from '../shared/game'
+import {reducer, isPlainObject} from '../shared/game'
 
 // @ts-ignore FIXME
 export const newRoom = (roomId: string, io: SocketIO.Server) => {
@@ -23,7 +23,11 @@ export const newRoom = (roomId: string, io: SocketIO.Server) => {
     sockets[socket.id] = playerName
     players[playerName] = socket
 
-    socket.on('gameAction', (action: unknown) => store.dispatch(action))
+    socket.on('gameAction', (action: unknown) => {
+      if (isPlainObject(action)) {
+        store.dispatch({...action, sender: playerName})
+      }
+    })
     store.subscribe(state => {
       socket.emit('gameState', state)
     })

@@ -1,28 +1,35 @@
 import React, {useState, useEffect} from 'react'
 import {BehaviorSubject} from 'rxjs'
 
-import {GameState} from '../../shared/game'
+import {GameState, initialState} from '../../shared/game'
 
 interface Props {
   playerName: string
   roomId: string
   gameState$: BehaviorSubject<GameState>
+  socket: SocketIOClient.Socket
 }
 
 const Game = (props: Props) => {
-  const [players, setPlayers] = useState<string[]>([])
+  const [gameState, setGameState] = useState<GameState>(initialState)
   useEffect(() => {
     const subscription = props.gameState$.subscribe(state =>
-      setPlayers(Object.keys(state.players)),
+      setGameState(state),
     )
     return () => subscription.unsubscribe()
   }, [props.gameState$])
   return (
     <>
       <h1>{props.roomId}</h1>
+      <button onClick={() => props.socket.emit('gameAction', {type: 'READY'})}>
+        Ready
+      </button>
       <ul>
-        {players.map(player => (
-          <li key={player}>{player}</li>
+        {Object.entries(gameState.players).map(([player, playerState]) => (
+          <li key={player}>
+            {playerState.ready && '☑️ '}
+            {player}
+          </li>
         ))}
       </ul>
     </>
