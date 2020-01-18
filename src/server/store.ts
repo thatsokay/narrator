@@ -8,10 +8,10 @@ export interface Store<S, A> {
 }
 
 export const createStore = <S, A>(
-  reducer: (state: S | undefined, action?: A) => S,
+  reducer: (state?: S, action?: A) => S,
   initialState?: S,
 ): Store<S, A> => {
-  const firstState = initialState || reducer(undefined)
+  const firstState = initialState || reducer()
   const action$ = new Subject<A>()
   const state$ = new BehaviorSubject<S>(firstState)
   action$.pipe(scan(reducer, firstState)).subscribe(state$)

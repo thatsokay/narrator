@@ -1,8 +1,16 @@
 import R from 'ramda'
 
-import {reducer} from '../../src/shared/game'
+import {reducer, isPlainObject} from '../../src/shared/game'
 
-const initialState = Object.freeze(reducer(undefined, undefined))
+const initialState = Object.freeze(reducer())
+
+test('plain object type guard', () => {
+  expect(isPlainObject({})).toBe(true)
+  expect(isPlainObject(null)).toBe(false)
+  expect(isPlainObject(1)).toBe(false)
+  expect(isPlainObject(new Date())).toBe(false)
+  expect(isPlainObject(Object.getPrototypeOf({}))).toBe(false)
+})
 
 test('player joining', () => {
   const joinState = reducer(initialState, {type: 'JOIN', sender: 'foo'})

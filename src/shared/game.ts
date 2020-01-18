@@ -32,18 +32,14 @@ interface Action {
   [key: string]: unknown
 }
 
-// https://github.com/reduxjs/redux/blob/master/src/types/actions.ts
+// https://github.com/reduxjs/redux/blob/master/src/utils/isPlainObject.ts
 export const isPlainObject = (obj: any): obj is PlainObject => {
   if (typeof obj !== 'object' || obj === null) {
     return false
   }
 
-  let proto = obj
-  while (Object.getPrototypeOf(proto) !== null) {
-    proto = Object.getPrototypeOf(proto)
-  }
-
-  return Object.getPrototypeOf(obj) === proto
+  const proto = Object.getPrototypeOf(obj)
+  return !!proto && Object.getPrototypeOf(proto) === null
 }
 
 const isAction = (action: PlainObject): action is Action =>
