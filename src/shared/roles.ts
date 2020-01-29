@@ -16,7 +16,7 @@ export type ActionType =
   | 'see' // See a target's side
   | 'heal' // Prevent a kill on target
 
-export const ROLES: Readonly<{[name: string]: Role}> = Object.freeze({
+export const ROLES: Readonly<Record<string, Role>> = Object.freeze({
   villager: {
     description: '',
     side: 'village',

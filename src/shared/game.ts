@@ -21,15 +21,11 @@ type Started = Phase<
 
 export type GameState = Waiting | Started
 
-interface PlainObject {
-  [key: string]: unknown
-}
+type PlainObject = Record<string, unknown>
 
-interface Action {
+interface Action extends PlainObject {
   type: string
   sender: string
-  // Other fields carry action payload
-  [key: string]: unknown
 }
 
 // https://github.com/reduxjs/redux/blob/master/src/utils/isPlainObject.ts

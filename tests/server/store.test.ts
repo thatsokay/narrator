@@ -1,6 +1,11 @@
 import {Subscription} from 'rxjs'
 
-import {createStore, Store} from '../../src/server/store'
+import {
+  createStore,
+  Store,
+  applyMiddleware,
+  Middleware,
+} from '../../src/server/store'
 
 interface State {
   count: number
@@ -79,4 +84,14 @@ test('get state', () => {
   expect(store.getState()).toStrictEqual({count: 0})
   store.dispatch({type: 'INCREMENT'})
   expect(store.getState()).toStrictEqual({count: 1})
+})
+
+test('middleware', () => {
+  const middleware: Middleware<State, any> = _store => next => action => {
+    next(action)
+    next(action)
+  }
+  const store = applyMiddleware(middleware)(createStore)(reducer)
+  store.dispatch({type: 'INCREMENT'})
+  expect(store.getState()).toStrictEqual({count: 2})
 })

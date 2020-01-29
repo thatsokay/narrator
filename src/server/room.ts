@@ -4,8 +4,8 @@ import {reducer, isPlainObject} from '../shared/game'
 // @ts-ignore FIXME
 export const newRoom = (roomId: string, io: SocketIO.Server) => {
   let store = createStore(reducer)
-  const sockets: {[socketId: string]: string} = {}
-  const players: {[playerName: string]: SocketIO.Socket} = {}
+  const sockets: Record<string, string> = {}
+  const players: Record<string, SocketIO.Socket> = {}
 
   const join = (socket: SocketIO.Socket, playerName: string) => {
     if (sockets[socket.id]) {

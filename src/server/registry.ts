@@ -11,8 +11,8 @@ const randomRoomId = (length: number) => {
 }
 
 export const newRegistry = (io: SocketIO.Server) => {
-  const sockets: {[socketId: string]: string} = {}
-  const rooms: {[roomId: string]: Room} = {}
+  const sockets: Record<string, string> = {}
+  const rooms: Record<string, Room> = {}
 
   const createRoom = () => {
     /* Create a new empty room and returns its room id. Generates random room
