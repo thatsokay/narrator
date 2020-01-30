@@ -1,4 +1,4 @@
-export type EventResponse<T> =
+export type EventResponse<T extends object = {}> =
   | ({
       success: true
     } & T)

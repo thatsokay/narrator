@@ -40,7 +40,7 @@ test('joining non-existent room', done => {
       EVENTS.JOIN_ROOM,
       'foo',
       'foo',
-      (response: EventResponse<{}>) => {
+      (response: EventResponse) => {
         expect(response).toStrictEqual({
           success: false,
           reason: 'Room with id FOO does not exist',
@@ -101,12 +101,12 @@ test('creating and joining room from single socket', async done => {
   }
 
   await expect(
-    new Promise<EventResponse<{}>>(resolve => {
+    new Promise<EventResponse>(resolve => {
       client.emit(
         EVENTS.JOIN_ROOM,
         'foo',
         response.roomId,
-        (response: EventResponse<{}>) => {
+        (response: EventResponse) => {
           resolve(response)
         },
       )
@@ -147,7 +147,7 @@ test('start game', async done => {
               EVENTS.JOIN_ROOM,
               `foo${i + 1}`,
               createResponse.roomId,
-              (response: EventResponse<{}>) => {
+              (response: EventResponse) => {
                 resolve(response.success)
               },
             )
@@ -165,7 +165,7 @@ test('start game', async done => {
             socket.emit(
               'gameAction',
               {type: 'READY'},
-              (response: EventResponse<{}>) => {
+              (response: EventResponse) => {
                 expect(response.success).toBe(true)
               },
             )

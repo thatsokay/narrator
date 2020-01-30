@@ -1,31 +1,38 @@
 import R from 'ramda'
 
-import {Role, ROLES} from './roles'
+import {Role, RoleName, ROLES} from './roles'
+import {Reducer, Middleware} from '../server/store'
 
-interface Phase<S, P> {
+type Phase<S extends string, P, T extends object = {}> = {
   status: S
-  players: {
-    [playerName: string]: P
-  }
+  players: Record<string, P>
   error: string | null
-}
+} & T
 
 type Waiting = Phase<'waiting', {ready: boolean}>
-type Started = Phase<
-  'firstNight' | 'day' | 'night',
+type Day = Phase<
+  'day',
   {
     alive: boolean
     role: Role
   }
 >
+type Night = Phase<
+  'firstNight' | 'night',
+  {
+    alive: boolean
+    role: Role
+  },
+  {awake: RoleName | null}
+>
 
-export type GameState = Waiting | Started
+export type GameState = Waiting | Day | Night
 
 type PlainObject = Record<string, unknown>
 
 interface Action extends PlainObject {
   type: string
-  sender: string
+  sender?: string
 }
 
 // https://github.com/reduxjs/redux/blob/master/src/utils/isPlainObject.ts
@@ -39,7 +46,8 @@ export const isPlainObject = (obj: any): obj is PlainObject => {
 }
 
 const isAction = (action: PlainObject): action is Action =>
-  typeof action.type === 'string' && typeof action.sender === 'string'
+  typeof action.type === 'string' &&
+  (typeof action.sender === 'string' || typeof action.sender === 'undefined')
 
 const shuffle = <T>(xs: T[]) => {
   /* Fisher-Yates shuffles an array in place.
@@ -58,55 +66,51 @@ export const initialState: GameState = {
   error: null,
 }
 
-export const reducer = (
-  state: GameState = initialState,
-  action?: PlainObject,
-): GameState => {
-  const cleanState = {...state, error: null}
+const playerReducer: Reducer<GameState, Action> = (
+  state = initialState,
+  action,
+) => {
   if (action === undefined) {
-    return cleanState
+    return state
   }
-  if (!isAction(action)) {
-    return {
-      ...cleanState,
-      error: 'Invalid action',
-    }
+  if (action.sender === undefined) {
+    return state
   }
   switch (action.type) {
     case 'JOIN':
-      if (cleanState.players[action.sender]) {
+      if (state.players[action.sender]) {
         return {
-          ...cleanState,
+          ...state,
           error: `Player name, ${action.sender}, is already taken`,
         }
       }
       // XXX: `assocPath` can produce invalid state
-      return R.assocPath(['players', action.sender], {ready: false}, cleanState)
+      return R.assocPath(['players', action.sender], {ready: false}, state)
     case 'LEAVE':
-      if (!cleanState.players[action.sender]) {
+      if (!state.players[action.sender]) {
         return {
-          ...cleanState,
+          ...state,
           error: `Player, ${action.sender}, does not exist in this game`,
         }
       }
       // XXX: `dissocPath` can produce invalid state
-      return R.dissocPath(['players', action.sender], cleanState)
+      return R.dissocPath(['players', action.sender], state)
     case 'READY':
-      if (cleanState.status !== 'waiting') {
+      if (state.status !== 'waiting') {
         return {
-          ...cleanState,
+          ...state,
           error: 'Game has already started',
         }
       }
-      if (cleanState.players[action.sender].ready) {
+      if (state.players[action.sender].ready) {
         // Don't change player state if already ready
-        return cleanState
+        return state
       }
       // XXX: `assocPath` can produce invalid state
       const newState = R.assocPath(
         ['players', action.sender, 'ready'],
         true,
-        cleanState,
+        state,
       )
       if (
         Object.keys(newState.players).length < 6 ||
@@ -130,6 +134,38 @@ export const reducer = (
         status: 'firstNight',
         players: R.zipObj(Object.keys(newState.players), playerStates),
         error: null,
+        awake: null,
+      }
+    default:
+      return {
+        ...state,
+        error: 'Unknown action type',
+      }
+  }
+}
+
+export const reducer: Reducer<GameState, PlainObject> = (
+  state = initialState,
+  action,
+) => {
+  const cleanState = {...state, error: null}
+  if (action === undefined) {
+    return cleanState
+  }
+  if (!isAction(action)) {
+    return {
+      ...cleanState,
+      error: 'Invalid action',
+    }
+  }
+  if (action.sender !== undefined) {
+    return playerReducer(cleanState, action)
+  }
+  switch (action.type) {
+    case 'WAKE_MAFIA':
+      return {
+        ...cleanState,
+        awake: 'mafia',
       }
     default:
       return {
@@ -137,4 +173,24 @@ export const reducer = (
         error: 'Unknown action type',
       }
   }
+}
+
+export const middleware: Middleware<
+  GameState,
+  PlainObject
+> = store => next => action => {
+  const beforeState = store.getState()
+  next(action)
+  const afterState = store.getState()
+
+  if (action.type !== 'READY') {
+    return
+  }
+  if (beforeState.status !== 'waiting') {
+    return
+  }
+  if (afterState.status !== 'firstNight') {
+    return
+  }
+  setTimeout(() => next({type: 'WAKE_MAFIA'}), 5000)
 }

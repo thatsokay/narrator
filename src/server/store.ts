@@ -1,8 +1,8 @@
 import {Subject, BehaviorSubject, Subscription} from 'rxjs'
 import {scan} from 'rxjs/operators'
 
-type Reducer<S, A> = (state?: S, action?: A) => S
-type Dispatcher<A> = (action: A) => void
+export type Reducer<S, A> = (state?: S, action?: A) => S
+export type Dispatcher<A> = (action: A) => void
 
 export interface Store<S, A> {
   dispatch: Dispatcher<A>
@@ -41,6 +41,7 @@ export const applyMiddleware = <S, A>(...middlewares: Middleware<S, A>[]) => (
   )
   const dispatch$ = new Subject<A>()
   dispatch$.subscribe(dispatch)
+  // TODO: Replace store.dispatch so that it can be used by middlewares
   return {
     ...store,
     dispatch: (action: A) => dispatch$.next(action),

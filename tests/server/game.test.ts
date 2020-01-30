@@ -1,6 +1,12 @@
 import R from 'ramda'
 
-import {reducer, isPlainObject} from '../../src/shared/game'
+import {
+  GameState,
+  reducer,
+  isPlainObject,
+  middleware,
+} from '../../src/shared/game'
+import {createStore, applyMiddleware, Middleware} from '../../src/server/store'
 
 const initialState = Object.freeze(reducer())
 
@@ -80,4 +86,31 @@ test('invalid action', () => {
     error: 'Unknown action type',
   })
   expect(unknownType.players).toBe(initialState.players)
+})
+
+test('middleware', () => {
+  jest.useFakeTimers()
+  const initialState: GameState = {
+    status: 'waiting',
+    players: R.zipObj(
+      R.range(0, 6).map(i => `${i}`),
+      [{ready: false}, ...new Array(5).fill({ready: true})],
+    ),
+    error: null,
+  }
+  let dispatcher: any = null
+  const reporter: Middleware<GameState, any> = _store => next => {
+    dispatcher = jest.fn(action => next(action))
+    return dispatcher
+  }
+  const store = applyMiddleware(middleware, reporter)(createStore)(
+    reducer,
+    initialState,
+  )
+  store.dispatch({type: 'READY', sender: '0'})
+  expect(store.getState().status).toBe('firstNight')
+  expect(dispatcher).toHaveBeenCalledTimes(1)
+  jest.runAllTimers()
+  expect(dispatcher).toHaveBeenCalledTimes(2)
+  expect(dispatcher).toHaveBeenNthCalledWith(2, {type: 'WAKE_MAFIA'})
 })

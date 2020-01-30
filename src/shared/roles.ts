@@ -9,6 +9,8 @@ export interface Role {
   }
 }
 
+export type RoleName = 'villager' | 'mafia' | 'detective' | 'nurse'
+
 export type ActionType =
   | 'inform' // Reveal role to others at night
   | 'lynch' // Vote to lynch target at day
@@ -16,7 +18,7 @@ export type ActionType =
   | 'see' // See a target's side
   | 'heal' // Prevent a kill on target
 
-export const ROLES: Readonly<Record<string, Role>> = Object.freeze({
+export const ROLES: Readonly<Record<RoleName, Role>> = Object.freeze({
   villager: {
     description: '',
     side: 'village',

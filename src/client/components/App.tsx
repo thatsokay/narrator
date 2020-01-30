@@ -58,7 +58,7 @@ const App = () => {
           EVENTS.JOIN_ROOM,
           playerName,
           roomId,
-          (response: EventResponse<{}>) => {
+          (response: EventResponse) => {
             if (response.success) {
               console.log('Joined room', roomId)
               setPlayerName(playerName)
