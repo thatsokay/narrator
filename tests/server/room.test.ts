@@ -14,6 +14,7 @@ describe('room', () => {
 
   test('join', () => {
     expect(() => room.join(mockServerSocket('foo'), 'foo')).not.toThrow()
+    expect(room.isEmpty()).toBe(false)
   })
 
   test('leave', () => {
@@ -24,9 +25,7 @@ describe('room', () => {
   test('join with duplicate socket', () => {
     const socket = mockServerSocket('foo')
     room.join(socket, 'foo')
-    expect(() => room.join(socket, 'bar')).toThrow(
-      'Socket already in room',
-    )
+    expect(() => room.join(socket, 'bar')).toThrow('Socket already in room')
   })
 
   test('join with duplicate name', () => {

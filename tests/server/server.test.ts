@@ -4,9 +4,8 @@ import R from 'ramda'
 
 import {EVENTS} from '../../src/shared/constants'
 import {EventResponse} from '../../src/shared/types'
-
+import {GameState} from '../../src/shared/game'
 import app from '../../src/server/server'
-import { GameState } from '../../src/shared/game'
 
 describe('server', () => {
   let server: Server
@@ -37,18 +36,13 @@ describe('server', () => {
 
   test('joining non-existent room', done => {
     client.once('connect', () => {
-      client.emit(
-        EVENTS.JOIN_ROOM,
-        'foo',
-        'foo',
-        (response: EventResponse) => {
-          expect(response).toStrictEqual({
-            success: false,
-            reason: 'Room with id FOO does not exist',
-          })
-          done()
-        },
-      )
+      client.emit(EVENTS.JOIN_ROOM, 'foo', 'foo', (response: EventResponse) => {
+        expect(response).toStrictEqual({
+          success: false,
+          reason: 'Room with id FOO does not exist',
+        })
+        done()
+      })
     })
   })
 
@@ -138,7 +132,9 @@ describe('server', () => {
     }
 
     // 5 more connection join room
-    const joinSockets = R.range(0, 5).map(() => socketIOClient('localhost:3000'))
+    const joinSockets = R.range(0, 5).map(() =>
+      socketIOClient('localhost:3000'),
+    )
     await expect(
       Promise.all(
         joinSockets.map(

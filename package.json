@@ -6,7 +6,7 @@
     "watch": "webpack --watch --progress --colors --mode=development",
     "watch:server": "nodemon --watch build/server.js build/server.js",
     "build": "webpack --progress --colors --mode=production",
-    "format": "prettier --write 'src/**/*.{ts,tsx,js,jsx}' 'webpack.config.js'",
+    "format": "prettier --write '{src,tests}/**/*.{ts,tsx,js,jsx}' 'webpack.config.js'",
     "test": "jest"
   },
   "dependencies": {

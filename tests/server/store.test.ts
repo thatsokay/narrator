@@ -73,7 +73,12 @@ describe('store', () => {
     const sub3 = store.subscribe(state => states3.push(state))
     store.dispatch({type: 'INCREMENT'})
 
-    expect(states).toStrictEqual([{count: 0}, {count: 1}, {count: 2}, {count: 3}])
+    expect(states).toStrictEqual([
+      {count: 0},
+      {count: 1},
+      {count: 2},
+      {count: 3},
+    ])
     expect(states2).toStrictEqual([{count: 1}, {count: 2}, {count: 3}])
     expect(states3).toStrictEqual([{count: 2}, {count: 3}])
 

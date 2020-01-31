@@ -44,7 +44,10 @@ describe('game', () => {
 
   test('player joining with existing name', () => {
     const firstJoinState = reducer(initialState, {type: 'JOIN', sender: 'foo'})
-    const secondJoinState = reducer(firstJoinState, {type: 'JOIN', sender: 'foo'})
+    const secondJoinState = reducer(firstJoinState, {
+      type: 'JOIN',
+      sender: 'foo',
+    })
     expect(secondJoinState).toStrictEqual({
       ...firstJoinState,
       error: `Player name, foo, is already taken`,
