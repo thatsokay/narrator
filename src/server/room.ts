@@ -1,9 +1,9 @@
-import {createStore} from './store'
-import {reducer, isPlainObject} from '../shared/game'
+import {createStore, applyMiddleware} from './store'
+import {reducer, middleware, isPlainObject} from '../shared/game'
 
 // @ts-ignore FIXME
 export const newRoom = (roomId: string, io: SocketIO.Server) => {
-  let store = createStore(reducer)
+  let store = applyMiddleware(middleware)(createStore)(reducer)
   const sockets: Record<string, string> = {}
   const players: Record<string, SocketIO.Socket> = {}
 

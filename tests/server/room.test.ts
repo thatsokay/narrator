@@ -1,3 +1,5 @@
+import R from 'ramda'
+
 import {newRoom, Room} from '../../src/server/room'
 import {mockServerSocket} from '../utilities'
 
@@ -38,5 +40,30 @@ describe('room', () => {
 
   test('invalid leave', () => {
     expect(() => room.leave('foo')).toThrow('Socket not in room')
+  })
+
+  test('game start', () => {
+    jest.useFakeTimers()
+    const sockets: [string, any][] = R.range(0, 6).map(i => [
+      `player ${i}`,
+      mockServerSocket(`${i}`),
+    ])
+    sockets.forEach(([name, socket]) => room.join(socket, name))
+    sockets.forEach(([_, socket]) =>
+      socket.clientEmit('gameAction', {type: 'READY'}),
+    )
+    sockets.forEach(([_, socket]) =>
+      expect(socket.emit).toHaveBeenLastCalledWith(
+        'gameState',
+        expect.objectContaining({status: 'firstNight', awake: null}),
+      ),
+    )
+    jest.runAllTimers()
+    sockets.forEach(([_, socket]) =>
+      expect(socket.emit).toHaveBeenLastCalledWith(
+        'gameState',
+        expect.objectContaining({status: 'firstNight', awake: 'mafia'}),
+      ),
+    )
   })
 })

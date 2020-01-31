@@ -32,7 +32,10 @@ export type Middleware<S, A> = (
 
 export const applyMiddleware = <S, A>(...middlewares: Middleware<S, A>[]) => (
   createStore: (reducer: Reducer<S, A>, initialState?: S) => Store<S, A>,
-) => (reducer: Reducer<S, A>, initialState?: S) => {
+) => (reducer: Reducer<S, A>, initialState?: S): Store<S, A> => {
+  /* Takes a series of middlewares, then a createStore function, and returns a
+   * new createStore function patched with the middlewares.
+   */
   const store = createStore(reducer, initialState)
   const patchers = middlewares.map(middleware => middleware(store))
   const dispatch = patchers.reduceRight(
