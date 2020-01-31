@@ -50,6 +50,13 @@ describe('room', () => {
     ])
     sockets.forEach(([name, socket]) => room.join(socket, name))
     sockets.forEach(([_, socket]) =>
+      expect(socket.emit).toHaveBeenLastCalledWith(
+        'gameState',
+        expect.objectContaining({status: 'waiting'}),
+      ),
+    )
+
+    sockets.forEach(([_, socket]) =>
       socket.clientEmit('gameAction', {type: 'READY'}),
     )
     sockets.forEach(([_, socket]) =>
@@ -58,6 +65,7 @@ describe('room', () => {
         expect.objectContaining({status: 'firstNight', awake: null}),
       ),
     )
+
     jest.runAllTimers()
     sockets.forEach(([_, socket]) =>
       expect(socket.emit).toHaveBeenLastCalledWith(
