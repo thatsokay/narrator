@@ -19,8 +19,8 @@ export type ActionType =
   | 'see' // See a target's side
   | 'heal' // Prevent a kill on target
 
-export const ROLES: Readonly<Record<RoleName, Role>> = Object.freeze({
-  villager: {
+export const roleCreator = {
+  villager: (): Role => ({
     name: 'villager',
     description: '',
     side: 'village',
@@ -28,8 +28,8 @@ export const ROLES: Readonly<Record<RoleName, Role>> = Object.freeze({
     actions: {
       day: 'lynch',
     },
-  },
-  mafia: {
+  }),
+  mafia: (): Role => ({
     name: 'mafia',
     description: '',
     side: 'mafia',
@@ -39,8 +39,8 @@ export const ROLES: Readonly<Record<RoleName, Role>> = Object.freeze({
       day: 'lynch',
       night: 'kill',
     },
-  },
-  detective: {
+  }),
+  detective: (): Role => ({
     name: 'detective',
     description: '',
     side: 'village',
@@ -49,8 +49,8 @@ export const ROLES: Readonly<Record<RoleName, Role>> = Object.freeze({
       day: 'lynch',
       night: 'see',
     },
-  },
-  nurse: {
+  }),
+  nurse: (): Role => ({
     name: 'nurse',
     description: '',
     side: 'village',
@@ -59,5 +59,5 @@ export const ROLES: Readonly<Record<RoleName, Role>> = Object.freeze({
       day: 'lynch',
       night: 'heal',
     },
-  },
-})
+  }),
+}

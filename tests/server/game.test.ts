@@ -6,6 +6,7 @@ import {
   isPlainObject,
   middleware,
 } from '../../src/shared/game'
+import {roleCreator} from '../../src/shared/roles'
 import {createStore, applyMiddleware, Middleware} from '../../src/server/store'
 
 const initialState = Object.freeze(reducer())
@@ -117,5 +118,27 @@ describe('game', () => {
     jest.runAllTimers()
     expect(dispatcher).toHaveBeenCalledTimes(2)
     expect(dispatcher).toHaveBeenNthCalledWith(2, {type: 'WAKE_MAFIA'})
+  })
+
+  test('inform', () => {
+    const initialState: GameState = {
+      status: 'firstNight',
+      awake: 'mafia',
+      players: R.zipObj(
+        R.range(0, 6).map(i => `${i}`),
+        [
+          {alive: true, role: roleCreator.mafia()},
+          {alive: true, role: roleCreator.mafia()},
+          ...new Array(4).fill({alive: true, role: roleCreator.villager()}),
+        ],
+      ),
+      error: null,
+    }
+    const store = applyMiddleware(middleware)(createStore)(
+      reducer,
+      initialState,
+    )
+    store.dispatch({type: 'ROLE_ACTION', roleAction: 'inform', sender: '0'})
+    expect(store.getState().status).toBe('day')
   })
 })

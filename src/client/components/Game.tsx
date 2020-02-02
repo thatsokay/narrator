@@ -21,6 +21,10 @@ const Game = (props: Props) => {
   return (
     <>
       <h1>{props.roomId}</h1>
+      <h2>{gameState.status}</h2>
+      {(gameState.status === 'firstNight' || gameState.status === 'night') && (
+        <p>Awake: {gameState.awake}</p>
+      )}
       <button onClick={() => props.socket.emit('gameAction', {type: 'READY'})}>
         Ready
       </button>
