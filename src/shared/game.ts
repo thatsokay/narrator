@@ -76,71 +76,92 @@ const playerReducer: Reducer<GameState, Action> = (
   if (action.sender === undefined) {
     return state
   }
-  switch (action.type) {
-    case 'JOIN':
-      if (state.players[action.sender]) {
-        return {
-          ...state,
-          error: `Player name, ${action.sender}, is already taken`,
-        }
+  switch (state.status) {
+    case 'waiting':
+      switch (action.type) {
+        case 'JOIN':
+          if (state.players[action.sender]) {
+            return {
+              ...state,
+              error: `Player name, ${action.sender}, is already taken`,
+            }
+          }
+          // XXX: `assocPath` can produce invalid state
+          return R.assocPath(['players', action.sender], {ready: false}, state)
+        case 'LEAVE':
+          if (!state.players[action.sender]) {
+            return {
+              ...state,
+              error: `Player, ${action.sender}, does not exist in this game`,
+            }
+          }
+          // XXX: `dissocPath` can produce invalid state
+          return R.dissocPath(['players', action.sender], state)
+        case 'READY':
+          if (state.players[action.sender].ready) {
+            // Don't change player state if already ready
+            return state
+          }
+          // XXX: `assocPath` can produce invalid state
+          const newState = R.assocPath(
+            ['players', action.sender, 'ready'],
+            true,
+            state,
+          )
+          if (
+            Object.keys(newState.players).length < 6 ||
+            Object.values(newState.players).filter(({ready}) => !ready).length
+          ) {
+            return newState
+          }
+
+          // Everyone's ready. Let's go.
+          const numPlayers = Object.keys(newState.players).length
+          // Gives 1 mafia for 6 players, 2 at 8, 3 at 12, and 4 at 18
+          const numMafia = Math.floor(Math.sqrt(numPlayers - 5.75) + 0.5) || 1
+          // Create array of available roles
+          const playerStates = [ROLES.detective, ROLES.nurse]
+            .concat(new Array(numMafia).fill(ROLES.mafia))
+            .concat(new Array(numPlayers - numMafia - 2).fill(ROLES.villager))
+            // Produce a player state for each available role
+            .map(role => ({alive: true, role}))
+          shuffle(playerStates)
+          return {
+            status: 'firstNight',
+            players: R.zipObj(Object.keys(newState.players), playerStates),
+            error: null,
+            awake: null,
+          }
+        default:
+          return {
+            ...state,
+            error: 'Unknown action type',
+          }
       }
-      // XXX: `assocPath` can produce invalid state
-      return R.assocPath(['players', action.sender], {ready: false}, state)
-    case 'LEAVE':
-      if (!state.players[action.sender]) {
-        return {
-          ...state,
-          error: `Player, ${action.sender}, does not exist in this game`,
-        }
-      }
-      // XXX: `dissocPath` can produce invalid state
-      return R.dissocPath(['players', action.sender], state)
-    case 'READY':
-      if (state.status !== 'waiting') {
-        return {
-          ...state,
-          error: 'Game has already started',
-        }
-      }
-      if (state.players[action.sender].ready) {
-        // Don't change player state if already ready
+    case 'firstNight':
+      if (state.players[action.sender].role.name !== state.awake) {
+        // TODO: Error message
         return state
       }
-      // XXX: `assocPath` can produce invalid state
-      const newState = R.assocPath(
-        ['players', action.sender, 'ready'],
-        true,
-        state,
-      )
-      if (
-        Object.keys(newState.players).length < 6 ||
-        Object.values(newState.players).filter(({ready}) => !ready).length
-      ) {
-        return newState
-      }
-
-      // Everyone's ready. Let's go.
-      const numPlayers = Object.keys(newState.players).length
-      // Gives 1 mafia for 6 players, 2 at 8, 3 at 12, and 4 at 18
-      const numMafia = Math.floor(Math.sqrt(numPlayers - 5.75) + 0.5) || 1
-      // Create array of available roles
-      const playerStates = [ROLES.detective, ROLES.nurse]
-        .concat(new Array(numMafia).fill(ROLES.mafia))
-        .concat(new Array(numPlayers - numMafia - 2).fill(ROLES.villager))
-        // Produce a player state for each available role
-        .map(role => ({alive: true, role}))
-      shuffle(playerStates)
-      return {
-        status: 'firstNight',
-        players: R.zipObj(Object.keys(newState.players), playerStates),
-        error: null,
-        awake: null,
+      switch (state.awake) {
+        case 'mafia':
+          if (action.type !== 'ROLE_ACTION') {
+            // TODO: Error message
+            return state
+          }
+          if (action.roleAction !== 'inform') {
+            // TODO: Error message
+            return state
+          }
+          // TODO: Set player's inform flag
+          return state
+        default:
+          // TODO: Other awake states
+          return state
       }
     default:
-      return {
-        ...state,
-        error: 'Unknown action type',
-      }
+      // TODO: Other phases
+      return state
   }
 }
 

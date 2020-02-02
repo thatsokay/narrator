@@ -1,4 +1,5 @@
 export interface Role {
+  name: string
   description: string
   side: 'mafia' | 'village' // Which side they win with
   appearsAs: 'mafia' | 'village' // Side revealed on 'see' actions
@@ -20,6 +21,7 @@ export type ActionType =
 
 export const ROLES: Readonly<Record<RoleName, Role>> = Object.freeze({
   villager: {
+    name: 'villager',
     description: '',
     side: 'village',
     appearsAs: 'village',
@@ -28,6 +30,7 @@ export const ROLES: Readonly<Record<RoleName, Role>> = Object.freeze({
     },
   },
   mafia: {
+    name: 'mafia',
     description: '',
     side: 'mafia',
     appearsAs: 'mafia',
@@ -38,6 +41,7 @@ export const ROLES: Readonly<Record<RoleName, Role>> = Object.freeze({
     },
   },
   detective: {
+    name: 'detective',
     description: '',
     side: 'village',
     appearsAs: 'village',
@@ -47,6 +51,7 @@ export const ROLES: Readonly<Record<RoleName, Role>> = Object.freeze({
     },
   },
   nurse: {
+    name: 'nurse',
     description: '',
     side: 'village',
     appearsAs: 'village',
