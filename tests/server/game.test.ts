@@ -56,7 +56,8 @@ describe('game', () => {
     expect(secondJoinState.players).toBe(firstJoinState.players)
   })
 
-  test('start game', () => {
+  // Status change is done by middleware
+  test.skip('start game', () => {
     // For 6 players, apply a join and ready action
     const startState = R.range(0, 6).reduce(
       (state, i) =>
@@ -114,10 +115,11 @@ describe('game', () => {
     )
     store.dispatch({type: 'READY', sender: '0'})
     expect(store.getState().status).toBe('firstNight')
-    expect(dispatcher).toHaveBeenCalledTimes(1)
-    jest.runAllTimers()
     expect(dispatcher).toHaveBeenCalledTimes(2)
-    expect(dispatcher).toHaveBeenNthCalledWith(2, {type: 'WAKE_MAFIA'})
+    expect(dispatcher).toHaveBeenNthCalledWith(2, {type: 'START_GAME'})
+    jest.runAllTimers()
+    expect(dispatcher).toHaveBeenCalledTimes(3)
+    expect(dispatcher).toHaveBeenNthCalledWith(3, {type: 'WAKE_MAFIA'})
   })
 
   test('inform', () => {

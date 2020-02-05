@@ -103,37 +103,11 @@ const playerReducer: Reducer<GameState, Action> = (
             return state
           }
           // XXX: `assocPath` can produce invalid state
-          const newState = R.assocPath(
+          return R.assocPath(
             ['players', action.sender, 'ready'],
             true,
             state,
           )
-          if (
-            Object.keys(newState.players).length < 6 ||
-            Object.values(newState.players).filter(({ready}) => !ready).length
-          ) {
-            return newState
-          }
-
-          // Everyone's ready. Let's go.
-          const numPlayers = Object.keys(newState.players).length
-          // Gives 1 mafia for 6 players, 2 at 8, 3 at 12, and 4 at 18
-          const numMafia = Math.floor(Math.sqrt(numPlayers - 5.75) + 0.5) || 1
-          // Create array of available roles
-          const playerStates = [ROLES.detective, ROLES.nurse]
-            // FIXME: Call `mafia` for each player
-            .concat(new Array(numMafia).fill(ROLES.mafia))
-            // FIXME: Call `villager` for each player
-            .concat(new Array(numPlayers - numMafia - 2).fill(ROLES.villager))
-            // Produce a player state for each available role
-            .map(role => ({alive: true, role}))
-          shuffle(playerStates)
-          return {
-            status: 'firstNight',
-            players: R.zipObj(Object.keys(newState.players), playerStates),
-            error: null,
-            awake: null,
-          }
         default:
           return {
             ...state,
@@ -211,6 +185,26 @@ export const reducer: Reducer<GameState, PlainObject> = (
     return playerReducer(cleanState, action)
   }
   switch (action.type) {
+    case 'START_GAME':
+      // Everyone's ready. Let's go.
+      const numPlayers = Object.keys(cleanState.players).length
+      // Gives 1 mafia for 6 players, 2 at 8, 3 at 12, and 4 at 18
+      const numMafia = Math.floor(Math.sqrt(numPlayers - 5.75) + 0.5) || 1
+      // Create array of available roles
+      const playerStates = [ROLES.detective, ROLES.nurse]
+        // FIXME: Call `mafia` for each player
+        .concat(new Array(numMafia).fill(ROLES.mafia))
+        // FIXME: Call `villager` for each player
+        .concat(new Array(numPlayers - numMafia - 2).fill(ROLES.villager))
+        // Produce a player state for each available role
+        .map(role => ({alive: true, role}))
+      shuffle(playerStates)
+      return {
+        status: 'firstNight',
+        players: R.zipObj(Object.keys(cleanState.players), playerStates),
+        error: null,
+        awake: null,
+      }
     case 'WAKE_MAFIA':
       return {
         ...cleanState,
@@ -242,9 +236,14 @@ export const middleware: Middleware<
       if (action.type !== 'READY') {
         return
       }
-      if (afterState.status !== 'firstNight') {
+      if (
+        Object.keys(afterState.players).length < 6 ||
+        Object.values(afterState.players).filter(({ready}) => !ready).length
+      ) {
+        // Not enough players or a player isn't ready
         return
       }
+      next({type: 'START_GAME'})
       setTimeout(() => next({type: 'WAKE_MAFIA'}), 5000)
       return
     case 'firstNight':
