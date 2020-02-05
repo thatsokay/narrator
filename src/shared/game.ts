@@ -224,6 +224,11 @@ export const reducer: Reducer<GameState, PlainObject> = (
   }
 }
 
+const nightRoleOrder: Readonly<RoleName[]> = Object.freeze([
+  'mafia',
+  'detective',
+  'nurse',
+])
 export const middleware: Middleware<
   GameState,
   PlainObject
@@ -232,14 +237,46 @@ export const middleware: Middleware<
   next(action)
   const afterState = store.getState()
 
-  if (action.type !== 'READY') {
-    return
+  switch (beforeState.status) {
+    case 'waiting':
+      if (action.type !== 'READY') {
+        return
+      }
+      if (afterState.status !== 'firstNight') {
+        return
+      }
+      setTimeout(() => next({type: 'WAKE_MAFIA'}), 5000)
+      return
+    case 'firstNight':
+      // Required because typescript can't narrow generic unions
+      // https://github.com/Microsoft/TypeScript/issues/20375
+      if (beforeState.status !== 'firstNight') {
+        return
+      }
+      if (beforeState.awake === null) {
+        return
+      }
+      if (afterState.status !== 'firstNight') {
+        return
+      }
+      if (afterState.awake !== null) {
+        return
+      }
+      // TODO: Check alive roles
+      const wakeNextIndex = nightRoleOrder.findIndex(
+        role => role === beforeState.awake,
+      )
+      if (wakeNextIndex < nightRoleOrder.length) {
+        setTimeout(
+          () =>
+            next({type: `WAKE_${nightRoleOrder[wakeNextIndex].toUpperCase()}`}),
+          5000,
+        )
+        return
+      }
+      setTimeout(() => next({type: 'PHASE_DAY'}), 5000)
+      return
+    default:
+      return
   }
-  if (beforeState.status !== 'waiting') {
-    return
-  }
-  if (afterState.status !== 'firstNight') {
-    return
-  }
-  setTimeout(() => next({type: 'WAKE_MAFIA'}), 5000)
 }
