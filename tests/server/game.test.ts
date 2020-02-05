@@ -6,7 +6,7 @@ import {
   isPlainObject,
   middleware,
 } from '../../src/shared/game'
-import {roleCreator} from '../../src/shared/roles'
+import {ROLES} from '../../src/shared/roles'
 import {createStore, applyMiddleware, Middleware} from '../../src/server/store'
 
 const initialState = Object.freeze(reducer())
@@ -127,9 +127,8 @@ describe('game', () => {
       players: R.zipObj(
         R.range(0, 6).map(i => `${i}`),
         [
-          {alive: true, role: roleCreator.mafia()},
-          {alive: true, role: roleCreator.mafia()},
-          ...new Array(4).fill({alive: true, role: roleCreator.villager()}),
+          ...new Array(2).fill({alive: true, role: ROLES.mafia}),
+          ...new Array(4).fill({alive: true, role: ROLES.villager}),
         ],
       ),
       error: null,
@@ -139,6 +138,8 @@ describe('game', () => {
       initialState,
     )
     store.dispatch({type: 'ROLE_ACTION', roleAction: 'inform', sender: '0'})
+    expect(store.getState().status).toBe('firstNight')
+    store.dispatch({type: 'ROLE_ACTION', roleAction: 'inform', sender: '1'})
     expect(store.getState().status).toBe('day')
   })
 })

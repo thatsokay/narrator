@@ -1,6 +1,6 @@
 import R from 'ramda'
 
-import {Role, RoleName, roleCreator} from './roles'
+import {Role, RoleName, ROLES} from './roles'
 import {Reducer, Middleware} from '../server/store'
 
 type Phase<S extends string, P, T extends object = {}> = {
@@ -120,13 +120,11 @@ const playerReducer: Reducer<GameState, Action> = (
           // Gives 1 mafia for 6 players, 2 at 8, 3 at 12, and 4 at 18
           const numMafia = Math.floor(Math.sqrt(numPlayers - 5.75) + 0.5) || 1
           // Create array of available roles
-          const playerStates = [roleCreator.detective(), roleCreator.nurse()]
+          const playerStates = [ROLES.detective, ROLES.nurse]
             // FIXME: Call `mafia` for each player
-            .concat(new Array(numMafia).fill(roleCreator.mafia()))
+            .concat(new Array(numMafia).fill(ROLES.mafia))
             // FIXME: Call `villager` for each player
-            .concat(
-              new Array(numPlayers - numMafia - 2).fill(roleCreator.villager()),
-            )
+            .concat(new Array(numPlayers - numMafia - 2).fill(ROLES.villager))
             // Produce a player state for each available role
             .map(role => ({alive: true, role}))
           shuffle(playerStates)
@@ -165,11 +163,25 @@ const playerReducer: Reducer<GameState, Action> = (
               'role',
               'actions',
               'firstNight',
-              'inform',
+              'completed',
             ],
             true,
             state,
           )
+          const phaseComplete = Object.values(newState.players)
+            .filter(({alive, role}) => alive && role.name === newState.awake)
+            // Reduce to true if all relevant actions are completed
+            .reduce(
+              (acc, {role}) => acc && !!role.actions.firstNight?.completed,
+              true,
+            )
+          if (phaseComplete) {
+            return {
+              ...newState,
+              // FIXME: Transition to `awake: null` and delay before day
+              status: 'day',
+            }
+          }
           return newState
         default:
           // TODO: Other awake states
