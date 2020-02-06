@@ -1,5 +1,5 @@
 export interface Role {
-  name: string
+  name: RoleName
   description: string
   side: 'mafia' | 'village' // Which side they win with
   appearsAs: 'mafia' | 'village' // Side revealed on 'see' actions

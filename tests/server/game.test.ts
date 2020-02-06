@@ -12,6 +12,10 @@ import {createStore, applyMiddleware, Middleware} from '../../src/server/store'
 const initialState = Object.freeze(reducer())
 
 describe('game', () => {
+  beforeEach(() => {
+    jest.useFakeTimers()
+  })
+
   test('plain object type guard', () => {
     expect(isPlainObject({})).toBe(true)
     expect(isPlainObject(null)).toBe(false)
@@ -95,7 +99,6 @@ describe('game', () => {
   })
 
   test('middleware', () => {
-    jest.useFakeTimers()
     const initialState: GameState = {
       status: 'waiting',
       players: R.zipObj(
@@ -122,7 +125,7 @@ describe('game', () => {
     expect(dispatcher).toHaveBeenNthCalledWith(3, {type: 'WAKE_MAFIA'})
   })
 
-  test('inform', () => {
+  test('first night', () => {
     const initialState: GameState = {
       status: 'firstNight',
       awake: 'mafia',
@@ -130,7 +133,8 @@ describe('game', () => {
         R.range(0, 6).map(i => `${i}`),
         [
           ...new Array(2).fill({alive: true, role: ROLES.mafia}),
-          ...new Array(4).fill({alive: true, role: ROLES.villager}),
+          ...new Array(3).fill({alive: true, role: ROLES.villager}),
+          {alive: true, role: ROLES.detective},
         ],
       ),
       error: null,
@@ -140,8 +144,13 @@ describe('game', () => {
       initialState,
     )
     store.dispatch({type: 'ROLE_ACTION', roleAction: 'inform', sender: '0'})
-    expect(store.getState().status).toBe('firstNight')
+    expect(store.getState()).toMatchObject({
+      status: 'firstNight',
+      awake: 'mafia',
+    })
     store.dispatch({type: 'ROLE_ACTION', roleAction: 'inform', sender: '1'})
+    expect(store.getState()).toMatchObject({status: 'firstNight', awake: null})
+    jest.runAllTimers()
     expect(store.getState().status).toBe('day')
   })
 })

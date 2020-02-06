@@ -103,11 +103,7 @@ const playerReducer: Reducer<GameState, Action> = (
             return state
           }
           // XXX: `assocPath` can produce invalid state
-          return R.assocPath(
-            ['players', action.sender, 'ready'],
-            true,
-            state,
-          )
+          return R.assocPath(['players', action.sender, 'ready'], true, state)
         default:
           return {
             ...state,
@@ -130,7 +126,7 @@ const playerReducer: Reducer<GameState, Action> = (
             return state
           }
           // XXX: `assocPath` can produce invalid state
-          const newState = R.assocPath(
+          return R.assocPath(
             [
               'players',
               action.sender,
@@ -142,21 +138,6 @@ const playerReducer: Reducer<GameState, Action> = (
             true,
             state,
           )
-          const phaseComplete = Object.values(newState.players)
-            .filter(({alive, role}) => alive && role.name === newState.awake)
-            // Reduce to true if all relevant actions are completed
-            .reduce(
-              (acc, {role}) => acc && !!role.actions.firstNight?.completed,
-              true,
-            )
-          if (phaseComplete) {
-            return {
-              ...newState,
-              // FIXME: Transition to `awake: null` and delay before day
-              status: 'day',
-            }
-          }
-          return newState
         default:
           // TODO: Other awake states
           return state
@@ -186,15 +167,12 @@ export const reducer: Reducer<GameState, PlainObject> = (
   }
   switch (action.type) {
     case 'START_GAME':
-      // Everyone's ready. Let's go.
       const numPlayers = Object.keys(cleanState.players).length
       // Gives 1 mafia for 6 players, 2 at 8, 3 at 12, and 4 at 18
       const numMafia = Math.floor(Math.sqrt(numPlayers - 5.75) + 0.5) || 1
       // Create array of available roles
       const playerStates = [ROLES.detective, ROLES.nurse]
-        // FIXME: Call `mafia` for each player
         .concat(new Array(numMafia).fill(ROLES.mafia))
-        // FIXME: Call `villager` for each player
         .concat(new Array(numPlayers - numMafia - 2).fill(ROLES.villager))
         // Produce a player state for each available role
         .map(role => ({alive: true, role}))
@@ -205,10 +183,21 @@ export const reducer: Reducer<GameState, PlainObject> = (
         error: null,
         awake: null,
       }
+    case 'SLEEP':
+      return {
+        ...cleanState,
+        awake: null,
+      }
     case 'WAKE_MAFIA':
       return {
         ...cleanState,
         awake: 'mafia',
+      }
+    case 'PHASE_DAY':
+      const {status, ...newState} = cleanState
+      return {
+        ...newState,
+        status: 'day',
       }
     default:
       return {
@@ -243,10 +232,14 @@ export const middleware: Middleware<
         // Not enough players or a player isn't ready
         return
       }
+      // Everyone's ready. Let's go.
       next({type: 'START_GAME'})
       setTimeout(() => next({type: 'WAKE_MAFIA'}), 5000)
       return
     case 'firstNight':
+      if (action.type !== 'ROLE_ACTION') {
+        return
+      }
       // Required because typescript can't narrow generic unions
       // https://github.com/Microsoft/TypeScript/issues/20375
       if (beforeState.status !== 'firstNight') {
@@ -258,22 +251,39 @@ export const middleware: Middleware<
       if (afterState.status !== 'firstNight') {
         return
       }
-      if (afterState.awake !== null) {
+      if (afterState.awake === null) {
         return
       }
-      // TODO: Check alive roles
-      const wakeNextIndex = nightRoleOrder.findIndex(
-        role => role === beforeState.awake,
+      const phaseComplete = Object.values(afterState.players)
+        .filter(({alive, role}) => alive && role.name === afterState.awake)
+        // Reduce to true if all relevant actions are completed
+        .reduce(
+          (acc, {role}) => acc && !!role.actions.firstNight?.completed,
+          true,
+        )
+      if (!phaseComplete) {
+        return
+      }
+      next({type: 'SLEEP'})
+      const aliveRoles = new Set(
+        Object.values(afterState.players)
+          .filter(({alive, role}) => alive && role.actions.firstNight)
+          .map(({role}) => role.name),
       )
-      if (wakeNextIndex < nightRoleOrder.length) {
+      const aliveRoleOrder = nightRoleOrder.filter(role => aliveRoles.has(role))
+      // `findIndex` here should never return -1 because currently awake role
+      // cannot be dead
+      const wakeNextIndex =
+        aliveRoleOrder.findIndex(role => role === afterState.awake) + 1
+      if (wakeNextIndex < aliveRoleOrder.length) {
         setTimeout(
           () =>
-            next({type: `WAKE_${nightRoleOrder[wakeNextIndex].toUpperCase()}`}),
+            next({type: `WAKE_${aliveRoleOrder[wakeNextIndex].toUpperCase()}`}),
           5000,
         )
-        return
+      } else {
+        setTimeout(() => next({type: 'PHASE_DAY'}), 5000)
       }
-      setTimeout(() => next({type: 'PHASE_DAY'}), 5000)
       return
     default:
       return
