@@ -243,7 +243,7 @@ export const middleware: Middleware<
       }
       if (
         Object.keys(afterState.players).length < 6 ||
-        Object.values(afterState.players).filter(({ready}) => !ready).length
+        Object.values(afterState.players).find(({ready}) => !ready)
       ) {
         // Not enough players or a player isn't ready
         return
@@ -270,13 +270,14 @@ export const middleware: Middleware<
       if (afterState.awake === null) {
         return
       }
-      const phaseComplete = Object.values(afterState.players)
-        .filter(({alive, role}) => alive && role.name === afterState.awake)
-        // Reduce to true if all relevant actions are completed
-        .reduce(
-          (acc, {role}) => acc && !!role.actions.firstNight?.completed,
-          true,
-        )
+      const phaseComplete = !Object.values(afterState.players).find(
+        // Returns true if there exists a living, awake player that has not
+        // completed their role action
+        ({alive, role}) =>
+          alive &&
+          role.name === afterState.awake &&
+          !role.actions.firstNight?.completed,
+      )
       if (!phaseComplete) {
         return
       }
