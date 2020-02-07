@@ -147,10 +147,27 @@ describe('game', () => {
     expect(store.getState()).toMatchObject({
       status: 'firstNight',
       awake: 'mafia',
+      players: {
+        '0': {role: {actions: {firstNight: {completed: true}}}},
+        '1': {role: {actions: {firstNight: {completed: false}}}},
+      },
     })
     store.dispatch({type: 'ROLE_ACTION', roleAction: 'inform', sender: '1'})
-    expect(store.getState()).toMatchObject({status: 'firstNight', awake: null})
+    expect(store.getState()).toMatchObject({
+      status: 'firstNight',
+      awake: null,
+      players: {
+        '0': {role: {actions: {firstNight: {completed: true}}}},
+        '1': {role: {actions: {firstNight: {completed: true}}}},
+      },
+    })
     jest.runAllTimers()
-    expect(store.getState().status).toBe('day')
+    expect(store.getState()).toMatchObject({
+      status: 'day',
+      players: {
+        '0': {role: {actions: {firstNight: {completed: false}}}},
+        '1': {role: {actions: {firstNight: {completed: false}}}},
+      },
+    })
   })
 })

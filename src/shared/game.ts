@@ -194,7 +194,23 @@ export const reducer: Reducer<GameState, PlainObject> = (
         awake: 'mafia',
       }
     case 'PHASE_DAY':
-      const {status, ...newState} = cleanState
+      if (cleanState.status !== 'firstNight' && cleanState.status !== 'night') {
+        return cleanState
+      }
+      const {awake, ...dayState} = cleanState
+      // Reset role action completed state
+      const newState = Object.entries(dayState.players)
+        .filter(([_, player]) => player.role.actions.firstNight)
+        .reduce(
+          (state, [name, _]) =>
+            // XXX: `assocPath` can produce invalid state
+            R.assocPath(
+              ['players', name, 'role', 'actions', 'firstNight', 'completed'],
+              false,
+              state,
+            ),
+          dayState,
+        )
       return {
         ...newState,
         status: 'day',
