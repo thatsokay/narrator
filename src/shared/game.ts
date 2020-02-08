@@ -379,9 +379,6 @@ export const middleware: Middleware<
       const voteCounts = R.countBy(x => x || '', votes)
       const [target, count] = Object.entries(voteCounts).reduce(
         (acc, current) => R.maxBy(([_, votes]) => votes, acc, current),
-        // Placeholder to prevent error if `voteCounts` is empty. Won't pass
-        // count check.
-        ['', 0],
       )
       if (count <= votes.length / 2) {
         return
