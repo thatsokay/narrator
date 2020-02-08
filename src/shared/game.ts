@@ -142,6 +142,25 @@ const playerReducer: Reducer<GameState, Action> = (
           // TODO: Other awake states
           return state
       }
+    case 'day':
+      if (action.type !== 'ROLE_ACTION') {
+        // TODO: Error message
+        return state
+      }
+      if (typeof action.lynch !== 'string' && action.lynch !== null) {
+        // TODO: Error message
+        return state
+      }
+      if (action.lynch !== null && !state.players[action.lynch]) {
+        // TODO: Error message
+        return state
+      }
+      // XXX: `assocPath` can produce invalid state
+      return R.assocPath(
+        ['players', action.sender, 'role', 'actions', 'day'],
+        {lynch: action.lynch, completed: true},
+        state,
+      )
     default:
       // TODO: Other phases
       return state
@@ -256,8 +275,6 @@ export const middleware: Middleware<
       if (action.type !== 'ROLE_ACTION') {
         return
       }
-      // Required because typescript can't narrow generic unions
-      // https://github.com/Microsoft/TypeScript/issues/20375
       if (beforeState.status !== 'firstNight') {
         return
       }

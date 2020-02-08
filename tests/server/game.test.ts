@@ -170,4 +170,50 @@ describe('game', () => {
       },
     })
   })
+
+  test('day lynch', () => {
+    const initialState: GameState = {
+      status: 'day',
+      players: R.zipObj(
+        R.range(0, 6).map(i => `${i}`),
+        [
+          {alive: true, role: ROLES.mafia},
+          {alive: true, role: ROLES.detective},
+          ...new Array(3).fill({alive: true, role: ROLES.villager}),
+        ],
+      ),
+      error: null,
+    }
+    const store = applyMiddleware(middleware)(createStore)(
+      reducer,
+      initialState,
+    )
+    store.dispatch({type: 'ROLE_ACTION', lynch: '1', sender: '0'})
+    expect(store.getState()).toMatchObject({
+      status: 'day',
+      players: {
+        '0': {role: {actions: {day: {completed: true, lynch: '1'}}}},
+        '1': {role: {actions: {day: {completed: false, lynch: null}}}},
+        '2': {role: {actions: {day: {completed: false, lynch: null}}}},
+      },
+    })
+    store.dispatch({type: 'ROLE_ACTION', lynch: 'x', sender: '1'})
+    expect(store.getState()).toMatchObject({
+      status: 'day',
+      players: {
+        '0': {role: {actions: {day: {completed: true, lynch: '1'}}}},
+        '1': {role: {actions: {day: {completed: false, lynch: null}}}},
+        '2': {role: {actions: {day: {completed: false, lynch: null}}}},
+      },
+    })
+    store.dispatch({type: 'ROLE_ACTION', lynch: null, sender: '2'})
+    expect(store.getState()).toMatchObject({
+      status: 'day',
+      players: {
+        '0': {role: {actions: {day: {completed: true, lynch: '1'}}}},
+        '1': {role: {actions: {day: {completed: false, lynch: null}}}},
+        '2': {role: {actions: {day: {completed: true, lynch: null}}}},
+      },
+    })
+  })
 })

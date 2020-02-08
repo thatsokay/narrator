@@ -32,6 +32,7 @@ export const ROLES = Object.freeze({
     actions: {
       day: {
         completed: false,
+        lynch: null as string | null,
       },
     },
   } as Role,
@@ -46,6 +47,7 @@ export const ROLES = Object.freeze({
       },
       day: {
         completed: false,
+        lynch: null as string | null,
       },
       night: {
         completed: false,
@@ -60,6 +62,7 @@ export const ROLES = Object.freeze({
     actions: {
       day: {
         completed: false,
+        lynch: null as string | null,
       },
       night: {
         completed: false,
@@ -74,6 +77,7 @@ export const ROLES = Object.freeze({
     actions: {
       day: {
         completed: false,
+        lynch: null as string | null,
       },
       night: {
         completed: false,
