@@ -179,6 +179,7 @@ describe('game', () => {
         [
           {alive: true, role: ROLES.mafia},
           {alive: true, role: ROLES.detective},
+          {alive: true, role: ROLES.nurse},
           ...new Array(3).fill({alive: true, role: ROLES.villager}),
         ],
       ),
@@ -197,23 +198,29 @@ describe('game', () => {
         '2': {role: {actions: {day: {completed: false, lynch: null}}}},
       },
     })
-    store.dispatch({type: 'ROLE_ACTION', lynch: 'x', sender: '1'})
+    // Test null vote
+    store.dispatch({type: 'ROLE_ACTION', lynch: null, sender: '1'})
     expect(store.getState()).toMatchObject({
       status: 'day',
       players: {
         '0': {role: {actions: {day: {completed: true, lynch: '1'}}}},
-        '1': {role: {actions: {day: {completed: false, lynch: null}}}},
+        '1': {role: {actions: {day: {completed: true, lynch: null}}}},
         '2': {role: {actions: {day: {completed: false, lynch: null}}}},
       },
     })
-    store.dispatch({type: 'ROLE_ACTION', lynch: null, sender: '2'})
+    // Test invalid lynch target vote
+    store.dispatch({type: 'ROLE_ACTION', lynch: 'x', sender: '2'})
     expect(store.getState()).toMatchObject({
       status: 'day',
       players: {
         '0': {role: {actions: {day: {completed: true, lynch: '1'}}}},
-        '1': {role: {actions: {day: {completed: false, lynch: null}}}},
-        '2': {role: {actions: {day: {completed: true, lynch: null}}}},
+        '1': {role: {actions: {day: {completed: true, lynch: null}}}},
+        '2': {role: {actions: {day: {completed: false, lynch: null}}}},
       },
     })
+    R.range(2, 6).forEach(i =>
+      store.dispatch({type: 'ROLE_ACTION', lynch: null, sender: `${i}`}),
+    )
+    expect(store.getState().status).toBe('night')
   })
 })

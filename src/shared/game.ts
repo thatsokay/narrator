@@ -77,9 +77,9 @@ const playerReducer: Reducer<GameState, Action> = (
     return state
   }
   switch (state.status) {
-    case 'waiting':
+    case 'waiting': {
       switch (action.type) {
-        case 'JOIN':
+        case 'JOIN': {
           if (state.players[action.sender]) {
             return {
               ...state,
@@ -88,7 +88,8 @@ const playerReducer: Reducer<GameState, Action> = (
           }
           // XXX: `assocPath` can produce invalid state
           return R.assocPath(['players', action.sender], {ready: false}, state)
-        case 'LEAVE':
+        }
+        case 'LEAVE': {
           if (!state.players[action.sender]) {
             return {
               ...state,
@@ -97,26 +98,30 @@ const playerReducer: Reducer<GameState, Action> = (
           }
           // XXX: `dissocPath` can produce invalid state
           return R.dissocPath(['players', action.sender], state)
-        case 'READY':
+        }
+        case 'READY': {
           if (state.players[action.sender].ready) {
             // Don't change player state if already ready
             return state
           }
           // XXX: `assocPath` can produce invalid state
           return R.assocPath(['players', action.sender, 'ready'], true, state)
-        default:
+        }
+        default: {
           return {
             ...state,
             error: 'Unknown action type',
           }
+        }
       }
-    case 'firstNight':
+    }
+    case 'firstNight': {
       if (state.players[action.sender].role.name !== state.awake) {
         // TODO: Error message
         return state
       }
       switch (state.awake) {
-        case 'mafia':
+        case 'mafia': {
           if (action.type !== 'ROLE_ACTION') {
             // TODO: Error message
             return state
@@ -138,11 +143,14 @@ const playerReducer: Reducer<GameState, Action> = (
             true,
             state,
           )
-        default:
+        }
+        default: {
           // TODO: Other awake states
           return state
+        }
       }
-    case 'day':
+    }
+    case 'day': {
       if (action.type !== 'ROLE_ACTION') {
         // TODO: Error message
         return state
@@ -161,9 +169,11 @@ const playerReducer: Reducer<GameState, Action> = (
         {lynch: action.lynch, completed: true},
         state,
       )
-    default:
+    }
+    default: {
       // TODO: Other phases
       return state
+    }
   }
 }
 
@@ -185,7 +195,7 @@ export const reducer: Reducer<GameState, PlainObject> = (
     return playerReducer(cleanState, action)
   }
   switch (action.type) {
-    case 'START_GAME':
+    case 'START_GAME': {
       const numPlayers = Object.keys(cleanState.players).length
       // Gives 1 mafia for 6 players, 2 at 8, 3 at 12, and 4 at 18
       const numMafia = Math.floor(Math.sqrt(numPlayers - 5.75) + 0.5) || 1
@@ -202,17 +212,20 @@ export const reducer: Reducer<GameState, PlainObject> = (
         error: null,
         awake: null,
       }
-    case 'SLEEP':
+    }
+    case 'SLEEP': {
       return {
         ...cleanState,
         awake: null,
       }
-    case 'WAKE_MAFIA':
+    }
+    case 'WAKE_MAFIA': {
       return {
         ...cleanState,
         awake: 'mafia',
       }
-    case 'PHASE_DAY':
+    }
+    case 'PHASE_DAY': {
       if (cleanState.status !== 'firstNight' && cleanState.status !== 'night') {
         return cleanState
       }
@@ -234,11 +247,35 @@ export const reducer: Reducer<GameState, PlainObject> = (
         ...newState,
         status: 'day',
       }
-    default:
+    }
+    case 'PHASE_NIGHT': {
+      if (cleanState.status !== 'day') {
+        return cleanState
+      }
+      const newState = Object.entries(cleanState.players)
+        .filter(([_, player]) => player.role.actions.firstNight)
+        .reduce(
+          (state, [name, _]) =>
+            // XXX: `assocPath` can produce invalid state
+            R.assocPath(
+              ['players', name, 'role', 'actions', 'day', 'completed'],
+              false,
+              state,
+            ),
+          cleanState,
+        )
+      return {
+        ...newState,
+        status: 'night',
+        awake: null,
+      }
+    }
+    default: {
       return {
         ...cleanState,
         error: 'Unknown action type',
       }
+    }
   }
 }
 
@@ -256,7 +293,7 @@ export const middleware: Middleware<
   const afterState = store.getState()
 
   switch (beforeState.status) {
-    case 'waiting':
+    case 'waiting': {
       if (action.type !== 'READY') {
         return
       }
@@ -271,7 +308,8 @@ export const middleware: Middleware<
       next({type: 'START_GAME'})
       setTimeout(() => next({type: 'WAKE_MAFIA'}), 5000)
       return
-    case 'firstNight':
+    }
+    case 'firstNight': {
       if (action.type !== 'ROLE_ACTION') {
         return
       }
@@ -319,7 +357,26 @@ export const middleware: Middleware<
         setTimeout(() => next({type: 'PHASE_DAY'}), 5000)
       }
       return
-    default:
+    }
+    case 'day': {
+      if (action.type !== 'ROLE_ACTION') {
+        return
+      }
+      if (afterState.status !== 'day') {
+        return
+      }
+      const dayComplete = !Object.values(afterState.players).find(
+        ({alive, role}) => alive && !role.actions.day?.completed,
+      )
+      if (!dayComplete) {
+        return
+      }
+      next({type: 'PHASE_NIGHT'})
+      setTimeout(() => next({type: 'WAKE_MAFIA'}), 5000)
       return
+    }
+    default: {
+      return
+    }
   }
 }
