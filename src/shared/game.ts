@@ -270,6 +270,12 @@ export const reducer: Reducer<GameState, PlainObject> = (
         awake: null,
       }
     }
+    case 'LYNCH': {
+      if (typeof action.lynch !== 'string') {
+        return cleanState
+      }
+      return R.assocPath(['players', action.lynch, 'alive'], false, cleanState)
+    }
     default: {
       return {
         ...cleanState,
@@ -377,13 +383,15 @@ export const middleware: Middleware<
         .map(({role}) => role.actions.day?.lynch)
       // Assumes empty string is not a possible player name
       const voteCounts = R.countBy(x => x || '', votes)
-      const [target, count] = Object.entries(voteCounts).reduce(
-        (acc, current) => R.maxBy(([_, votes]) => votes, acc, current),
+      const [lynch, count] = Object.entries(voteCounts).reduce((acc, current) =>
+        R.maxBy(([_, votes]) => votes, acc, current),
       )
       if (count <= votes.length / 2) {
         return
       }
-      next({type: 'LYNCH', lynch: target || null})
+      if (lynch) {
+        next({type: 'LYNCH', lynch})
+      }
       next({type: 'PHASE_NIGHT'})
       setTimeout(() => next({type: 'WAKE_MAFIA'}), 5000)
       return
