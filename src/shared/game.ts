@@ -253,7 +253,7 @@ export const reducer: Reducer<GameState, PlainObject> = (
         return cleanState
       }
       const newState = Object.entries(cleanState.players)
-        .filter(([_, player]) => player.role.actions.firstNight)
+        .filter(([_, player]) => player.role.actions.day)
         .reduce(
           (state, [name, _]) =>
             // XXX: `assocPath` can produce invalid state

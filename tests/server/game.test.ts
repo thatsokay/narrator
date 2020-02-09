@@ -219,8 +219,18 @@ describe('game', () => {
       },
     })
     R.range(2, 6).forEach(i =>
-      store.dispatch({type: 'ROLE_ACTION', lynch: null, sender: `${i}`}),
+      store.dispatch({type: 'ROLE_ACTION', lynch: '5', sender: `${i}`}),
     )
-    expect(store.getState().status).toBe('night')
+    expect(store.getState()).toMatchObject({
+      status: 'night',
+      awake: null,
+      players: {
+        '0': {role: {actions: {day: {completed: false, lynch: '1'}}}},
+        '1': {role: {actions: {day: {completed: false, lynch: null}}}},
+        '5': {alive: false},
+      },
+    })
+    jest.runAllTimers()
+    expect(store.getState()).toMatchObject({status: 'night', awake: 'mafia'})
   })
 })
