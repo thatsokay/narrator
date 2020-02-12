@@ -285,11 +285,11 @@ export const reducer: Reducer<GameState, PlainObject> = (
   }
 }
 
-const nightRoleOrder: Readonly<RoleName[]> = Object.freeze([
+const nightRoleOrder: Readonly<RoleName[]> = [
   'mafia',
   'detective',
   'nurse',
-])
+] as const
 export const middleware: Middleware<
   GameState,
   PlainObject
@@ -378,9 +378,8 @@ export const middleware: Middleware<
         return
       }
       const votes: Array<string | null> = Object.values(afterState.players)
-        .filter(({alive}) => alive)
-        // @ts-ignore FIXME
-        .map(({role}) => role.actions.day?.lynch)
+        .filter(({alive, role}) => alive && role.actions.day)
+        .map(({role}) => role.actions.day!.lynch)
       // Assumes empty string is not a possible player name
       const voteCounts = R.countBy(x => x || '', votes)
       const [lynch, count] = Object.entries(voteCounts).reduce((acc, current) =>
