@@ -34,7 +34,7 @@ interface RoleActions<
 
 interface Villager extends RoleBase {
   name: 'villager'
-  description: ''
+  description: string
   side: 'village'
   appearsAs: 'village'
   actions: RoleActions<never, {lynch: string | null}, never>
@@ -42,7 +42,7 @@ interface Villager extends RoleBase {
 
 interface Mafia extends RoleBase {
   name: 'mafia'
-  description: ''
+  description: string
   side: 'mafia'
   appearsAs: 'mafia'
   actions: RoleActions<{}, {lynch: string | null}, {}>
@@ -50,7 +50,7 @@ interface Mafia extends RoleBase {
 
 interface Detective extends RoleBase {
   name: 'detective'
-  description: ''
+  description: string
   side: 'village'
   appearsAs: 'village'
   actions: RoleActions<never, {lynch: string | null}, {}>
@@ -58,7 +58,7 @@ interface Detective extends RoleBase {
 
 interface Nurse extends RoleBase {
   name: 'nurse'
-  description: ''
+  description: string
   side: 'village'
   appearsAs: 'village'
   actions: RoleActions<never, {lynch: string | null}, {}>
