@@ -377,7 +377,7 @@ export const middleware: Middleware<
       if (!dayComplete) {
         return
       }
-      const votes: Array<string | null> = Object.values(afterState.players)
+      const votes = Object.values(afterState.players)
         .filter(({alive, role}) => alive && role.actions.day)
         .map(({role}) => role.actions.day!.lynch)
       // Assumes empty string is not a possible player name

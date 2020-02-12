@@ -3,7 +3,7 @@ export interface RoleBase {
   description: string
   side: 'mafia' | 'village' // Which side they win with
   appearsAs: 'mafia' | 'village' // Side revealed on 'see' actions
-  actions: RoleActions
+  actions: RoleActions<any, any, any>
 }
 
 export type RoleName = 'villager' | 'mafia' | 'detective' | 'nurse'
@@ -21,13 +21,15 @@ type PhaseAction<T extends Object = {}> = {
 } & T
 
 interface RoleActions<
-  F extends Object = {},
-  D extends Object = {},
-  N extends Object = {}
+  F extends Object | never,
+  D extends Object | never,
+  N extends Object | never
 > {
-  firstNight?: PhaseAction<F>
-  day?: PhaseAction<D>
-  night?: PhaseAction<N>
+  // Want to be able to specify that certain fields never have a value but still
+  // want to be able to use optional chaining on arbitrary RoleActions.
+  firstNight?: F extends Object ? PhaseAction<F> : never
+  day?: D extends Object ? PhaseAction<D> : never
+  night?: N extends Object ? PhaseAction<N> : never
 }
 
 interface Villager extends RoleBase {
@@ -35,7 +37,7 @@ interface Villager extends RoleBase {
   description: ''
   side: 'village'
   appearsAs: 'village'
-  actions: RoleActions<{}, {lynch: string | null}, {}>
+  actions: RoleActions<never, {lynch: string | null}, never>
 }
 
 interface Mafia extends RoleBase {
@@ -51,7 +53,7 @@ interface Detective extends RoleBase {
   description: ''
   side: 'village'
   appearsAs: 'village'
-  actions: RoleActions<{}, {lynch: string | null}, {}>
+  actions: RoleActions<never, {lynch: string | null}, {}>
 }
 
 interface Nurse extends RoleBase {
@@ -59,7 +61,7 @@ interface Nurse extends RoleBase {
   description: ''
   side: 'village'
   appearsAs: 'village'
-  actions: RoleActions<{}, {lynch: string | null}, {}>
+  actions: RoleActions<never, {lynch: string | null}, {}>
 }
 
 export type Role = Villager | Mafia | Detective | Nurse
@@ -73,7 +75,7 @@ export const ROLES = {
     actions: {
       day: {
         completed: false,
-        lynch: null as string | null,
+        lynch: null,
       },
     },
   } as Villager,
@@ -88,7 +90,7 @@ export const ROLES = {
       },
       day: {
         completed: false,
-        lynch: null as string | null,
+        lynch: null,
       },
       night: {
         completed: false,
@@ -103,7 +105,7 @@ export const ROLES = {
     actions: {
       day: {
         completed: false,
-        lynch: null as string | null,
+        lynch: null,
       },
       night: {
         completed: false,
@@ -118,7 +120,7 @@ export const ROLES = {
     actions: {
       day: {
         completed: false,
-        lynch: null as string | null,
+        lynch: null,
       },
       night: {
         completed: false,
