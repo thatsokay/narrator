@@ -16,20 +16,20 @@ type PhaseActionType =
   | 'see' // See a target's side
   | 'heal' // Prevent a kill on target
 
-type PhaseAction<T extends Object = {}> = {
+type PhaseAction<T extends object = {}> = {
   completed: boolean
 } & T
 
 interface RoleActions<
-  F extends Object | never,
-  D extends Object | never,
-  N extends Object | never
+  F extends object | never,
+  D extends object | never,
+  N extends object | never
 > {
   // Want to be able to specify that certain fields never have a value but still
   // want to be able to use optional chaining on arbitrary RoleActions.
-  firstNight?: F extends Object ? PhaseAction<F> : never
-  day?: D extends Object ? PhaseAction<D> : never
-  night?: N extends Object ? PhaseAction<N> : never
+  firstNight?: F extends object ? PhaseAction<F> : never
+  day?: D extends object ? PhaseAction<D> : never
+  night?: N extends object ? PhaseAction<N> : never
 }
 
 interface Villager extends RoleBase {
