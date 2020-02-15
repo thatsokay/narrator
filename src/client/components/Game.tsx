@@ -26,8 +26,9 @@ const Game = (props: Props) => {
         <p>Awake: {gameState.awake}</p>
       )}
       {gameState.status === 'firstNight' &&
-        gameState.players[props.playerName].role.name === 'mafia' &&
-        gameState.awake === 'mafia' && (
+        gameState.players[props.playerName].role.name === gameState.awake &&
+        gameState.players[props.playerName].role.actions.firstNight?.name ===
+          'inform' && (
           <button onClick={() => props.sendAction({type: 'ROLE_ACTION'})}>
             Inform
           </button>
@@ -41,7 +42,8 @@ const Game = (props: Props) => {
             {playerState.ready && '☑️ '}
             {player}
             {gameState.status === 'day' &&
-              gameState.players[props.playerName].role.actions.day && (
+              gameState.players[props.playerName].role.actions.day?.name ===
+                'lynch' && (
                 <button
                   onClick={() =>
                     props.sendAction({type: 'ROLE_ACTION', lynch: player})

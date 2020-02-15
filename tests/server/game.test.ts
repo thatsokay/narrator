@@ -193,9 +193,19 @@ describe('game', () => {
     expect(store.getState()).toMatchObject({
       status: 'day',
       players: {
-        '0': {role: {actions: {day: {completed: true, lynch: '1'}}}},
-        '1': {role: {actions: {day: {completed: false, lynch: null}}}},
-        '2': {role: {actions: {day: {completed: false, lynch: null}}}},
+        '0': {
+          role: {actions: {day: {completed: true, name: 'lynch', lynch: '1'}}},
+        },
+        '1': {
+          role: {
+            actions: {day: {completed: false, name: 'lynch', lynch: null}},
+          },
+        },
+        '2': {
+          role: {
+            actions: {day: {completed: false, name: 'lynch', lynch: null}},
+          },
+        },
       },
     })
     // Test null vote
@@ -203,9 +213,17 @@ describe('game', () => {
     expect(store.getState()).toMatchObject({
       status: 'day',
       players: {
-        '0': {role: {actions: {day: {completed: true, lynch: '1'}}}},
-        '1': {role: {actions: {day: {completed: true, lynch: null}}}},
-        '2': {role: {actions: {day: {completed: false, lynch: null}}}},
+        '0': {
+          role: {actions: {day: {completed: true, name: 'lynch', lynch: '1'}}},
+        },
+        '1': {
+          role: {actions: {day: {completed: true, name: 'lynch', lynch: null}}},
+        },
+        '2': {
+          role: {
+            actions: {day: {completed: false, name: 'lynch', lynch: null}},
+          },
+        },
       },
     })
     // Test invalid lynch target vote
@@ -213,9 +231,17 @@ describe('game', () => {
     expect(store.getState()).toMatchObject({
       status: 'day',
       players: {
-        '0': {role: {actions: {day: {completed: true, lynch: '1'}}}},
-        '1': {role: {actions: {day: {completed: true, lynch: null}}}},
-        '2': {role: {actions: {day: {completed: false, lynch: null}}}},
+        '0': {
+          role: {actions: {day: {completed: true, name: 'lynch', lynch: '1'}}},
+        },
+        '1': {
+          role: {actions: {day: {completed: true, name: 'lynch', lynch: null}}},
+        },
+        '2': {
+          role: {
+            actions: {day: {completed: false, name: 'lynch', lynch: null}},
+          },
+        },
       },
     })
     R.range(2, 6).forEach(i =>
@@ -225,8 +251,14 @@ describe('game', () => {
       status: 'night',
       awake: null,
       players: {
-        '0': {role: {actions: {day: {completed: false, lynch: '1'}}}},
-        '1': {role: {actions: {day: {completed: false, lynch: null}}}},
+        '0': {
+          role: {actions: {day: {completed: false, name: 'lynch', lynch: '1'}}},
+        },
+        '1': {
+          role: {
+            actions: {day: {completed: false, name: 'lynch', lynch: null}},
+          },
+        },
         '5': {alive: false},
       },
     })

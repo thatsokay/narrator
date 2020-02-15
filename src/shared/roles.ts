@@ -13,31 +13,37 @@ type PhaseActionType =
   | 'inform' // Reveal role to others at night
   | 'lynch' // Vote to lynch target at day
   | 'kill' // Vote to kill target at night
-  | 'see' // See a target's side
+  | 'investigate' // Reveal a target's `appearAs`
   | 'heal' // Prevent a kill on target
 
-type PhaseAction<T extends object = {}> = {
+type PhaseAction<T extends {name: PhaseActionType}> = {
   completed: boolean
 } & T
 
 interface RoleActions<
-  F extends object | never,
-  D extends object | never,
-  N extends object | never
+  F extends {name: PhaseActionType} | never,
+  D extends {name: PhaseActionType} | never,
+  N extends {name: PhaseActionType} | never
 > {
   // Want to be able to specify that certain fields never have a value but still
   // want to be able to use optional chaining on arbitrary RoleActions.
-  firstNight?: F extends object ? PhaseAction<F> : never
-  day?: D extends object ? PhaseAction<D> : never
-  night?: N extends object ? PhaseAction<N> : never
+  firstNight?: F extends {name: PhaseActionType} ? PhaseAction<F> : never
+  day?: D extends {name: PhaseActionType} ? PhaseAction<D> : never
+  night?: N extends {name: PhaseActionType} ? PhaseAction<N> : never
 }
+
+type Inform = {name: 'inform'}
+type Lynch = {name: 'lynch'; lynch: string | null}
+type Kill = {name: 'kill'; kill: string}
+type Investigate = {name: 'investigate'; investigate: string}
+type Heal = {name: 'heal'; heal: string}
 
 interface Villager extends RoleBase {
   name: 'villager'
   description: string
   side: 'village'
   appearsAs: 'village'
-  actions: RoleActions<never, {lynch: string | null}, never>
+  actions: RoleActions<never, Lynch, never>
 }
 
 interface Mafia extends RoleBase {
@@ -45,7 +51,7 @@ interface Mafia extends RoleBase {
   description: string
   side: 'mafia'
   appearsAs: 'mafia'
-  actions: RoleActions<{}, {lynch: string | null}, {}>
+  actions: RoleActions<Inform, Lynch, Kill>
 }
 
 interface Detective extends RoleBase {
@@ -53,7 +59,7 @@ interface Detective extends RoleBase {
   description: string
   side: 'village'
   appearsAs: 'village'
-  actions: RoleActions<never, {lynch: string | null}, {}>
+  actions: RoleActions<never, Lynch, Investigate>
 }
 
 interface Nurse extends RoleBase {
@@ -61,7 +67,7 @@ interface Nurse extends RoleBase {
   description: string
   side: 'village'
   appearsAs: 'village'
-  actions: RoleActions<never, {lynch: string | null}, {}>
+  actions: RoleActions<never, Lynch, Heal>
 }
 
 export type Role = Villager | Mafia | Detective | Nurse
@@ -75,6 +81,7 @@ export const ROLES = {
     actions: {
       day: {
         completed: false,
+        name: 'lynch',
         lynch: null,
       },
     },
@@ -87,13 +94,16 @@ export const ROLES = {
     actions: {
       firstNight: {
         completed: false,
+        name: 'inform',
       },
       day: {
         completed: false,
+        name: 'lynch',
         lynch: null,
       },
       night: {
         completed: false,
+        name: 'kill',
       },
     },
   } as Mafia,
@@ -105,10 +115,12 @@ export const ROLES = {
     actions: {
       day: {
         completed: false,
+        name: 'lynch',
         lynch: null,
       },
       night: {
         completed: false,
+        name: 'investigate',
       },
     },
   } as Detective,
@@ -120,10 +132,12 @@ export const ROLES = {
     actions: {
       day: {
         completed: false,
+        name: 'lynch',
         lynch: null,
       },
       night: {
         completed: false,
+        name: 'heal',
       },
     },
   } as Nurse,

@@ -162,7 +162,7 @@ const playerReducer: Reducer<GameState, Action> = (
       // XXX: `assocPath` can produce invalid state
       return R.assocPath(
         ['players', action.sender, 'role', 'actions', 'day'],
-        {lynch: action.lynch, completed: true},
+        {lynch: action.lynch, name: 'lynch', completed: true},
         state,
       )
     }
