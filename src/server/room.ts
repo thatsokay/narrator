@@ -5,13 +5,12 @@ import {reducer, middleware, isPlainObject} from '../shared/game'
 export const newRoom = (roomId: string, io: SocketIO.Server) => {
   let store = applyMiddleware(middleware)(createStore)(reducer)
   const sockets: Record<string, string> = {}
-  const players: Record<string, SocketIO.Socket> = {}
 
-  const join = (socket: SocketIO.Socket, playerName: string) => {
-    if (sockets[socket.id]) {
+  const join = (socketId: string, playerName: string) => {
+    if (sockets[socketId]) {
       throw 'Socket already in room'
     }
-    if (players[playerName]) {
+    if (Object.values(sockets).includes(playerName)) {
       throw 'Player name is already taken'
     }
     store.dispatch({type: 'JOIN', sender: playerName})
@@ -20,17 +19,15 @@ export const newRoom = (roomId: string, io: SocketIO.Server) => {
       // Should be unreachable
       throw state.error
     }
-    sockets[socket.id] = playerName
-    players[playerName] = socket
+    sockets[socketId] = playerName
 
-    socket.on('gameAction', (action: unknown) => {
+    const send$ = store.state$
+    const receive = (action: unknown) => {
       if (isPlainObject(action)) {
         store.dispatch({...action, sender: playerName})
       }
-    })
-    store.subscribe(state => {
-      socket.emit('gameState', state)
-    })
+    }
+    return [send$, receive] as const
   }
 
   const leave = (socketId: string) => {
@@ -43,7 +40,6 @@ export const newRoom = (roomId: string, io: SocketIO.Server) => {
       // Should be unreachable
       throw state.error
     }
-    delete players[sockets[socketId]]
     delete sockets[socketId]
   }
 

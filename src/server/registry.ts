@@ -26,15 +26,11 @@ export const newRegistry = (io: SocketIO.Server) => {
     return roomId
   }
 
-  const joinRoom = (
-    socket: SocketIO.Socket,
-    playerName: string,
-    roomId: string,
-  ) => {
+  const joinRoom = (socketId: string, playerName: string, roomId: string) => {
     /* Adds a player to the room with a given room id if it exists.
      */
-    if (sockets[socket.id] !== undefined) {
-      console.error(socket.id, 'attempted to join room when already registered')
+    if (sockets[socketId] !== undefined) {
+      console.error(socketId, 'attempted to join room when already registered')
       throw 'Already in a room'
     }
 
@@ -45,9 +41,9 @@ export const newRegistry = (io: SocketIO.Server) => {
       throw `Room with id ${roomId} does not exist`
     }
 
-    room.join(socket, playerName)
-    sockets[socket.id] = roomId
+    sockets[socketId] = roomId
     console.log(playerName, 'joined room', roomId)
+    return room.join(socketId, playerName)
   }
 
   const leave = (socketId: string) => {

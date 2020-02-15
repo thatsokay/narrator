@@ -5,6 +5,7 @@ export type Reducer<S, A> = (state?: S, action?: A) => S
 export type Dispatcher<A> = (action: A) => void
 
 export interface Store<S, A> {
+  state$: BehaviorSubject<S>
   dispatch: Dispatcher<A>
   subscribe: (listener: (state: S) => void) => Subscription
   getState: () => S
@@ -20,6 +21,7 @@ export const createStore = <S, A>(
   dispatch$.pipe(scan(reducer, firstState)).subscribe(state$)
 
   return {
+    state$,
     dispatch: (action: A) => dispatch$.next(action),
     subscribe: (listener: (state: S) => void) => state$.subscribe(listener),
     getState: () => state$.getValue(),
@@ -39,7 +41,7 @@ export const applyMiddleware = <S, A>(...middlewares: Middleware<S, A>[]) => (
   const store = createStore(reducer, initialState)
   const patchers = middlewares.map(middleware => middleware(store))
   const dispatch = patchers.reduceRight(
-    (acc, dispatcher) => dispatcher(acc),
+    (acc, patcher) => patcher(acc),
     store.dispatch,
   )
   const dispatch$ = new Subject<A>()

@@ -285,11 +285,7 @@ export const reducer: Reducer<GameState, PlainObject> = (
   }
 }
 
-const nightRoleOrder: Readonly<RoleName[]> = [
-  'mafia',
-  'detective',
-  'nurse',
-] as const
+const nightRoleOrder = ['mafia', 'detective', 'nurse'] as const
 export const middleware: Middleware<
   GameState,
   PlainObject
@@ -382,8 +378,8 @@ export const middleware: Middleware<
         .map(({role}) => role.actions.day!.lynch)
       // Assumes empty string is not a possible player name
       const voteCounts = R.countBy(x => x || '', votes)
-      const [lynch, count] = Object.entries(voteCounts).reduce((acc, current) =>
-        R.maxBy(([_, votes]) => votes, acc, current),
+      const [lynch, count] = Object.entries(voteCounts).reduce(
+        R.maxBy<[string, number]>(([_, votes]) => votes),
       )
       if (count <= votes.length / 2) {
         return

@@ -3,6 +3,7 @@ import Koa from 'koa'
 import koaStatic from 'koa-static'
 import send from 'koa-send'
 import socketIO from 'socket.io'
+import {Observable} from 'rxjs'
 
 import {newRegistry} from './registry'
 import {EVENTS} from '../shared/constants'
@@ -21,53 +22,55 @@ io.on('connect', socket => {
     console.log(`Socket disconnected due to ${reason}`)
   })
   console.log('Socket connected')
-  socket.on(EVENTS.CREATE_ROOM, (...args: unknown[]) => {
-    if (
-      args.length !== 2 ||
-      typeof args[0] !== 'string' ||
-      typeof args[1] !== 'function'
-    ) {
+  socket.on(EVENTS.CREATE_ROOM, (playerName: unknown, respond: unknown) => {
+    if (typeof playerName !== 'string' || typeof respond !== 'function') {
       return
     }
-    const [playerName, respond] = args
     // TODO: Remove room on joinRoom exception
     const roomId = registry.createRoom()
+    let send$: Observable<any>
+    let receive: (action: unknown) => void
     try {
-      registry.joinRoom(socket, playerName, roomId)
+      ;[send$, receive] = registry.joinRoom(socket.id, playerName, roomId)
     } catch (error) {
       respond({success: false, reason: error})
       socket.disconnect()
       return
     }
     respond({success: true, roomId: roomId})
-    socket.join(roomId)
+    send$.subscribe(state => socket.emit('gameState', state))
+    socket.on('gameAction', receive)
     socket.on('disconnect', () => {
       registry.leave(socket.id)
     })
   })
-  socket.on(EVENTS.JOIN_ROOM, (...args: unknown[]) => {
-    if (
-      args.length !== 3 ||
-      typeof args[0] !== 'string' ||
-      typeof args[1] !== 'string' ||
-      typeof args[2] !== 'function'
-    ) {
-      return
-    }
-    const [playerName, roomId, respond] = args
-    try {
-      registry.joinRoom(socket, playerName, roomId)
-    } catch (error) {
-      respond({success: false, reason: error})
-      socket.disconnect()
-      return
-    }
-    respond({success: true})
-    socket.join(roomId)
-    socket.on('disconnect', () => {
-      registry.leave(socket.id)
-    })
-  })
+  socket.on(
+    EVENTS.JOIN_ROOM,
+    (playerName: unknown, roomId: unknown, respond: unknown) => {
+      if (
+        typeof playerName !== 'string' ||
+        typeof roomId !== 'string' ||
+        typeof respond !== 'function'
+      ) {
+        return
+      }
+      let send$: Observable<any>
+      let receive: (action: unknown) => void
+      try {
+        ;[send$, receive] = registry.joinRoom(socket.id, playerName, roomId)
+      } catch (error) {
+        respond({success: false, reason: error})
+        socket.disconnect()
+        return
+      }
+      respond({success: true})
+      send$.subscribe(state => socket.emit('gameState', state))
+      socket.on('gameAction', receive)
+      socket.on('disconnect', () => {
+        registry.leave(socket.id)
+      })
+    },
+  )
 })
 
 const server = http.createServer(app.callback())
