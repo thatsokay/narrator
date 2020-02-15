@@ -21,6 +21,7 @@ describe('room', () => {
   test('leave', () => {
     room.join('foo', 'foo')
     expect(() => room.leave('foo')).not.toThrow()
+    expect(room.isEmpty()).toBe(true)
   })
 
   test('join with duplicate socket', () => {
