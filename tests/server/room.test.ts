@@ -6,7 +6,7 @@ describe('room', () => {
   let room: Room
 
   beforeEach(() => {
-    room = newRoom('ASDF', {} as any)
+    room = newRoom('ASDF')
   })
 
   test('empty', () => {

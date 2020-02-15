@@ -10,7 +10,7 @@ const randomRoomId = (length: number) => {
   return chars.join('')
 }
 
-export const newRegistry = (io: SocketIO.Server) => {
+export const newRegistry = () => {
   const sockets: Record<string, string> = {}
   const rooms: Record<string, Room> = {}
 
@@ -22,7 +22,7 @@ export const newRegistry = (io: SocketIO.Server) => {
     while (rooms[roomId] !== undefined) {
       roomId = randomRoomId(4)
     }
-    rooms[roomId] = newRoom(roomId, io)
+    rooms[roomId] = newRoom(roomId)
     return roomId
   }
 

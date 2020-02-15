@@ -10,7 +10,7 @@ import {EVENTS} from '../shared/constants'
 
 const app = new Koa()
 const io = socketIO()
-const registry = newRegistry(io)
+const registry = newRegistry()
 
 app.use(koaStatic(`${__dirname}/public`))
 app.use(async (ctx: Koa.Context) => {

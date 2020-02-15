@@ -2,11 +2,9 @@ import {Registry, newRegistry} from '../../src/server/registry'
 
 describe('registry', () => {
   let registry: Registry
-  let io: SocketIO.Server
 
   beforeEach(() => {
-    io = {} as SocketIO.Server
-    registry = newRegistry(io)
+    registry = newRegistry()
   })
 
   test('creating, joining, and leaving a room', () => {
