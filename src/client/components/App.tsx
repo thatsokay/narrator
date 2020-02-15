@@ -17,13 +17,13 @@ const App = () => {
   const [gameState$] = useState(new BehaviorSubject<GameState>(initialState))
 
   useEffect(() => {
-    if (socket) {
-      const subscription = fromEvent<GameState>(socket, 'gameState').subscribe(
-        gameState$,
-      )
-      return () => subscription.unsubscribe()
+    if (!socket) {
+      return () => {}
     }
-    return () => {}
+    const subscription = fromEvent<GameState>(socket, 'gameState').subscribe(
+      gameState$,
+    )
+    return () => subscription.unsubscribe()
   }, [socket])
 
   const handleSubmit = (playerName: string, roomId?: string) => (
@@ -87,7 +87,14 @@ const App = () => {
   return (
     <>
       {inRoom && socket ? (
-        <Game {...{playerName, roomId, gameState$, socket}} />
+        <Game
+          {...{
+            playerName,
+            roomId,
+            gameState$,
+            sendAction: (action: any) => socket.emit('gameAction', action),
+          }}
+        />
       ) : (
         <>
           <CreateForm handleSubmit={handleSubmit} />

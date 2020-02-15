@@ -126,10 +126,6 @@ const playerReducer: Reducer<GameState, Action> = (
             // TODO: Error message
             return state
           }
-          if (action.roleAction !== 'inform') {
-            // TODO: Error message
-            return state
-          }
           // XXX: `assocPath` can produce invalid state
           return R.assocPath(
             [
