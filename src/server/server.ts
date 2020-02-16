@@ -12,9 +12,10 @@ const app = new Koa()
 const io = socketIO()
 const registry = newRegistry()
 
-app.use(koaStatic(`${__dirname}/public`))
-app.use(async (ctx: Koa.Context) => {
-  await send(ctx, 'index.html', {root: `${__dirname}/public`})
+const root = 'build/public'
+app.use(koaStatic(root))
+app.use(async ctx => {
+  await send(ctx, 'index.html', {root})
 })
 
 io.on('connect', socket => {
