@@ -3,11 +3,11 @@
   "version": "0.1.0",
   "main": "index.js",
   "scripts": {
-    "watch": "webpack --watch --progress --colors --mode=development",
-    "watch:server": "nodemon --watch build/server.js build/server.js",
+    "start": "nodemon --watch build/server.js build/server.js",
+    "test": "jest",
     "build": "webpack --progress --colors --mode=production",
-    "format": "prettier --write '{src,tests}/**/*.{ts,tsx,js,jsx}' 'webpack.config.js'",
-    "test": "jest"
+    "watch": "webpack --watch --progress --colors --mode=development",
+    "format": "prettier --write '{src,tests}/**/*.{ts,tsx,js,jsx}' 'webpack.config.js'"
   },
   "dependencies": {
     "koa": "^2.8.2",
