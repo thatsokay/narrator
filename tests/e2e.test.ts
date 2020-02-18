@@ -5,14 +5,17 @@ import R from 'ramda'
 import app from '../src/server/server'
 
 describe('e2e', () => {
-  let browser: puppeteer.Browser
   let server: Server
+  let browser: puppeteer.Browser
+  let pages: puppeteer.Page[]
 
   jest.setTimeout(30_000)
 
   beforeAll(async () => {
-    browser = await puppeteer.launch()
     server = app.listen(3000)
+    browser = await puppeteer.launch()
+    pages = await Promise.all(R.range(0, 6).map(_ => browser.newPage()))
+    await Promise.all(pages.map(page => page.goto('http://localhost:3000')))
   })
 
   afterAll(async () => {
@@ -20,15 +23,7 @@ describe('e2e', () => {
     server.close()
   })
 
-  test('connect', async () => {
-    const page = await browser.newPage()
-    await page.goto('http://localhost:3000')
-    await page.waitFor('#create-player-name', {timeout: 100})
-  })
-
   test('start game', async done => {
-    const pages = await Promise.all(R.range(0, 6).map(_ => browser.newPage()))
-    await Promise.all(pages.map(page => page.goto('http://localhost:3000')))
     await (await pages[0].waitFor('#create-player-name')).type('player0\n')
     const roomIdHandle = await pages[0].waitFor('h1')
     const roomId = (await roomIdHandle.evaluate(

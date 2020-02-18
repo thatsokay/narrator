@@ -27,9 +27,9 @@ interface RoleActions<
 > {
   // Want to be able to specify that certain fields never have a value but still
   // want to be able to use optional chaining on arbitrary RoleActions.
-  firstNight?: F extends {name: PhaseActionType} ? PhaseAction<F> : never
-  day?: D extends {name: PhaseActionType} ? PhaseAction<D> : never
-  night?: N extends {name: PhaseActionType} ? PhaseAction<N> : never
+  firstNight?: F extends never ? never : PhaseAction<F>
+  day?: D extends never ? never : PhaseAction<D>
+  night?: N extends never ? never : PhaseAction<N>
 }
 
 type Inform = {name: 'inform'}
