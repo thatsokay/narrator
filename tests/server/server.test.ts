@@ -12,8 +12,9 @@ describe('server', () => {
   let client: SocketIOClient.Socket
 
   beforeEach(() => {
-    server = app.listen(3000)
-    client = socketIOClient('localhost:3000')
+    // E2e test server uses port 3000
+    server = app.listen(3001)
+    client = socketIOClient('localhost:3001')
   })
 
   afterEach(() => {
@@ -133,7 +134,7 @@ describe('server', () => {
 
     // 5 more connection join room
     const joinSockets = R.range(0, 5).map(() =>
-      socketIOClient('localhost:3000'),
+      socketIOClient('localhost:3001'),
     )
     await expect(
       Promise.all(
