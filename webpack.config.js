@@ -20,6 +20,15 @@ const clientConfig = {
     path: path.resolve(__dirname, 'build', 'public'),
     filename: 'js/[name].js',
   },
+  module: {
+    rules: [
+      ...commonConfig.module.rules,
+      {
+        test: /\.css$/i,
+        use: ['style-loader', 'css-loader'],
+      },
+    ],
+  },
   plugins: [
     new HtmlWebpackPlugin({inject: true, template: './public/index.html'}),
   ],
