@@ -105,16 +105,24 @@ const App = () => {
           <div className="flex justify-center">
             <div className="ba" style={{marginRight: '-1px'}}>
               <a
-                className="no-underline black hover-bg-black hover-white db items-center pa3"
+                className={
+                  'no-underline black hover-bg-black hover-white db pa3 ' +
+                  (showForm === 'create' ? 'bg-black white' : 'bg-white black')
+                }
                 onClick={() => setShowForm('create')}
+                href="#"
               >
                 New room
               </a>
             </div>
             <div className="ba">
               <a
-                className="no-underline black hover-bg-black hover-white db items-center pa3"
+                className={
+                  'no-underline black hover-bg-black hover-white db pa3 ' +
+                  (showForm === 'join' ? 'bg-black white' : 'bg-white black')
+                }
                 onClick={() => setShowForm('join')}
+                href="#"
               >
                 Join room
               </a>
