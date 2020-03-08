@@ -88,7 +88,7 @@ const App = () => {
 
   return (
     <div
-      className="sans-serif mw6"
+      className="sans-serif mw5"
       style={{marginLeft: 'auto', marginRight: 'auto'}}
     >
       {inRoom && socket ? (
@@ -106,7 +106,7 @@ const App = () => {
             <div className="ba" style={{marginRight: '-1px'}}>
               <a
                 className={
-                  'no-underline black hover-bg-black hover-white db pa3 ' +
+                  'no-underline black hover-bg-black hover-white db pa2 ' +
                   (showForm === 'create' ? 'bg-black white' : 'bg-white black')
                 }
                 onClick={() => setShowForm('create')}
@@ -118,7 +118,7 @@ const App = () => {
             <div className="ba">
               <a
                 className={
-                  'no-underline black hover-bg-black hover-white db pa3 ' +
+                  'no-underline black hover-bg-black hover-white db pa2 ' +
                   (showForm === 'join' ? 'bg-black white' : 'bg-white black')
                 }
                 onClick={() => setShowForm('join')}

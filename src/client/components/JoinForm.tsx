@@ -18,6 +18,7 @@ const JoinForm = (props: Props) => {
         value={roomId}
         onChange={event => setRoomId(event.target.value)}
         id="join-room-id"
+        className="w-100"
         type="text"
         name="room-id"
         maxLength={4}
@@ -27,6 +28,7 @@ const JoinForm = (props: Props) => {
         value={playerName}
         onChange={event => setPlayerName(event.target.value)}
         id="join-player-name"
+        className="w-100"
         type="text"
         name="player-name"
         maxLength={12}

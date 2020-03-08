@@ -17,6 +17,7 @@ const CreateForm = (props: Props) => {
         value={playerName}
         onChange={event => setPlayerName(event.target.value)}
         id="create-player-name"
+        className="w-100"
         type="text"
         name="player-name"
         maxLength={12}
