@@ -159,12 +159,18 @@ const playerReducer: Reducer<GameState, Action> = (
         // TODO: Error message
         return state
       }
-      // XXX: `assocPath` can produce invalid state
-      return R.assocPath(
-        ['players', action.sender, 'role', 'actions', 'day'],
-        {lynch: action.lynch, name: 'lynch', completed: true},
-        state,
-      )
+      return R.pipe(
+        // XXX: `assocPath` can produce invalid state
+        R.assocPath<string | null, GameState>(
+          ['players', action.sender, 'role', 'actions', 'day', 'lynch'],
+          action.lynch
+        ),
+        // XXX: `assocPath` can produce invalid state
+        R.assocPath<boolean, GameState>(
+          ['players', action.sender, 'role', 'actions', 'day', 'completed'],
+          true
+        ),
+      )(state)
     }
     default: {
       // TODO: Other phases
