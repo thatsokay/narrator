@@ -163,12 +163,12 @@ const playerReducer: Reducer<GameState, Action> = (
         // XXX: `assocPath` can produce invalid state
         R.assocPath<string | null, GameState>(
           ['players', action.sender, 'role', 'actions', 'day', 'lynch'],
-          action.lynch
+          action.lynch,
         ),
         // XXX: `assocPath` can produce invalid state
         R.assocPath<boolean, GameState>(
           ['players', action.sender, 'role', 'actions', 'day', 'completed'],
-          true
+          true,
         ),
       )(state)
     }
