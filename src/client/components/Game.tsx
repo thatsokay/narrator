@@ -1,13 +1,13 @@
 import React, {useState, useEffect} from 'react'
 import {Observable} from 'rxjs'
 
-import {GameState, initialState} from '../../shared/game'
+import {GameState, Action, initialState} from '../../shared/game'
 
 interface Props {
   playerName: string
   roomId: string
   gameState$: Observable<GameState>
-  sendAction: (action: any) => void
+  sendAction: (action: Action) => void
 }
 
 const Game = (props: Props) => {

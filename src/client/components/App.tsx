@@ -8,7 +8,7 @@ import JoinForm from './JoinForm'
 import Game from './Game'
 import {EVENTS} from '../../shared/constants'
 import {EventResponse} from '../../shared/types'
-import {GameState, initialState} from '../../shared/game'
+import {GameState, Action, initialState} from '../../shared/game'
 
 const App = () => {
   const [playerName, setPlayerName] = useState('')
@@ -26,7 +26,7 @@ const App = () => {
       gameState$,
     )
     return () => subscription.unsubscribe()
-  }, [socket])
+  }, [socket, gameState$])
 
   const handleSubmit = (playerName: string, roomId?: string) => (
     event: React.FormEvent,
@@ -97,7 +97,7 @@ const App = () => {
             playerName,
             roomId,
             gameState$,
-            sendAction: (action: any) => socket.emit('gameAction', action),
+            sendAction: (action: Action) => socket.emit('gameAction', action),
           }}
         />
       ) : (

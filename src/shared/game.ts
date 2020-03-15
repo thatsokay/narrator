@@ -30,7 +30,7 @@ export type GameState = Waiting | Day | Night
 
 type PlainObject = Record<string, unknown>
 
-interface Action extends PlainObject {
+export interface Action extends PlainObject {
   type: string
   sender?: string
 }
