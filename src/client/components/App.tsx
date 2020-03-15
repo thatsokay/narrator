@@ -88,7 +88,7 @@ const App = () => {
 
   return (
     <div
-      className="sans-serif mw5"
+      className="sans-serif w-100 w5-ns ph4 ph0-ns"
       style={{marginLeft: 'auto', marginRight: 'auto'}}
     >
       {inRoom && socket ? (
