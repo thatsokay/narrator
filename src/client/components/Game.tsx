@@ -20,8 +20,10 @@ const Game = (props: Props) => {
   }, [props.gameState$])
   return (
     <>
-      <h1>{props.roomId}</h1>
-      <h2>{gameState.status}</h2>
+      <div className="flex">
+        <h2 className="ttc">{gameState.status}</h2>
+        <h2 className="flex-auto tr">{props.roomId}</h2>
+      </div>
       {(gameState.status === 'firstNight' || gameState.status === 'night') && (
         <p>Awake: {gameState.awake}</p>
       )}
