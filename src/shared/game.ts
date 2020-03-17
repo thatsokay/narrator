@@ -36,6 +36,8 @@ export interface Action extends PlainObject {
 }
 
 // https://github.com/reduxjs/redux/blob/master/src/utils/isPlainObject.ts
+// See also:
+// https://github.com/char0n/ramda-adjunct/blob/master/src/isPlainObj.js
 export const isPlainObject = (obj: any): obj is PlainObject => {
   if (typeof obj !== 'object' || obj === null) {
     return false

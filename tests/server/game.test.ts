@@ -18,8 +18,11 @@ describe('game', () => {
 
   test('plain object type guard', () => {
     expect(isPlainObject({})).toBe(true)
+    expect(isPlainObject(new Object())).toBe(true)
     expect(isPlainObject(null)).toBe(false)
     expect(isPlainObject(1)).toBe(false)
+    expect(isPlainObject([1, 2, 3])).toBe(false)
+    expect(isPlainObject(Object.create(null))).toBe(false)
     expect(isPlainObject(new Date())).toBe(false)
     expect(isPlainObject(Object.getPrototypeOf({}))).toBe(false)
   })

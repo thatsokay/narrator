@@ -20,9 +20,9 @@ const Game = (props: Props) => {
   }, [props.gameState$])
   return (
     <>
-      <div className="flex">
+      <div className="flex justify-between">
         <h2 className="ttc">{gameState.status}</h2>
-        <h2 className="flex-auto tr">{props.roomId}</h2>
+        <h2>{props.roomId}</h2>
       </div>
       {(gameState.status === 'firstNight' || gameState.status === 'night') && (
         <p>Awake: {gameState.awake}</p>
