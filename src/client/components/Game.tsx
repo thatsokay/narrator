@@ -18,12 +18,20 @@ const Game = (props: Props) => {
     )
     return () => subscription.unsubscribe()
   }, [props.gameState$])
+
   return (
     <>
       <div className="flex justify-between">
         <h2 className="ttc">{gameState.status}</h2>
         <h2>{props.roomId}</h2>
       </div>
+      {gameState.status !== 'waiting' && (
+        <div>
+          <span className="bg-moon-gray moon-gray">
+            {gameState.players[props.playerName].role.name}
+          </span>
+        </div>
+      )}
       {(gameState.status === 'firstNight' || gameState.status === 'night') && (
         <p>Awake: {gameState.awake}</p>
       )}
