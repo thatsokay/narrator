@@ -35,17 +35,8 @@ const Game = (props: Props) => {
       {(gameState.status === 'firstNight' || gameState.status === 'night') && (
         <p>Awake: {gameState.awake}</p>
       )}
-      {gameState.status === 'firstNight' &&
-        gameState.players[props.playerName].role.name === gameState.awake &&
-        gameState.players[props.playerName].role.actions.firstNight?.name ===
-          'inform' && (
-          <button onClick={() => props.sendAction({type: 'ROLE_ACTION'})}>
-            Inform
-          </button>
-        )}
-      {gameState.status === 'waiting' && (
-        <button onClick={() => props.sendAction({type: 'READY'})}>Ready</button>
-      )}
+      <InformActionable {...{...props, gameState}} />
+      <ReadyActionable {...{...props, gameState}} />
       <ul>
         {Object.entries(gameState.players).map(([player, playerState]) => (
           <li key={player}>
@@ -68,5 +59,29 @@ const Game = (props: Props) => {
     </>
   )
 }
+
+interface ActionableProps extends Omit<Props, 'gameState$'> {
+  gameState: GameState
+}
+
+const ReadyActionable = ({gameState, sendAction}: ActionableProps) =>
+  gameState.status === 'waiting' ? (
+    <button onClick={() => sendAction({type: 'READY'})}>Ready</button>
+  ) : (
+    <></>
+  )
+
+const InformActionable = ({
+  gameState,
+  playerName,
+  sendAction,
+}: ActionableProps) =>
+  gameState.status === 'firstNight' &&
+  gameState.players[playerName].role.name === gameState.awake &&
+  gameState.players[playerName].role.actions.firstNight?.name === 'inform' ? (
+    <button onClick={() => sendAction({type: 'ROLE_ACTION'})}>Inform</button>
+  ) : (
+    <></>
+  )
 
 export default Game
