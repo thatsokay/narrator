@@ -8,7 +8,6 @@ export interface RoleBase {
 
 export type RoleName = 'villager' | 'mafia' | 'detective' | 'nurse'
 
-// @ts-ignore
 type PhaseActionType =
   | 'inform' // Reveal role to others at night
   | 'lynch' // Vote to lynch target at day
@@ -16,17 +15,23 @@ type PhaseActionType =
   | 'investigate' // Reveal a target's `appearAs`
   | 'heal' // Prevent a kill on target
 
-type PhaseAction<T extends {name: PhaseActionType}> = {
+type PhaseActionName = {name: PhaseActionType}
+
+type PhaseAction<T extends PhaseActionName> = {
   completed: boolean
 } & T
 
 interface RoleActions<
-  F extends {name: PhaseActionType} | never,
-  D extends {name: PhaseActionType} | never,
-  N extends {name: PhaseActionType} | never
+  F extends PhaseActionName | never,
+  D extends PhaseActionName | never,
+  N extends PhaseActionName | never
 > {
-  // Want to be able to specify that certain fields never have a value but still
-  // want to be able to use optional chaining on arbitrary RoleActions.
+  // Want to:
+  // - specify that certain fields never have a value
+  // - use optional chaining on arbitrary RoleActions
+  //   (eg. `actions?.day?.name` on `RoleAction<never, never, never>`)
+  // - set RoleActions to an empty object without explicitly specifying each
+  //   property as undefined
   firstNight?: F extends never ? never : PhaseAction<F>
   day?: D extends never ? never : PhaseAction<D>
   night?: N extends never ? never : PhaseAction<N>
