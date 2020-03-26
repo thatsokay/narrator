@@ -12,7 +12,6 @@ describe('server', () => {
   let client: SocketIOClient.Socket
 
   beforeEach(() => {
-    // E2e test server uses port 3000
     server = app.listen(3001)
     client = socketIOClient('localhost:3001')
   })

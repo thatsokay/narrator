@@ -88,7 +88,7 @@ const App = () => {
 
   return (
     <div
-      className="sans-serif w-100 w5-ns ph4 ph0-ns"
+      className="w-100 w5-ns ph4 ph0-ns"
       style={{marginLeft: 'auto', marginRight: 'auto'}}
     >
       {inRoom && socket ? (
@@ -105,6 +105,7 @@ const App = () => {
           <div className="flex justify-center">
             <div className="ba" style={{marginRight: '-1px'}}>
               <a
+                id="create-room-form"
                 className={
                   'no-underline black hover-bg-black hover-white db pa2 ' +
                   (showForm === 'create' ? 'bg-black white' : 'bg-white black')
@@ -117,6 +118,7 @@ const App = () => {
             </div>
             <div className="ba">
               <a
+                id="join-room-form"
                 className={
                   'no-underline black hover-bg-black hover-white db pa2 ' +
                   (showForm === 'join' ? 'bg-black white' : 'bg-white black')

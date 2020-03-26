@@ -23,7 +23,7 @@ const Game = (props: Props) => {
     <>
       <div className="flex justify-between">
         <h2 className="ttc">{gameState.status}</h2>
-        <h2>{props.roomId}</h2>
+        <h2 id="room-id">{props.roomId}</h2>
       </div>
       {gameState.status !== 'waiting' && (
         <div>
