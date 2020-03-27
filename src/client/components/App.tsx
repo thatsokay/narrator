@@ -16,7 +16,7 @@ const App = () => {
   const [socket, setSocket] = useState<SocketIOClient.Socket | null>(null)
   const [inRoom, setInRoom] = useState(false)
   const [showForm, setShowForm] = useState<'create' | 'join'>('create')
-  const [gameState$] = useState(new BehaviorSubject<GameState>(initialState))
+  const [gameState$] = useState(new BehaviorSubject(initialState))
 
   useEffect(() => {
     if (!socket) {
