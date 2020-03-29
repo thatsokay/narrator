@@ -22,7 +22,9 @@ const Game = (props: Props) => {
   return (
     <>
       <div className="flex justify-between">
-        <h2 className="ttc">{gameState.status}</h2>
+        <h2 className="ttc">
+          {gameState.status === 'firstNight' ? 'night' : gameState.status}
+        </h2>
         <h2 id="room-id">{props.roomId}</h2>
       </div>
       {gameState.status !== 'waiting' && (
@@ -33,15 +35,20 @@ const Game = (props: Props) => {
         </div>
       )}
       {(gameState.status === 'firstNight' || gameState.status === 'night') && (
-        <p>Awake: {gameState.awake}</p>
+        <p>
+          Awake: <span className="ttc">{gameState.awake ?? 'nobody'}</span>
+        </p>
       )}
       <InformActionable {...{...props, gameState}} />
       <ReadyActionable {...{...props, gameState}} />
-      <ul>
+      <ul className="list">
         {Object.entries(gameState.players).map(([player, playerState]) => (
+          // XXX: playerState is not type safe
           <li key={player}>
-            {playerState.ready && '☑️ '}
+            {gameState.status !== 'waiting' &&
+              (playerState.alive ? '🙂 ' : '💀 ')}
             {player}
+            {gameState.status === 'waiting' && playerState.ready && ': Ready'}
             {gameState.status === 'day' &&
               gameState.players[props.playerName].role.actions.day?.name ===
                 'lynch' && (
