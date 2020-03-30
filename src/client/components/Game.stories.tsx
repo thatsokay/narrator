@@ -1,12 +1,13 @@
 import React from 'react'
 import {BehaviorSubject} from 'rxjs'
 import {action} from '@storybook/addon-actions'
+import {withKnobs, radios} from '@storybook/addon-knobs'
 
 import Game from './Game'
 import {GameState} from '../../shared/game'
 import {ROLES} from '../../shared/roles'
 
-export default {title: 'Game'}
+export default {title: 'Game', decorators: [withKnobs]}
 
 const GameDefault = ({gameState}: {gameState: GameState}) => (
   <Game
@@ -34,18 +35,37 @@ export const waiting = () => {
 }
 
 export const firstNight = () => {
+  const playerRole = radios(
+    'Player role',
+    {
+      Villager: 'villager',
+      Mafia: 'mafia',
+      Detective: 'detective',
+      Nurse: 'nurse',
+    },
+    'mafia',
+  )
+  const awake = radios(
+    'Awake',
+    {
+      // Radio deselects if value is null
+      Nobody: 'null',
+      Mafia: 'mafia',
+    },
+    'mafia',
+  )
   const gameState: GameState = {
     status: 'firstNight',
     players: {
-      player0: {alive: true, role: ROLES.villager},
+      player0: {alive: true, role: ROLES[playerRole]},
       player1: {alive: true, role: ROLES.villager},
-      player2: {alive: true, role: ROLES.detective},
-      player3: {alive: true, role: ROLES.nurse},
-      player4: {alive: true, role: ROLES.mafia},
+      player2: {alive: true, role: ROLES.villager},
+      player3: {alive: true, role: ROLES.detective},
+      player4: {alive: true, role: ROLES.nurse},
       player5: {alive: true, role: ROLES.mafia},
     },
     error: null,
-    awake: null,
+    awake: awake === 'null' ? null : awake,
   }
   return <GameDefault gameState={gameState} />
 }
