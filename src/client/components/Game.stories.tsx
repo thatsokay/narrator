@@ -7,7 +7,7 @@ import {ROLES} from '../../shared/roles'
 
 export default {title: 'Game'}
 
-export const initial = () => {
+export const waiting = () => {
   const gameState: GameState = {
     status: 'waiting',
     players: {
