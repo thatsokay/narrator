@@ -1,11 +1,21 @@
 import React from 'react'
 import {BehaviorSubject} from 'rxjs'
+import {action} from '@storybook/addon-actions'
 
 import Game from './Game'
 import {GameState} from '../../shared/game'
 import {ROLES} from '../../shared/roles'
 
 export default {title: 'Game'}
+
+const GameDefault = ({gameState}: {gameState: GameState}) => (
+  <Game
+    playerName="player0"
+    roomId="ROOM"
+    gameState$={new BehaviorSubject(gameState)}
+    sendAction={action('sendAction')}
+  />
+)
 
 export const waiting = () => {
   const gameState: GameState = {
@@ -20,14 +30,7 @@ export const waiting = () => {
     },
     error: null,
   }
-  return (
-    <Game
-      playerName="player"
-      roomId="ROOM"
-      gameState$={new BehaviorSubject(gameState)}
-      sendAction={() => {}}
-    />
-  )
+  return <GameDefault gameState={gameState} />
 }
 
 export const firstNight = () => {
@@ -44,12 +47,5 @@ export const firstNight = () => {
     error: null,
     awake: null,
   }
-  return (
-    <Game
-      playerName="player0"
-      roomId="ROOM"
-      gameState$={new BehaviorSubject(gameState)}
-      sendAction={() => {}}
-    />
-  )
+  return <GameDefault gameState={gameState} />
 }
