@@ -31,7 +31,7 @@ describe('game', () => {
     const joinState = reducer(initialState, {type: 'JOIN', sender: 'foo'})
     expect(joinState).toStrictEqual({
       ...initialState,
-      players: {foo: {ready: false}},
+      players: {foo: {status: 'waiting', ready: false}},
     })
   })
 
