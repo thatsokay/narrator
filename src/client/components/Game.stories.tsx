@@ -2,6 +2,7 @@ import React from 'react'
 import {BehaviorSubject} from 'rxjs'
 import {action} from '@storybook/addon-actions'
 import {withKnobs, radios} from '@storybook/addon-knobs'
+import * as R from 'ramda'
 
 import Game from './Game'
 import {GameState} from '../../shared/game'
@@ -19,16 +20,16 @@ const GameDefault = ({gameState}: {gameState: GameState}) => (
 )
 
 export const waiting = () => {
+  const readiness = [false, false, false, false, true, true]
+  const players = R.fromPairs(
+    readiness.map((ready, i) => [
+      `player${i}`,
+      {status: 'waiting' as const, ready},
+    ]),
+  )
   const gameState: GameState = {
     status: 'waiting',
-    players: {
-      player0: {ready: false},
-      player1: {ready: false},
-      player2: {ready: false},
-      player3: {ready: false},
-      player4: {ready: true},
-      player5: {ready: true},
-    },
+    players,
     error: null,
   }
   return <GameDefault gameState={gameState} />
@@ -54,16 +55,23 @@ export const firstNight = () => {
     },
     'mafia',
   )
+  const roles = [
+    ROLES[playerRole],
+    ROLES.villager,
+    ROLES.villager,
+    ROLES.detective,
+    ROLES.nurse,
+    ROLES.mafia,
+  ]
+  const players = R.fromPairs(
+    roles.map((role, i) => [
+      `player${i}`,
+      {status: 'started' as const, alive: true, role},
+    ]),
+  )
   const gameState: GameState = {
     status: 'firstNight',
-    players: {
-      player0: {alive: true, role: ROLES[playerRole]},
-      player1: {alive: true, role: ROLES.villager},
-      player2: {alive: true, role: ROLES.villager},
-      player3: {alive: true, role: ROLES.detective},
-      player4: {alive: true, role: ROLES.nurse},
-      player5: {alive: true, role: ROLES.mafia},
-    },
+    players,
     error: null,
     awake: awake === 'null' ? null : awake,
   }

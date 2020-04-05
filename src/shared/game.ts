@@ -3,16 +3,21 @@ import R from 'ramda'
 import {Role, RoleName, ROLES} from './roles'
 import {Reducer, Middleware} from '../server/store'
 
-type Phase<S extends string, P, T extends object = {}> = {
+type Phase<
+  S extends string,
+  P extends {status: string},
+  T extends object = {}
+> = {
   status: S
   players: Record<string, P>
   error: string | null
 } & T
 
-type Waiting = Phase<'waiting', {ready: boolean}>
+type Waiting = Phase<'waiting', {status: 'waiting'; ready: boolean}>
 type Day = Phase<
   'day',
   {
+    status: 'started'
     alive: boolean
     role: Role
   }
@@ -20,6 +25,7 @@ type Day = Phase<
 type Night = Phase<
   'firstNight' | 'night',
   {
+    status: 'started'
     alive: boolean
     role: Role
   },
@@ -89,7 +95,11 @@ const playerReducer: Reducer<GameState, Action> = (
             }
           }
           // XXX: `assocPath` can produce invalid state
-          return R.assocPath(['players', action.sender], {ready: false}, state)
+          return R.assocPath(
+            ['players', action.sender],
+            {status: 'waiting' as const, ready: false},
+            state,
+          )
         }
         case 'LEAVE': {
           if (!state.players[action.sender]) {
@@ -208,7 +218,7 @@ export const reducer: Reducer<GameState, PlainObject> = (
         .concat(new Array(numMafia).fill(ROLES.mafia))
         .concat(new Array(numPlayers - numMafia - 2).fill(ROLES.villager))
         // Produce a player state for each available role
-        .map(role => ({alive: true, role}))
+        .map(role => ({status: 'started' as const, alive: true, role}))
       shuffle(playerStates)
       return {
         status: 'firstNight',

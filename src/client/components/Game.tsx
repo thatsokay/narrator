@@ -42,26 +42,29 @@ const Game = (props: Props) => {
       <InformActionable {...{...props, gameState}} />
       <ReadyActionable {...{...props, gameState}} />
       <ul className="list">
-        {Object.entries(gameState.players).map(([player, playerState]) => (
-          // XXX: playerState is not type safe
-          <li key={player}>
-            {gameState.status !== 'waiting' &&
-              (playerState.alive ? '🙂 ' : '💀 ')}
-            {player}
-            {gameState.status === 'waiting' && playerState.ready && ': Ready'}
-            {gameState.status === 'day' &&
-              gameState.players[props.playerName].role.actions.day?.name ===
-                'lynch' && (
-                <button
-                  onClick={() =>
-                    props.sendAction({type: 'ROLE_ACTION', lynch: player})
-                  }
-                >
-                  Lynch
-                </button>
-              )}
-          </li>
-        ))}
+        {Object.entries<GameState['players'][string]>(gameState.players).map(
+          ([player, playerState]) => (
+            <li key={player}>
+              {playerState.status !== 'waiting' &&
+                (playerState.alive ? '🙂 ' : '💀 ')}
+              {player}
+              {playerState.status === 'waiting' &&
+                playerState.ready &&
+                ': Ready'}
+              {gameState.status === 'day' &&
+                gameState.players[props.playerName].role.actions.day?.name ===
+                  'lynch' && (
+                  <button
+                    onClick={() =>
+                      props.sendAction({type: 'ROLE_ACTION', lynch: player})
+                    }
+                  >
+                    Lynch
+                  </button>
+                )}
+            </li>
+          ),
+        )}
       </ul>
     </>
   )
