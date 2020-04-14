@@ -18,6 +18,14 @@ Open `localhost:3000`.
 
 ## Testing
 
+### Automated Testing
+
 ```bash
 npm test
+```
+
+### Manual UI Testing
+
+```bash
+npm run storybook
 ```

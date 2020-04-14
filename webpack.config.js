@@ -40,6 +40,8 @@ const serverConfig = {
     console: false,
     __dirname: false,
   },
+  // https://stackoverflow.com/a/30709692
+  // https://jlongster.com/Backend-Apps-with-Webpack--Part-I
   externals: fs
     .readdirSync('node_modules')
     .filter(module => ['.bin'].indexOf(module) === -1)
