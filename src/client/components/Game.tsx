@@ -42,18 +42,20 @@ const Game = (props: Props) => {
       <InformActionable {...{...props, gameState}} />
       <ReadyActionable {...{...props, gameState}} />
       <ul className="list">
-        {Object.entries<GameState['players'][string]>(gameState.players).map(
-          ([player, playerState]) => (
+        {gameState.status === 'waiting' &&
+          Object.entries(gameState.players).map(([player, playerState]) => (
             <li key={player}>
-              {playerState.status !== 'waiting' &&
-                (playerState.alive ? '🙂 ' : '💀 ')}
               {player}
-              {playerState.status === 'waiting' &&
-                playerState.ready &&
-                ': Ready'}
+              {playerState.ready && ': Ready'}
+            </li>
+          ))}
+        {gameState.status !== 'waiting' &&
+          Object.entries(gameState.players).map(([player, playerState]) => (
+            <li key={player}>
+              {playerState.alive ? '🙂 ' : '💀 '}
+              {player}
               {gameState.status === 'day' &&
-                gameState.players[props.playerName].role.actions.day?.name ===
-                  'lynch' && (
+                playerState.role.actions.day?.name === 'lynch' && (
                   <button
                     onClick={() =>
                       props.sendAction({type: 'ROLE_ACTION', lynch: player})
@@ -63,8 +65,7 @@ const Game = (props: Props) => {
                   </button>
                 )}
             </li>
-          ),
-        )}
+          ))}
       </ul>
     </>
   )
