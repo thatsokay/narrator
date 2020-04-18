@@ -19,6 +19,9 @@ const Game = (props: Props) => {
     return () => subscription.unsubscribe()
   }, [props.gameState$])
 
+  const lynchVoteCount = countLynchVote(gameState)
+  const aliveCount = Object.keys(gameState.players).length
+
   return (
     <>
       <div className="flex justify-between">
@@ -41,7 +44,7 @@ const Game = (props: Props) => {
       )}
       <InformActionable {...{...props, gameState}} />
       <ReadyActionable {...{...props, gameState}} />
-      <ul className="list">
+      <ul className="list pa0">
         {gameState.status === 'waiting' &&
           Object.entries(gameState.players).map(([player, playerState]) => (
             <li key={player}>
@@ -49,21 +52,16 @@ const Game = (props: Props) => {
               {playerState.ready && ': Ready'}
             </li>
           ))}
-        {gameState.status !== 'waiting' &&
+        {gameState.status === 'day' &&
           Object.entries(gameState.players).map(([player, playerState]) => (
-            <li key={player}>
-              {playerState.alive ? '🙂 ' : '💀 '}
-              {player}
-              {gameState.status === 'day' &&
-                playerState.role.actions.day?.name === 'lynch' && (
-                  <button
-                    onClick={() =>
-                      props.sendAction({type: 'ROLE_ACTION', lynch: player})
-                    }
-                  >
-                    Lynch
-                  </button>
-                )}
+            <li className="flex justify-between" key={player}>
+              <div>
+                {player}
+                {playerState.alive ? ' 🙂' : ' 💀'}
+              </div>
+              <div>
+                {Math.floor((lynchVoteCount[player] / aliveCount) * 100)}%
+              </div>
             </li>
           ))}
       </ul>
@@ -94,5 +92,39 @@ const InformActionable = ({
   ) : (
     <></>
   )
+
+const countLynchVote = (gameState: GameState) => {
+  if (gameState.status !== 'day') {
+    return {}
+  }
+  const initialAcc = Object.keys(gameState.players).reduce(
+    (acc: Record<string, number>, player) => {
+      acc[player] = 0
+      return acc
+    },
+    {'': 0},
+  )
+  return Object.values(gameState.players).reduce(
+    (acc: Record<string, number>, playerState) => {
+      if (!playerState.alive) {
+        return acc
+      }
+      if (playerState.role.actions.day?.completed) {
+        // Player hasn't voted
+        return acc
+      }
+      const target = playerState.role.actions.day?.lynch
+        ? playerState.role.actions.day?.lynch
+        : '' // Use empty string to represent `null` as object key
+      if (!acc[target]) {
+        acc[target] = 1
+      } else {
+        acc[target] += 1
+      }
+      return acc
+    },
+    initialAcc,
+  )
+}
 
 export default Game
