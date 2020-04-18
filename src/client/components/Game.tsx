@@ -109,13 +109,13 @@ const countLynchVote = (gameState: GameState) => {
       if (!playerState.alive) {
         return acc
       }
-      if (playerState.role.actions.day?.completed) {
+      if (!playerState.role.actions.day?.completed) {
         // Player hasn't voted
         return acc
       }
-      const target = playerState.role.actions.day?.lynch
-        ? playerState.role.actions.day?.lynch
-        : '' // Use empty string to represent `null` as object key
+      // Use empty string to represent `null` as object key
+      // Assumes empty string is not a possible player name
+      const target = playerState.role.actions.day?.lynch || ''
       if (!acc[target]) {
         acc[target] = 1
       } else {

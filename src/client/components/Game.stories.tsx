@@ -82,6 +82,14 @@ export const day = () => {
     },
     'mafia',
   )
+  const playerLynchVote = radios(
+    'Player lynch vote',
+    {
+      Nobody: 'null',
+      player1: 'player1',
+    },
+    'null',
+  )
   const roles = [
     ROLES[playerRole],
     ROLES.villager,
@@ -90,8 +98,20 @@ export const day = () => {
     ROLES.nurse,
     ROLES.mafia,
   ]
-  const players = R.fromPairs(
+  let players = R.fromPairs(
     roles.map((role, i) => [`player${i}`, {alive: true, role}]),
+  )
+  // XXX: `assocPath` can produce invalid state
+  players = R.assocPath(
+    ['player0', 'role', 'actions', 'day', 'lynch'],
+    playerLynchVote === 'null' ? null : playerLynchVote,
+    players,
+  )
+  // XXX: `assocPath` can produce invalid state
+  players = R.assocPath(
+    ['player0', 'role', 'actions', 'day', 'completed'],
+    true,
+    players,
   )
   const gameState: GameState = {
     status: 'day',

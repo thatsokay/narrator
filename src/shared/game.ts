@@ -380,6 +380,7 @@ export const middleware: Middleware<
       const votes = Object.values(afterState.players)
         .filter(({alive, role}) => alive && role.actions.day)
         .map(({role}) => role.actions.day!.lynch)
+      // Use empty string to represent `null` lynch vote
       // Assumes empty string is not a possible player name
       const voteCounts = R.countBy(x => x || '', votes)
       const [lynch, count] = Object.entries(voteCounts).reduce(
