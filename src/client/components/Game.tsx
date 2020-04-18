@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from 'react'
 import {Observable} from 'rxjs'
+import * as R from 'ramda'
 
 import {GameState, Action, initialState} from '../../shared/game'
 
@@ -20,7 +21,12 @@ const Game = (props: Props) => {
   }, [props.gameState$])
 
   const lynchVoteCount = countLynchVote(gameState)
-  const aliveCount = Object.keys(gameState.players).length
+  const voterPopulation =
+    gameState.status === 'day'
+      ? Object.values(gameState.players).filter(
+          ({alive, role}) => alive && role.actions.day?.name === 'lynch',
+        ).length
+      : 0
 
   return (
     <>
@@ -55,13 +61,16 @@ const Game = (props: Props) => {
         {gameState.status === 'day' &&
           Object.entries(gameState.players).map(([player, playerState]) => {
             const lynchVotePercent = Math.floor(
-              (lynchVoteCount[player] / aliveCount) * 100,
+              ((lynchVoteCount[player] || 0) / voterPopulation) * 100,
             )
             return (
               <li className="flex justify-between relative" key={player}>
                 <div
                   className="absolute bg-lightest-blue h-100"
-                  style={{width: `${Math.min(100, lynchVotePercent * 1.33)}%`}}
+                  style={{
+                    // Max vote percent should be 67% (50% + 1 vote)
+                    width: `${Math.min(100, lynchVotePercent * 1.33)}%`,
+                  }}
                 ></div>
                 <div className="relative">
                   {player}
@@ -104,34 +113,17 @@ const countLynchVote = (gameState: GameState) => {
   if (gameState.status !== 'day') {
     return {}
   }
-  const initialAcc = Object.keys(gameState.players).reduce(
-    (acc: Record<string, number>, player) => {
-      acc[player] = 0
-      return acc
-    },
-    {'': 0},
-  )
-  return Object.values(gameState.players).reduce(
-    (acc: Record<string, number>, playerState) => {
-      if (!playerState.alive) {
-        return acc
-      }
-      if (!playerState.role.actions.day?.completed) {
-        // Player hasn't voted
-        return acc
-      }
-      // Use empty string to represent `null` as object key
-      // Assumes empty string is not a possible player name
-      const target = playerState.role.actions.day?.lynch || ''
-      if (!acc[target]) {
-        acc[target] = 1
-      } else {
-        acc[target] += 1
-      }
-      return acc
-    },
-    initialAcc,
-  )
+  const votes = Object.values(gameState.players)
+    .filter(
+      ({alive, role}) =>
+        alive &&
+        role.actions.day?.name === 'lynch' &&
+        role.actions.day?.completed,
+    )
+    .map(({role}) => role.actions.day!.lynch)
+  // Use empty string to represent `null` lynch vote
+  // Assumes empty string is not a possible player name
+  return R.countBy(x => x || '', votes)
 }
 
 export default Game

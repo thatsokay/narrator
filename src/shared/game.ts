@@ -371,14 +371,13 @@ export const middleware: Middleware<
       if (afterState.status !== 'day') {
         return
       }
-      const dayComplete = !Object.values(afterState.players).find(
-        ({alive, role}) => alive && !role.actions.day?.completed,
-      )
-      if (!dayComplete) {
-        return
-      }
       const votes = Object.values(afterState.players)
-        .filter(({alive, role}) => alive && role.actions.day)
+        .filter(
+          ({alive, role}) =>
+            alive &&
+            role.actions.day?.name === 'lynch' &&
+            role.actions.day?.completed,
+        )
         .map(({role}) => role.actions.day!.lynch)
       // Use empty string to represent `null` lynch vote
       // Assumes empty string is not a possible player name
@@ -386,7 +385,10 @@ export const middleware: Middleware<
       const [lynch, count] = Object.entries(voteCounts).reduce(
         R.maxBy<[string, number]>(([_, votes]) => votes),
       )
-      if (count <= votes.length / 2) {
+      const voterPopulation = Object.values(afterState.players).filter(
+        ({alive, role}) => alive && role.actions.day?.name === 'lynch',
+      ).length
+      if (count <= voterPopulation / 2) {
         return
       }
       if (lynch) {
