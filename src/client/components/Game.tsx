@@ -53,17 +53,24 @@ const Game = (props: Props) => {
             </li>
           ))}
         {gameState.status === 'day' &&
-          Object.entries(gameState.players).map(([player, playerState]) => (
-            <li className="flex justify-between" key={player}>
-              <div>
-                {player}
-                {playerState.alive ? ' 🙂' : ' 💀'}
-              </div>
-              <div>
-                {Math.floor((lynchVoteCount[player] / aliveCount) * 100)}%
-              </div>
-            </li>
-          ))}
+          Object.entries(gameState.players).map(([player, playerState]) => {
+            const lynchVotePercent = Math.floor(
+              (lynchVoteCount[player] / aliveCount) * 100,
+            )
+            return (
+              <li className="flex justify-between relative" key={player}>
+                <div
+                  className="absolute bg-lightest-blue h-100"
+                  style={{width: `${Math.min(100, lynchVotePercent * 1.33)}%`}}
+                ></div>
+                <div className="relative">
+                  {player}
+                  {playerState.alive ? ' 🙂' : ' 💀'}
+                </div>
+                <div className="relative">{lynchVotePercent}%</div>
+              </li>
+            )
+          })}
       </ul>
     </>
   )
