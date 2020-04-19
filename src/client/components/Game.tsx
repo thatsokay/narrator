@@ -20,7 +20,7 @@ const Game = (props: Props) => {
     return () => subscription.unsubscribe()
   }, [props.gameState$])
 
-  const lynchVoteCount = countLynchVote(gameState)
+  const lynchVoteCounts = countLynchVote(gameState)
   const voterPopulation =
     gameState.status === 'day'
       ? Object.values(gameState.players).filter(
@@ -60,23 +60,27 @@ const Game = (props: Props) => {
           ))}
         {gameState.status === 'day' &&
           Object.entries(gameState.players).map(([player, playerState]) => {
-            const lynchVotePercent = Math.floor(
-              ((lynchVoteCount[player] || 0) / voterPopulation) * 100,
-            )
+            const lynchVotes = lynchVoteCounts[player] || 0
             return (
               <li className="flex justify-between relative" key={player}>
                 <div
                   className="absolute bg-lightest-blue h-100"
                   style={{
-                    // Max vote percent should be 67% (50% + 1 vote)
-                    width: `${Math.min(100, lynchVotePercent * 1.33)}%`,
+                    width: `${Math.min(
+                      100,
+                      // Reach 100% width at 50% + 1 vote
+                      (100 * lynchVotes) /
+                        (Math.floor(voterPopulation / 2) + 1),
+                    )}%`,
                   }}
                 ></div>
                 <div className="relative">
                   {player}
                   {playerState.alive ? ' 🙂' : ' 💀'}
                 </div>
-                <div className="relative">{lynchVotePercent}%</div>
+                <div className="relative">
+                  {Math.floor((100 * lynchVotes) / voterPopulation)}%
+                </div>
               </li>
             )
           })}
