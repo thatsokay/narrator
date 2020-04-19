@@ -28,6 +28,13 @@ const Game = (props: Props) => {
         ).length
       : 0
 
+  const handleLynchClickFactory = (player: string) => (
+    event: React.MouseEvent,
+  ) => {
+    event.preventDefault()
+    props.sendAction({type: 'ROLE_ACTION', lynch: player})
+  }
+
   return (
     <>
       <div className="flex justify-between">
@@ -75,6 +82,12 @@ const Game = (props: Props) => {
                   }}
                 ></div>
                 <div className="relative">
+                  <button
+                    onClick={handleLynchClickFactory(player)}
+                    className="dib b--none pa0 ma0 bg-inherit color-inherit no-underline"
+                  >
+                    🔪
+                  </button>
                   {player}
                   {playerState.alive ? ' 🙂' : ' 💀'}
                 </div>
