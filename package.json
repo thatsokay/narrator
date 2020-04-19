@@ -20,7 +20,8 @@
     "rxjs": "^6.5.3",
     "socket.io": "^2.3.0",
     "socket.io-client": "^2.3.0",
-    "tachyons": "^4.11.1"
+    "tachyons": "^4.11.1",
+    "tailwindcss": "^1.2.0"
   },
   "devDependencies": {
     "@storybook/addon-actions": "^5.3.17",
