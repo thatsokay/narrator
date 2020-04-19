@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, useCallback} from 'react'
 import {Observable} from 'rxjs'
 import * as R from 'ramda'
 
@@ -28,12 +28,13 @@ const Game = (props: Props) => {
         ).length
       : 0
 
-  const handleLynchClickFactory = (player: string) => (
-    event: React.MouseEvent,
-  ) => {
-    event.preventDefault()
-    props.sendAction({type: 'ROLE_ACTION', lynch: player})
-  }
+  const handleLynchClickFactory = useCallback(
+    (player: string) => (event: React.MouseEvent) => {
+      event.preventDefault()
+      props.sendAction({type: 'ROLE_ACTION', lynch: player})
+    },
+    [props.sendAction],
+  )
 
   return (
     <>
