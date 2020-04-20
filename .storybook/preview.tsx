@@ -1,13 +1,7 @@
 import React from 'react'
 import {addDecorator} from '@storybook/react'
-import 'tachyons/css/tachyons.min.css'
 import '../src/client/styles.css'
 
 addDecorator(storyFn => (
-  <div
-    className="w-100 w5-ns ph4 ph0-ns"
-    style={{marginLeft: 'auto', marginRight: 'auto'}}
-  >
-    {storyFn()}
-  </div>
+  <div className="w-full sm:w-64 px-8 sm:px-0 sm:mx-auto">{storyFn()}</div>
 ))

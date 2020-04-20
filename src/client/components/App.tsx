@@ -1,7 +1,6 @@
 import React, {useState, useEffect} from 'react'
 import socketIO from 'socket.io-client'
 import {BehaviorSubject, fromEvent} from 'rxjs'
-import 'tachyons/css/tachyons.min.css'
 
 import CreateForm from './CreateForm'
 import JoinForm from './JoinForm'
@@ -86,11 +85,15 @@ const App = () => {
     setSocket(socket)
   }
 
+  const handleShowFormClickFactory = (form: typeof showForm) => (
+    event: React.MouseEvent<HTMLAnchorElement>,
+  ) => {
+    event.preventDefault()
+    setShowForm(form)
+  }
+
   return (
-    <div
-      className="w-100 w5-ns ph4 ph0-ns"
-      style={{marginLeft: 'auto', marginRight: 'auto'}}
-    >
+    <div className="w-full sm:w-64 px-8 sm:px-0 sm:mx-auto">
       {inRoom && socket ? (
         <Game
           {...{
@@ -103,27 +106,31 @@ const App = () => {
       ) : (
         <>
           <div className="flex justify-center">
-            <div className="ba" style={{marginRight: '-1px'}}>
+            <div className="border border-black -mr-px">
               <a
                 id="create-room-form"
                 className={
-                  'no-underline black hover-bg-black hover-white db pa2 ' +
-                  (showForm === 'create' ? 'bg-black white' : 'bg-white black')
+                  'block hover:text-white hover:bg-black p-2 no-underline ' +
+                  (showForm === 'create'
+                    ? 'text-white bg-black'
+                    : 'text-black bg-white')
                 }
-                onClick={() => setShowForm('create')}
+                onClick={handleShowFormClickFactory('create')}
                 href="#"
               >
                 New room
               </a>
             </div>
-            <div className="ba">
+            <div className="border border-black">
               <a
                 id="join-room-form"
                 className={
-                  'no-underline black hover-bg-black hover-white db pa2 ' +
-                  (showForm === 'join' ? 'bg-black white' : 'bg-white black')
+                  'block hover:text-white hover:bg-black p-2 no-underline ' +
+                  (showForm === 'join'
+                    ? 'text-white bg-black'
+                    : 'text-black bg-white')
                 }
-                onClick={() => setShowForm('join')}
+                onClick={handleShowFormClickFactory('join')}
                 href="#"
               >
                 Join room

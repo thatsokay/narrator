@@ -14,15 +14,15 @@ const CreateForm = (props: Props) => {
     <form onSubmit={props.handleSubmit(playerName)}>
       <label htmlFor="create-player-name">Player name</label>
       <input
+        className="w-full px-1 border border-black"
         value={playerName}
         onChange={event => setPlayerName(event.target.value)}
         id="create-player-name"
-        className="w-100"
         type="text"
         name="player-name"
         maxLength={12}
       />
-      <button>Create room</button>
+      <button className="p-2">Create room</button>
     </form>
   )
 }
