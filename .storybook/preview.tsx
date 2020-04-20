@@ -1,6 +1,7 @@
 import React from 'react'
 import {addDecorator} from '@storybook/react'
 import 'tachyons/css/tachyons.min.css'
+import '../src/client/styles.css'
 
 addDecorator(storyFn => (
   <div
