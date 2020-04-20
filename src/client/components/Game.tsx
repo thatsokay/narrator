@@ -20,6 +20,12 @@ const Game = (props: Props) => {
     return () => subscription.unsubscribe()
   }, [props.gameState$])
 
+  // `null` is a vote to lynch no-one, `undefined` is no vote
+  const [lynchVote, setLynchVote] = useState<string | null | undefined>(
+    undefined,
+  )
+  // Reset lynch vote on game status change
+  useEffect(() => setLynchVote(undefined), [gameState.status])
   const lynchVoteCounts = countLynchVote(gameState)
   const voterPopulation =
     gameState.status === 'day'
@@ -28,12 +34,12 @@ const Game = (props: Props) => {
         ).length
       : 0
 
-  const handleLynchClickFactory = useCallback(
-    (player: string) => (event: React.MouseEvent) => {
-      event.preventDefault()
+  const handleLynchChangeFactory = useCallback(
+    (player: string) => () => {
       props.sendAction({type: 'ROLE_ACTION', lynch: player})
+      setLynchVote(player)
     },
-    [props.sendAction],
+    [props.sendAction, setLynchVote],
   )
 
   return (
@@ -70,30 +76,31 @@ const Game = (props: Props) => {
           Object.entries(gameState.players).map(([player, playerState]) => {
             const lynchVotes = lynchVoteCounts[player] || 0
             return (
-              <li className="flex justify-between relative" key={player}>
-                <div
-                  className="absolute bg-lightest-blue h-100"
-                  style={{
-                    width: `${Math.min(
-                      100,
-                      // Reach 100% width at 50% + 1 vote
-                      (100 * lynchVotes) /
-                        (Math.floor(voterPopulation / 2) + 1),
-                    )}%`,
-                  }}
-                ></div>
-                <div className="relative">
-                  <button
-                    onClick={handleLynchClickFactory(player)}
-                    className="dib b--none pa0 ma0 bg-inherit color-inherit no-underline"
-                  >
-                    🔪
-                  </button>
-                  {player}
-                  {playerState.alive ? ' 🙂' : ' 💀'}
-                </div>
-                <div className="relative">
-                  {Math.floor((100 * lynchVotes) / voterPopulation)}%
+              <li className="flex" key={player}>
+                <input
+                  type="radio"
+                  onChange={handleLynchChangeFactory(player)}
+                  checked={lynchVote === player}
+                />
+                <div className="flex justify-between flex-auto relative ml1">
+                  <div
+                    className="absolute bg-lightest-blue h-100"
+                    style={{
+                      width: `${Math.min(
+                        100,
+                        // Reach 100% width at 50% + 1 vote
+                        (100 * lynchVotes) /
+                          (Math.floor(voterPopulation / 2) + 1),
+                      )}%`,
+                    }}
+                  ></div>
+                  <div className="relative mh1">
+                    {player}
+                    {playerState.alive ? ' 🙂' : ' 💀'}
+                  </div>
+                  <div className="relative">
+                    {Math.floor((100 * lynchVotes) / voterPopulation)}%
+                  </div>
                 </div>
               </li>
             )
