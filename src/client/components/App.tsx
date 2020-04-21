@@ -110,7 +110,7 @@ const App = () => {
               <a
                 id="create-room-form"
                 className={
-                  'block hover:text-white hover:bg-black p-2 no-underline ' +
+                  'block px-2 py-1 hover:text-white hover:bg-black no-underline ' +
                   (showForm === 'create'
                     ? 'text-white bg-black'
                     : 'text-black bg-white')
@@ -125,7 +125,7 @@ const App = () => {
               <a
                 id="join-room-form"
                 className={
-                  'block hover:text-white hover:bg-black p-2 no-underline ' +
+                  'block px-2 py-1 hover:text-white hover:bg-black no-underline ' +
                   (showForm === 'join'
                     ? 'text-white bg-black'
                     : 'text-black bg-white')

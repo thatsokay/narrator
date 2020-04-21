@@ -22,7 +22,9 @@ const CreateForm = (props: Props) => {
         name="player-name"
         maxLength={12}
       />
-      <button className="p-2">Create room</button>
+      <button className="px-2 py-1 text-black bg-white hover:text-white hover:bg-black border border-black">
+        Create room
+      </button>
     </form>
   )
 }

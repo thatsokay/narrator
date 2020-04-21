@@ -15,25 +15,27 @@ const JoinForm = (props: Props) => {
     <form onSubmit={props.handleSubmit(playerName, roomId)}>
       <label htmlFor="join-room-id">Room code</label>
       <input
+        className="w-full px-1 border border-black"
         value={roomId}
         onChange={event => setRoomId(event.target.value)}
         id="join-room-id"
-        className="w-100"
         type="text"
         name="room-id"
         maxLength={4}
       />
       <label htmlFor="join-player-name">Player name</label>
       <input
+        className="w-full px-1 border border-black"
         value={playerName}
         onChange={event => setPlayerName(event.target.value)}
         id="join-player-name"
-        className="w-100"
         type="text"
         name="player-name"
         maxLength={12}
       />
-      <button>Join room</button>
+      <button className="px-2 py-1 text-black bg-white hover:text-white hover:bg-black border border-black">
+        Join room
+      </button>
     </form>
   )
 }
