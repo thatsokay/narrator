@@ -45,26 +45,27 @@ const Game = (props: Props) => {
   return (
     <>
       <div className="flex justify-between">
-        <h2 className="ttc">
+        <h2 className="capitalize">
           {gameState.status === 'firstNight' ? 'night' : gameState.status}
         </h2>
         <h2 id="room-id">{props.roomId}</h2>
       </div>
       {gameState.status !== 'waiting' && (
         <div>
-          <span className="bg-moon-gray moon-gray">
+          <span className="text-gray-400 bg-gray-400">
             {gameState.players[props.playerName].role.name}
           </span>
         </div>
       )}
       {(gameState.status === 'firstNight' || gameState.status === 'night') && (
         <p>
-          Awake: <span className="ttc">{gameState.awake ?? 'nobody'}</span>
+          Awake:{' '}
+          <span className="capitalize">{gameState.awake ?? 'nobody'}</span>
         </p>
       )}
       <InformActionable {...{...props, gameState}} />
       <ReadyActionable {...{...props, gameState}} />
-      <ul className="list pa0">
+      <ul>
         {gameState.status === 'waiting' &&
           Object.entries(gameState.players).map(([player, playerState]) => (
             <li key={player}>
@@ -82,9 +83,9 @@ const Game = (props: Props) => {
                   onChange={handleLynchChangeFactory(player)}
                   checked={lynchVote === player}
                 />
-                <div className="flex justify-between flex-auto relative ml1">
+                <div className="flex justify-between flex-auto relative pl-1">
                   <div
-                    className="absolute bg-lightest-blue h-100"
+                    className="absolute bg-blue-200 h-full"
                     style={{
                       width: `${Math.min(
                         100,
@@ -94,7 +95,7 @@ const Game = (props: Props) => {
                       )}%`,
                     }}
                   ></div>
-                  <div className="relative mh1">
+                  <div className="relative px-1">
                     {player}
                     {playerState.alive ? ' 🙂' : ' 💀'}
                   </div>
