@@ -5,7 +5,7 @@
   "scripts": {
     "start": "nodemon --watch build/server.js build/server.js",
     "test": "jest",
-    "build": "webpack --progress --colors --mode=production",
+    "build": "NODE_ENV=production webpack --progress --colors --mode=production",
     "watch": "webpack --watch --progress --colors --mode=development",
     "format": "prettier --write '{src,tests,.storybook}/**/*.{ts,tsx,js,jsx}' 'webpack.config.js'",
     "storybook": "start-storybook"
@@ -24,6 +24,7 @@
     "tailwindcss": "^1.2.0"
   },
   "devDependencies": {
+    "@fullhuman/postcss-purgecss": "^2.1.2",
     "@storybook/addon-actions": "^5.3.17",
     "@storybook/addon-knobs": "^5.3.17",
     "@storybook/addon-viewport": "^5.3.17",

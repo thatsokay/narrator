@@ -110,10 +110,9 @@ const App = () => {
               <a
                 id="create-room-form"
                 className={
-                  'block px-2 py-1 hover:text-white hover:bg-black no-underline ' +
-                  (showForm === 'create'
-                    ? 'text-white bg-black'
-                    : 'text-black bg-white')
+                  showForm === 'create'
+                    ? 'block px-2 py-1 text-white bg-black hover:text-white hover:bg-black no-underline'
+                    : 'block px-2 py-1 text-black bg-white hover:text-white hover:bg-black no-underline'
                 }
                 onClick={handleShowFormClickFactory('create')}
                 href="#"
@@ -125,10 +124,9 @@ const App = () => {
               <a
                 id="join-room-form"
                 className={
-                  'block px-2 py-1 hover:text-white hover:bg-black no-underline ' +
-                  (showForm === 'join'
-                    ? 'text-white bg-black'
-                    : 'text-black bg-white')
+                  showForm === 'join'
+                    ? 'block px-2 py-1 text-white bg-black hover:text-white hover:bg-black no-underline'
+                    : 'block px-2 py-1 text-black bg-white hover:text-white hover:bg-black no-underline'
                 }
                 onClick={handleShowFormClickFactory('join')}
                 href="#"

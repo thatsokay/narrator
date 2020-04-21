@@ -1,6 +1,6 @@
-const HtmlWebpackPlugin = require('html-webpack-plugin')
 const path = require('path')
 const fs = require('fs')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 const commonConfig = {
   resolve: {
@@ -25,17 +25,7 @@ const clientConfig = {
       ...commonConfig.module.rules,
       {
         test: /\.css$/i,
-        use: [
-          'style-loader',
-          'css-loader',
-          {
-            loader: 'postcss-loader',
-            options: {
-              ident: 'postcss',
-              plugins: [require('tailwindcss'), require('autoprefixer')],
-            },
-          },
-        ],
+        use: ['style-loader', 'css-loader', 'postcss-loader'],
       },
     ],
   },
