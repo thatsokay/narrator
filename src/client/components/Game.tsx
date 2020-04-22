@@ -45,10 +45,10 @@ const Game = (props: Props) => {
   return (
     <>
       <div className="flex justify-between">
-        <h2 className="capitalize">
+        <h2 className="capitalize text-xl font-medium">
           {gameState.status === 'firstNight' ? 'night' : gameState.status}
         </h2>
-        <h2 id="room-id">{props.roomId}</h2>
+        <h2 id="room-id" className="text-xl font-medium">{props.roomId}</h2>
       </div>
       {gameState.status !== 'waiting' && (
         <div>
