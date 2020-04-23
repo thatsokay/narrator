@@ -48,7 +48,9 @@ const Game = (props: Props) => {
         <h2 className="capitalize text-xl font-medium">
           {gameState.status === 'firstNight' ? 'night' : gameState.status}
         </h2>
-        <h2 id="room-id" className="text-xl font-medium">{props.roomId}</h2>
+        <h2 id="room-id" className="text-xl font-medium">
+          {props.roomId}
+        </h2>
       </div>
       {gameState.status !== 'waiting' && (
         <div>
@@ -68,9 +70,9 @@ const Game = (props: Props) => {
       <ul>
         {gameState.status === 'waiting' &&
           Object.entries(gameState.players).map(([player, playerState]) => (
-            <li key={player}>
-              {player}
-              {playerState.ready && ': Ready'}
+            <li className="flex justify-between" key={player}>
+              <div>{player}</div>
+              <div>{playerState.ready ? 'Ready' : 'Not ready'}</div>
             </li>
           ))}
         {gameState.status === 'day' &&
