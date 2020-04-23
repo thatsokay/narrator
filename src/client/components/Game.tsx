@@ -81,6 +81,7 @@ const Game = (props: Props) => {
             return (
               <li className="flex" key={player}>
                 <input
+                  id={player}
                   type="radio"
                   onChange={handleLynchChangeFactory(player)}
                   checked={lynchVote === player}
@@ -97,10 +98,10 @@ const Game = (props: Props) => {
                       )}%`,
                     }}
                   ></div>
-                  <div className="relative px-1">
+                  <label className="relative px-1" htmlFor={player}>
                     {player}
                     {playerState.alive ? ' 🙂' : ' 💀'}
-                  </div>
+                  </label>
                   <div className="relative">
                     {Math.floor((100 * lynchVotes) / voterPopulation)}%
                   </div>
