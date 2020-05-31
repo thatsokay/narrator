@@ -7,7 +7,7 @@
     "test": "jest",
     "build": "NODE_ENV=production webpack --progress --colors --mode=production",
     "watch": "webpack --watch --progress --colors --mode=development",
-    "format": "prettier --write '{src,tests,.storybook}/{**,}/*.{ts,tsx,js,jsx}' '*.js'",
+    "format": "prettier --write '{src,tests,.storybook}/{**/,}*.{ts,tsx,js,jsx}' '*.js'",
     "storybook": "start-storybook"
   },
   "dependencies": {
