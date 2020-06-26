@@ -1,4 +1,4 @@
-import R from 'ramda'
+import * as R from 'ramda'
 
 import {Role, RoleName, ROLES} from './roles'
 import {Reducer, Middleware} from '../server/store'
@@ -371,23 +371,11 @@ export const middleware: Middleware<
       if (afterState.status !== 'day') {
         return
       }
-      const votes = Object.values(afterState.players)
-        .filter(
-          ({alive, role}) =>
-            alive &&
-            role.actions.day?.name === 'lynch' &&
-            role.actions.day?.completed,
-        )
-        .map(({role}) => role.actions.day!.lynch)
-      // Use empty string to represent `null` lynch vote
-      // Assumes empty string is not a possible player name
-      const voteCounts = R.countBy(x => x || '', votes)
-      const [lynch, count] = Object.entries(voteCounts).reduce(
+      const lynchVoteCounts = countLynchVotes(afterState)
+      const voterPopulation = countVoterPopulation(afterState)
+      const [lynch, count] = Object.entries(lynchVoteCounts).reduce(
         R.maxBy<[string, number]>(([_, votes]) => votes),
       )
-      const voterPopulation = Object.values(afterState.players).filter(
-        ({alive, role}) => alive && role.actions.day?.name === 'lynch',
-      ).length
       if (count <= voterPopulation / 2) {
         return
       }
@@ -403,3 +391,33 @@ export const middleware: Middleware<
     }
   }
 }
+
+/**
+ * Returns an object mapping player names to the number of lynch votes for them.
+ */
+export const countLynchVotes = (gameState: GameState) => {
+  if (gameState.status !== 'day') {
+    return {}
+  }
+  const votes = Object.values(gameState.players)
+    .filter(
+      ({alive, role}) =>
+        alive &&
+        role.actions.day?.name === 'lynch' &&
+        role.actions.day?.completed,
+    )
+    .map(({role}) => role.actions.day!.lynch)
+  // Use empty string to represent `null` lynch vote
+  // Assumes empty string is not a possible player name
+  return R.countBy(x => x || '', votes)
+}
+
+/**
+ * Returns the number of players that can currently cast a lynch vote.
+ */
+export const countVoterPopulation = (gameState: GameState) =>
+  gameState.status === 'day'
+    ? Object.values(gameState.players).filter(
+        ({alive, role}) => alive && role.actions.day?.name === 'lynch',
+      ).length
+    : 0

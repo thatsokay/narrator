@@ -1,8 +1,13 @@
 import React, {useState, useEffect, useCallback} from 'react'
 import {Observable} from 'rxjs'
-import * as R from 'ramda'
 
-import {GameState, Action, initialState} from '../../shared/game'
+import {
+  GameState,
+  Action,
+  initialState,
+  countLynchVotes,
+  countVoterPopulation,
+} from '../../shared/game'
 
 interface Props {
   playerName: string
@@ -12,6 +17,7 @@ interface Props {
 }
 
 const Game = (props: Props) => {
+  // Initialise and subscribe to game state
   const [gameState, setGameState] = useState<GameState>(initialState)
   useEffect(() => {
     const subscription = props.gameState$.subscribe(state =>
@@ -20,20 +26,18 @@ const Game = (props: Props) => {
     return () => subscription.unsubscribe()
   }, [props.gameState$])
 
+  // Player that this client is voting to kill
   // `null` is a vote to lynch no-one, `undefined` is no vote
   const [lynchVote, setLynchVote] = useState<string | null | undefined>(
     undefined,
   )
   // Reset lynch vote on game status change
   useEffect(() => setLynchVote(undefined), [gameState.status])
-  const lynchVoteCounts = countLynchVote(gameState)
-  const voterPopulation =
-    gameState.status === 'day'
-      ? Object.values(gameState.players).filter(
-          ({alive, role}) => alive && role.actions.day?.name === 'lynch',
-        ).length
-      : 0
 
+  const lynchVoteCounts = countLynchVotes(gameState)
+  const voterPopulation = countVoterPopulation(gameState)
+
+  // Returns an event handler to cast a lynch vote on a player.
   const handleLynchChangeFactory = useCallback(
     (player: string) => () => {
       props.sendAction({type: 'ROLE_ACTION', lynch: player})
@@ -147,22 +151,5 @@ const InformActionable = ({
   ) : (
     <></>
   )
-
-const countLynchVote = (gameState: GameState) => {
-  if (gameState.status !== 'day') {
-    return {}
-  }
-  const votes = Object.values(gameState.players)
-    .filter(
-      ({alive, role}) =>
-        alive &&
-        role.actions.day?.name === 'lynch' &&
-        role.actions.day?.completed,
-    )
-    .map(({role}) => role.actions.day!.lynch)
-  // Use empty string to represent `null` lynch vote
-  // Assumes empty string is not a possible player name
-  return R.countBy(x => x || '', votes)
-}
 
 export default Game
