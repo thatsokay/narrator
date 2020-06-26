@@ -79,32 +79,42 @@ const Game = (props: Props) => {
           Object.entries(gameState.players).map(([player, playerState]) => {
             const lynchVotes = lynchVoteCounts[player] || 0
             return (
-              <li className="flex" key={player}>
+              <li className="flex space-x-1" key={player}>
                 <input
                   id={player}
                   type="radio"
                   onChange={handleLynchChangeFactory(player)}
                   checked={lynchVote === player}
+                  disabled={!playerState.alive}
                 />
-                <div className="flex justify-between flex-auto relative pl-1">
-                  <div
-                    className="absolute bg-blue-200 h-full"
-                    style={{
-                      width: `${Math.min(
-                        100,
-                        // Reach 100% width at 50% + 1 vote
-                        (100 * lynchVotes) /
-                          (Math.floor(voterPopulation / 2) + 1),
-                      )}%`,
-                    }}
-                  ></div>
+                <div className="flex justify-between flex-1 relative">
+                  {playerState.alive && (
+                    <div
+                      className="absolute bg-blue-200 h-full"
+                      style={{
+                        width: `${Math.min(
+                          100,
+                          // Reach 100% width at 50% + 1 vote
+                          (100 * lynchVotes) /
+                            (Math.floor(voterPopulation / 2) + 1),
+                        )}%`,
+                      }}
+                    ></div>
+                  )}
                   <label className="relative px-1" htmlFor={player}>
-                    {player}
-                    {playerState.alive ? ' 🙂' : ' 💀'}
+                    <span
+                      className={
+                        playerState.alive ? '' : 'text-gray-600 line-through'
+                      }
+                    >
+                      {player}
+                    </span>
                   </label>
-                  <div className="relative">
-                    {Math.floor((100 * lynchVotes) / voterPopulation)}%
-                  </div>
+                  {playerState.alive && (
+                    <div className="relative">
+                      {Math.floor((100 * lynchVotes) / voterPopulation)}%
+                    </div>
+                  )}
                 </div>
               </li>
             )

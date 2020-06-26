@@ -90,16 +90,16 @@ export const day = () => {
     },
     'null',
   )
-  const roles = [
-    ROLES[playerRole],
-    ROLES.villager,
-    ROLES.villager,
-    ROLES.detective,
-    ROLES.nurse,
-    ROLES.mafia,
+  const playerStates = [
+    {role: ROLES[playerRole], alive: true},
+    {role: ROLES.villager, alive: true},
+    {role: ROLES.villager, alive: false},
+    {role: ROLES.detective, alive: true},
+    {role: ROLES.nurse, alive: true},
+    {role: ROLES.mafia, alive: true},
   ]
   let players = R.fromPairs(
-    roles.map((role, i) => [`player${i}`, {alive: true, role}]),
+    playerStates.map((state, i) => [`player${i}`, state]),
   )
   // XXX: `assocPath` can produce invalid state
   players = R.assocPath(
