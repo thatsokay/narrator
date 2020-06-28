@@ -9,6 +9,42 @@ import {
   countVoterPopulation,
 } from '../../shared/game'
 
+/**
+ * Subscribes to the given observable and returns the latest game state.
+ */
+const useGameState = (gameState$: Observable<GameState>) => {
+  // Initialise and subscribe to game state
+  const [gameState, setGameState] = useState<GameState>(initialState)
+  useEffect(() => {
+    const subscription = gameState$.subscribe(state => setGameState(state))
+    return () => subscription.unsubscribe()
+  }, [gameState$])
+  return gameState
+}
+
+/**
+ * Returns a lynch vote state that sends actions to the server on change and
+ * resets on game status change.
+ */
+const useLynchVoteState = (
+  gameState: GameState,
+  sendAction: (action: Action) => void,
+) => {
+  // Player that this client is voting to kill.
+  // `null` is a vote to lynch no-one, `undefined` is no vote.
+  const lynchVoteState = useState<string | null | undefined>(undefined)
+  const [lynchVote, setLynchVote] = lynchVoteState
+  // Reset lynch vote on game status change.
+  useEffect(() => setLynchVote(undefined), [gameState.status])
+  // Send action to server on vote change.
+  useEffect(() => {
+    if (lynchVote !== undefined) {
+      sendAction({type: 'ROLE_ACTION', lynch: lynchVote})
+    }
+  }, [lynchVote, sendAction])
+  return lynchVoteState
+}
+
 interface Props {
   playerName: string
   roomId: string
@@ -17,33 +53,20 @@ interface Props {
 }
 
 const Game = (props: Props) => {
-  // Initialise and subscribe to game state
-  const [gameState, setGameState] = useState<GameState>(initialState)
-  useEffect(() => {
-    const subscription = props.gameState$.subscribe(state =>
-      setGameState(state),
-    )
-    return () => subscription.unsubscribe()
-  }, [props.gameState$])
-
-  // Player that this client is voting to kill
-  // `null` is a vote to lynch no-one, `undefined` is no vote
-  const [lynchVote, setLynchVote] = useState<string | null | undefined>(
-    undefined,
+  // Initialise and subscribe to game state.
+  const gameState = useGameState(props.gameState$)
+  const [lynchVote, setLynchVote] = useLynchVoteState(
+    gameState,
+    props.sendAction,
   )
-  // Reset lynch vote on game status change
-  useEffect(() => setLynchVote(undefined), [gameState.status])
 
   const lynchVoteCounts = countLynchVotes(gameState)
   const voterPopulation = countVoterPopulation(gameState)
 
   // Returns an event handler to cast a lynch vote on a player.
   const handleLynchChangeFactory = useCallback(
-    (player: string) => () => {
-      props.sendAction({type: 'ROLE_ACTION', lynch: player})
-      setLynchVote(player)
-    },
-    [props.sendAction, setLynchVote],
+    (player: string) => () => setLynchVote(player),
+    [setLynchVote],
   )
 
   return (
@@ -98,7 +121,7 @@ const Game = (props: Props) => {
                       style={{
                         width: `${Math.min(
                           100,
-                          // Reach 100% width at 50% + 1 vote
+                          // Reach 100% width at 50% + 1 vote.
                           (100 * lynchVotes) /
                             (Math.floor(voterPopulation / 2) + 1),
                         )}%`,
