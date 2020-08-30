@@ -1,10 +1,11 @@
 import {createStore, applyMiddleware} from './store'
 import {reducer, middleware, isPlainObject} from '../shared/game'
+import {Dict} from '../shared/types'
 
 // @ts-ignore FIXME
 export const newRoom = (roomId: string) => {
   let store = applyMiddleware(middleware)(createStore)(reducer)
-  const sockets: Record<string, string> = {}
+  const sockets: Dict<string> = {}
 
   const join = (socketId: string, playerName: string) => {
     if (sockets[socketId]) {

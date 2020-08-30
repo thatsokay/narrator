@@ -1,4 +1,5 @@
 import {newRoom, Room} from './room'
+import {Dict} from '../shared/types'
 
 const randomRoomId = (length: number) => {
   /* Generates a random string of capital letters of given length.
@@ -11,8 +12,8 @@ const randomRoomId = (length: number) => {
 }
 
 export const newRegistry = () => {
-  const sockets: Record<string, string> = {}
-  const rooms: Record<string, Room> = {}
+  const sockets: Dict<string> = {}
+  const rooms: Dict<Room> = {}
 
   const createRoom = () => {
     /* Create a new empty room and returns its room id. Generates random room

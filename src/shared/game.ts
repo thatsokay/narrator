@@ -2,10 +2,11 @@ import * as R from 'ramda'
 
 import {Role, RoleName, ROLES} from './roles'
 import {Reducer, Middleware} from '../server/store'
+import {Dict} from '../shared/types'
 
 type Phase<S extends string, P, T extends object = {}> = {
   status: S
-  players: Record<string, P>
+  players: Dict<P>
   error: string | null
 } & T
 
@@ -28,7 +29,7 @@ type Night = Phase<
 
 export type GameState = Waiting | Day | Night
 
-type PlainObject = Record<string, unknown>
+type PlainObject = Dict<unknown>
 
 export interface Action extends PlainObject {
   type: string
@@ -102,7 +103,7 @@ const playerReducer: Reducer<GameState, Action> = (
           return R.dissocPath(['players', action.sender], state)
         }
         case 'READY': {
-          if (state.players[action.sender].ready) {
+          if (state.players[action.sender]!.ready) {
             // Don't change player state if already ready
             return state
           }
@@ -118,7 +119,7 @@ const playerReducer: Reducer<GameState, Action> = (
       }
     }
     case 'firstNight': {
-      if (state.players[action.sender].role.name !== state.awake) {
+      if (state.players[action.sender]!.role.name !== state.awake) {
         // TODO: Error message
         return state
       }

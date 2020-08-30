@@ -82,7 +82,7 @@ const Game = (props: Props) => {
       {gameState.status !== 'waiting' && (
         <div>
           <span className="text-gray-400 bg-gray-400">
-            {gameState.players[props.playerName].role.name}
+            {gameState.players[props.playerName]!.role.name}
           </span>
         </div>
       )}
@@ -168,8 +168,8 @@ const InformActionable = ({
   sendAction,
 }: ActionableProps) =>
   gameState.status === 'firstNight' &&
-  gameState.players[playerName].role.name === gameState.awake &&
-  gameState.players[playerName].role.actions.firstNight?.name === 'inform' ? (
+  gameState.players[playerName]?.role.name === gameState.awake &&
+  gameState.players[playerName]?.role.actions.firstNight?.name === 'inform' ? (
     <button onClick={() => sendAction({type: 'ROLE_ACTION'})}>Inform</button>
   ) : (
     <></>
