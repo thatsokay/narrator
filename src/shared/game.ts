@@ -2,7 +2,6 @@ import * as R from 'ramda'
 
 import {Role, RoleName, ROLES} from './roles'
 import {Reducer, Middleware} from '../server/store'
-import {Dict} from '../shared/types'
 
 type Phase<S extends string, P, T extends object = {}> = {
   status: S

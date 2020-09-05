@@ -26,12 +26,13 @@ interface RoleActions<
   D extends PhaseActionName | never,
   N extends PhaseActionName | never
 > {
-  // Want to:
-  // - specify that certain fields never have a value
-  // - use optional chaining on arbitrary RoleActions
-  //   (eg. `actions?.day?.name` on `RoleAction<never, never, never>`)
-  // - set RoleActions to an empty object without explicitly specifying each
-  //   property as undefined
+  /* Want to:
+   * - specify that certain fields never have a value
+   * - use optional chaining on arbitrary RoleActions
+   *   (eg. `actions?.day?.name` on `RoleAction<never, never, never>`)
+   * - set RoleActions to an empty object without explicitly specifying each
+   *   property as undefined
+   */
   firstNight?: F extends never ? never : PhaseAction<F>
   day?: D extends never ? never : PhaseAction<D>
   night?: N extends never ? never : PhaseAction<N>

@@ -1,9 +1,7 @@
 import {createStore, applyMiddleware} from './store'
 import {reducer, middleware, isPlainObject} from '../shared/game'
-import {Dict} from '../shared/types'
 
-// @ts-ignore FIXME
-export const newRoom = (roomId: string) => {
+export const newRoom = (_roomId: string) => {
   let store = applyMiddleware(middleware)(createStore)(reducer)
   const sockets: Dict<string> = {}
 

@@ -1,5 +1,4 @@
 import {newRoom, Room} from './room'
-import {Dict} from '../shared/types'
 
 const randomRoomId = (length: number) => {
   /* Generates a random string of capital letters of given length.
@@ -15,10 +14,11 @@ export const newRegistry = () => {
   const sockets: Dict<string> = {}
   const rooms: Dict<Room> = {}
 
+  /**
+   * Create a new empty room and returns its room id. Generates random room ids
+   * until an available id is found.
+   */
   const createRoom = () => {
-    /* Create a new empty room and returns its room id. Generates random room
-     * ids until an available id is found.
-     */
     let roomId = randomRoomId(4)
     while (rooms[roomId] !== undefined) {
       roomId = randomRoomId(4)
@@ -27,9 +27,10 @@ export const newRegistry = () => {
     return roomId
   }
 
+  /**
+   * Adds a player to the room with a given room id if it exists.
+   */
   const joinRoom = (socketId: string, playerName: string, roomId: string) => {
-    /* Adds a player to the room with a given room id if it exists.
-     */
     if (sockets[socketId] !== undefined) {
       console.error(socketId, 'attempted to join room when already registered')
       throw 'Already in a room'
