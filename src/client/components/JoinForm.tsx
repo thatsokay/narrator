@@ -13,9 +13,14 @@ const JoinForm = (props: Props) => {
 
   return (
     <form onSubmit={props.handleSubmit(playerName, roomId)}>
-      <label htmlFor="join-room-id">Room code</label>
+      <label
+        className="px-1 text-xs text-grey-400 uppercase"
+        htmlFor="join-room-id"
+      >
+        Room code
+      </label>
       <input
-        className="w-full px-1 border border-black"
+        className="w-full px-1 mb-6 bg-transparent border-b border-gray-400 rounded-sm"
         value={roomId}
         onChange={event => setRoomId(event.target.value)}
         id="join-room-id"
@@ -23,9 +28,14 @@ const JoinForm = (props: Props) => {
         name="room-id"
         maxLength={4}
       />
-      <label htmlFor="join-player-name">Player name</label>
+      <label
+        className="px-1 text-xs text-grey-400 uppercase"
+        htmlFor="join-player-name"
+      >
+        Player name
+      </label>
       <input
-        className="w-full px-1 border border-black"
+        className="w-full px-1 mb-6 bg-transparent border-b border-gray-400 rounded-sm"
         value={playerName}
         onChange={event => setPlayerName(event.target.value)}
         id="join-player-name"
@@ -33,9 +43,11 @@ const JoinForm = (props: Props) => {
         name="player-name"
         maxLength={12}
       />
-      <button className="px-2 py-1 text-black bg-white hover:text-white hover:bg-black border border-black">
-        Join room
-      </button>
+      <div className="flex justify-end">
+        <button className="px-4 py-2 bg-primary rounded-sm text-sm uppercase">
+          Join room
+        </button>
+      </div>
     </form>
   )
 }

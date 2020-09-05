@@ -2,6 +2,7 @@ import React, {useState, useEffect} from 'react'
 import socketIO from 'socket.io-client'
 import {BehaviorSubject, fromEvent} from 'rxjs'
 
+import AppBar from './AppBar'
 import CreateForm from './CreateForm'
 import JoinForm from './JoinForm'
 import Game from './Game'
@@ -93,42 +94,41 @@ const App = () => {
   }
 
   return (
-    <div className="w-full sm:w-64 px-8 sm:px-0 sm:mx-auto">
-      {inRoom && socket ? (
-        <Game
-          {...{
-            playerName,
-            roomId,
-            gameState$,
-            sendAction: (action: Action) => socket.emit('gameAction', action),
-          }}
-        />
-      ) : (
-        <>
-          <div className="flex justify-center">
-            <div className="border border-black -mr-px">
+    <>
+      <AppBar className="pb-6" />
+      <div className="w-full sm:w-64 px-8 sm:px-0 sm:mx-auto text-white">
+        {inRoom && socket ? (
+          <Game
+            {...{
+              playerName,
+              roomId,
+              gameState$,
+              sendAction: (action: Action) => socket.emit('gameAction', action),
+            }}
+          />
+        ) : (
+          <>
+            <div className="pb-6 flex justify-center">
               <a
                 id="create-room-form"
                 className={
-                  'block px-2 py-1 hover:text-white hover:bg-black no-underline ' +
+                  'block px-4 py-2 border border-grey-200 rounded-l-sm text-sm uppercase no-underline ' +
                   (showForm === 'create'
-                    ? 'text-white bg-black'
-                    : 'text-black bg-white')
+                    ? 'text-black bg-grey-200'
+                    : 'text-white')
                 }
                 onClick={handleShowFormClickFactory('create')}
                 href="#"
               >
                 New room
               </a>
-            </div>
-            <div className="border border-black">
               <a
                 id="join-room-form"
                 className={
-                  'block px-2 py-1 hover:text-white hover:bg-black no-underline ' +
+                  'block -ml-px px-4 py-2 border border-grey-200 rounded-r-sm text-sm uppercase no-underline ' +
                   (showForm === 'join'
-                    ? 'text-white bg-black'
-                    : 'text-black bg-white')
+                    ? 'text-black bg-grey-200'
+                    : 'text-white')
                 }
                 onClick={handleShowFormClickFactory('join')}
                 href="#"
@@ -136,15 +136,15 @@ const App = () => {
                 Join room
               </a>
             </div>
-          </div>
-          {showForm === 'create' ? (
-            <CreateForm handleSubmit={handleSubmit} />
-          ) : (
-            <JoinForm handleSubmit={handleSubmit} />
-          )}
-        </>
-      )}
-    </div>
+            {showForm === 'create' ? (
+              <CreateForm handleSubmit={handleSubmit} />
+            ) : (
+              <JoinForm handleSubmit={handleSubmit} />
+            )}
+          </>
+        )}
+      </div>
+    </>
   )
 }
 

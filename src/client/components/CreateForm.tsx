@@ -12,9 +12,14 @@ const CreateForm = (props: Props) => {
 
   return (
     <form onSubmit={props.handleSubmit(playerName)}>
-      <label htmlFor="create-player-name">Player name</label>
+      <label
+        className="px-1 text-xs text-grey-400 uppercase"
+        htmlFor="create-player-name"
+      >
+        Player name
+      </label>
       <input
-        className="w-full px-1 border border-black"
+        className="w-full px-1 mb-6 bg-transparent border-b border-gray-400 rounded-sm"
         value={playerName}
         onChange={event => setPlayerName(event.target.value)}
         id="create-player-name"
@@ -22,9 +27,11 @@ const CreateForm = (props: Props) => {
         name="player-name"
         maxLength={12}
       />
-      <button className="px-2 py-1 text-black bg-white hover:text-white hover:bg-black border border-black">
-        Create room
-      </button>
+      <div className="flex justify-end">
+        <button className="px-4 py-2 bg-primary rounded-sm text-sm uppercase">
+          Create room
+        </button>
+      </div>
     </form>
   )
 }
