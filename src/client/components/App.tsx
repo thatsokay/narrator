@@ -112,7 +112,7 @@ const App = () => {
               <a
                 id="create-room-form"
                 className={
-                  'block px-4 py-2 border border-grey-200 rounded-l-sm text-sm uppercase no-underline ' +
+                  'block px-4 py-2 border border-grey-200 rounded-l-xs text-sm uppercase no-underline ' +
                   (showForm === 'create'
                     ? 'text-black bg-grey-200'
                     : 'text-white')
@@ -125,7 +125,7 @@ const App = () => {
               <a
                 id="join-room-form"
                 className={
-                  'block -ml-px px-4 py-2 border border-grey-200 rounded-r-sm text-sm uppercase no-underline ' +
+                  'block -ml-px px-4 py-2 border border-grey-200 rounded-r-xs text-sm uppercase no-underline ' +
                   (showForm === 'join'
                     ? 'text-black bg-grey-200'
                     : 'text-white')

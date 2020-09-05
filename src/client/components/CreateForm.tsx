@@ -28,7 +28,7 @@ const CreateForm = (props: Props) => {
         maxLength={12}
       />
       <div className="flex justify-end">
-        <button className="px-4 py-2 bg-primary rounded-sm text-sm uppercase">
+        <button className="px-4 py-2 bg-primary rounded-xs text-sm uppercase">
           Create room
         </button>
       </div>

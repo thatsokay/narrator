@@ -30,6 +30,9 @@ module.exports = {
           '900': '#212121',
         },
       },
+      borderRadius: {
+        xs: '0.0625rem',
+      },
     },
   },
   variants: {},
