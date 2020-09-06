@@ -108,7 +108,7 @@ const App = () => {
           />
         ) : (
           <>
-            <div className="pb-6 flex justify-center">
+            <div className="pb-6 flex justify-center -space-x-px">
               <a
                 id="create-room-form"
                 className={
@@ -125,7 +125,7 @@ const App = () => {
               <a
                 id="join-room-form"
                 className={
-                  'block -ml-px px-4 py-1 border border-grey-200 rounded-r-xs text-sm font-label uppercase no-underline ' +
+                  'block px-4 py-1 border border-grey-200 rounded-r-xs text-sm font-label uppercase no-underline ' +
                   (showForm === 'join'
                     ? 'text-black bg-grey-200'
                     : 'text-white')
