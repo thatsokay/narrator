@@ -14,7 +14,7 @@ const JoinForm = (props: Props) => {
   return (
     <form onSubmit={props.handleSubmit(playerName, roomId)}>
       <label
-        className="px-1 text-xs text-grey-400 uppercase"
+        className="px-1 text-xs text-grey-400 font-label uppercase"
         htmlFor="join-room-id"
       >
         Room code
@@ -29,7 +29,7 @@ const JoinForm = (props: Props) => {
         maxLength={4}
       />
       <label
-        className="px-1 text-xs text-grey-400 uppercase"
+        className="px-1 text-xs text-grey-400 font-label uppercase"
         htmlFor="join-player-name"
       >
         Player name
@@ -44,7 +44,7 @@ const JoinForm = (props: Props) => {
         maxLength={12}
       />
       <div className="flex justify-end">
-        <button className="px-4 py-2 bg-primary rounded-xs text-sm uppercase">
+        <button className="px-4 py-2 bg-primary rounded-xs text-sm font-label uppercase">
           Join room
         </button>
       </div>

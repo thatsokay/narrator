@@ -1,3 +1,5 @@
+const defaultTheme = require('tailwindcss/defaultTheme')
+
 module.exports = {
   purge: {
     content: ['./src/{**,}/*.tsx', './public/index.html'],
@@ -29,6 +31,15 @@ module.exports = {
           '800': '#424242',
           '900': '#212121',
         },
+      },
+      fontFamily: {
+        sans: ['"PT Sans"', ...defaultTheme.fontFamily.sans],
+        serif: ['"PT Serif Caption"', ...defaultTheme.fontFamily.serif],
+        label: [
+          '"PT Sans Caption"',
+          '"PT Sans"',
+          ...defaultTheme.fontFamily.sans,
+        ],
       },
       borderRadius: {
         xs: '0.0625rem',

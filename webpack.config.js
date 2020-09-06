@@ -37,6 +37,14 @@ const clientConfig = {
           },
         ],
       },
+      {
+        test: /\.woff2?$/i,
+        loader: 'file-loader',
+        options: {
+          outputPath: 'fonts',
+          name: '[name].[ext]',
+        },
+      },
     ],
   },
   plugins: [
