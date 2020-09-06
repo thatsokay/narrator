@@ -44,7 +44,7 @@ const JoinForm = (props: Props) => {
         maxLength={4}
       />
       <div className="flex justify-end">
-        <button className="px-4 py-1 bg-primary rounded-xs text-sm font-label uppercase">
+        <button className="btn bg-primary">
           Start
         </button>
       </div>
