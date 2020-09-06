@@ -7,11 +7,11 @@ interface Props {
   ) => (event: React.FormEvent) => void
 }
 
-const CreateForm = (props: Props) => {
+const CreateForm = ({handleSubmit}: Props) => {
   const [playerName, setPlayerName] = useState('')
 
   return (
-    <form onSubmit={props.handleSubmit(playerName)}>
+    <form onSubmit={handleSubmit(playerName)}>
       <label htmlFor="create-player-name">Player name</label>
       <input
         className="w-full mb-6"

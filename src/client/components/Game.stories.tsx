@@ -1,5 +1,6 @@
 import React from 'react'
 import {BehaviorSubject} from 'rxjs'
+import {Meta} from '@storybook/react/types-6-0'
 import {action} from '@storybook/addon-actions'
 import {withKnobs, radios} from '@storybook/addon-knobs'
 import * as R from 'ramda'
@@ -8,7 +9,7 @@ import Game from './Game'
 import {GameState} from '../../shared/game'
 import {ROLES} from '../../shared/roles'
 
-export default {title: 'Game', decorators: [withKnobs]}
+const meta: Meta = {title: 'Components/Game', component: Game, decorators: [withKnobs]}
 
 const GameDefault = ({gameState}: {gameState: GameState}) => (
   <Game
@@ -19,7 +20,7 @@ const GameDefault = ({gameState}: {gameState: GameState}) => (
   />
 )
 
-export const waiting = () => {
+export const Waiting = () => {
   const readiness = [false, false, false, false, true, true]
   const players = R.fromPairs(
     readiness.map((ready, i) => [`player${i}`, {ready}]),
@@ -32,7 +33,7 @@ export const waiting = () => {
   return <GameDefault gameState={gameState} />
 }
 
-export const firstNight = () => {
+export const FirstNight = () => {
   const playerRole = radios(
     'Player role',
     {
@@ -71,7 +72,7 @@ export const firstNight = () => {
   return <GameDefault gameState={gameState} />
 }
 
-export const day = () => {
+export const Day = () => {
   const playerRole = radios(
     'Player role',
     {
@@ -120,3 +121,5 @@ export const day = () => {
   }
   return <GameDefault gameState={gameState} />
 }
+
+export default meta

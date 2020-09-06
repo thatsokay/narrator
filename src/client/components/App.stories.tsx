@@ -1,7 +1,9 @@
-import React from 'react'
+import {Meta} from '@storybook/react/types-6-0'
 
 import App from './App'
 
-export default {title: 'App'}
+const meta: Meta = {title: 'Components/App', component: App}
 
-export const index = () => <App />
+export const Index = App
+
+export default meta

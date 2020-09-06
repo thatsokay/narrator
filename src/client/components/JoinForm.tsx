@@ -7,12 +7,12 @@ interface Props {
   ) => (event: React.FormEvent) => void
 }
 
-const JoinForm = (props: Props) => {
+const JoinForm = ({handleSubmit}: Props) => {
   const [roomId, setRoomId] = useState('')
   const [playerName, setPlayerName] = useState('')
 
   return (
-    <form onSubmit={props.handleSubmit(playerName, roomId)}>
+    <form onSubmit={handleSubmit(playerName, roomId)}>
       <label htmlFor="join-player-name">Player name</label>
       <input
         className="w-full mb-6"

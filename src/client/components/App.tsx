@@ -96,7 +96,7 @@ const App = () => {
   return (
     <>
       <AppBar className="pb-6" />
-      <div className="w-full sm:w-64 px-8 sm:px-0 sm:mx-auto text-white">
+      <div className="w-full sm:w-64 px-8 sm:px-0 sm:mx-auto">
         {inRoom && socket ? (
           <Game
             {...{

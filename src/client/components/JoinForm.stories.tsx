@@ -1,9 +1,12 @@
 import React from 'react'
+import {Meta} from '@storybook/react/types-6-0'
 
 import JoinForm from './JoinForm'
 
-export default {title: 'JoinForm'}
+const meta: Meta = {title: 'Components/JoinForm', component: JoinForm}
 
-export const index = () => (
+export const Index = () => (
   <JoinForm handleSubmit={() => e => e.preventDefault()} />
 )
+
+export default meta
