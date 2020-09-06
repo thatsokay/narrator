@@ -12,14 +12,9 @@ const CreateForm = (props: Props) => {
 
   return (
     <form onSubmit={props.handleSubmit(playerName)}>
-      <label
-        className="px-1 text-xs text-grey-400 font-label uppercase"
-        htmlFor="create-player-name"
-      >
-        Player name
-      </label>
+      <label htmlFor="create-player-name">Player name</label>
       <input
-        className="w-full px-1 mb-6 bg-transparent border-b border-gray-400 rounded-sm"
+        className="w-full mb-6"
         value={playerName}
         onChange={event => setPlayerName(event.target.value)}
         id="create-player-name"
@@ -28,9 +23,7 @@ const CreateForm = (props: Props) => {
         maxLength={12}
       />
       <div className="flex justify-end">
-        <button className="btn bg-primary">
-          Start
-        </button>
+        <button className="btn bg-primary">Start</button>
       </div>
     </form>
   )
