@@ -1,7 +1,7 @@
 import React, {useState} from 'react'
 
 interface Props {
-  submitForm: (playerName: string, roomId?: string) => void
+  submitForm: (form: {playerName: string; roomId?: string}) => void
 }
 
 const JoinForm = ({submitForm}: Props) => {
@@ -12,7 +12,7 @@ const JoinForm = ({submitForm}: Props) => {
     <form
       onSubmit={event => {
         event.preventDefault()
-        submitForm(playerName, roomId)
+        submitForm({playerName, roomId})
       }}
     >
       <label htmlFor="join-player-name">Player name</label>

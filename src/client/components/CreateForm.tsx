@@ -1,7 +1,7 @@
 import React, {useState} from 'react'
 
 interface Props {
-  submitForm: (playerName: string, roomId?: string) => void
+  submitForm: (form: {playerName: string; roomId?: string}) => void
 }
 
 const CreateForm = ({submitForm}: Props) => {
@@ -10,7 +10,7 @@ const CreateForm = ({submitForm}: Props) => {
     <form
       onSubmit={event => {
         event.preventDefault()
-        submitForm(playerName)
+        submitForm({playerName})
       }}
     >
       <label htmlFor="create-player-name">Player name</label>

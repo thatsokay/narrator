@@ -26,7 +26,13 @@ const App = () => {
     return () => subscription.unsubscribe()
   }, [socket, gameState$])
 
-  const submitForm = (playerName: string, roomId?: string) => {
+  const submitForm = ({
+    playerName,
+    roomId,
+  }: {
+    playerName: string
+    roomId?: string
+  }) => {
     /* Takes a player name and optionally a room id and returns an event
      * handler. Creates a socket that emits an event on connection depending on
      * whether a room id was provided.

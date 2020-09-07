@@ -4,7 +4,7 @@ import CreateForm from './CreateForm'
 import JoinForm from './JoinForm'
 
 interface Props {
-  submitForm: (playerName: string, roomId?: string) => void
+  submitForm: (form: {playerName: string; roomId?: string}) => void
 }
 
 const HomePage: React.FC<Props> = ({submitForm}) => {
