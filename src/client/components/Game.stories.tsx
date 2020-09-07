@@ -9,7 +9,11 @@ import Game from './Game'
 import {GameState} from '../../shared/game'
 import {ROLES} from '../../shared/roles'
 
-const meta: Meta = {title: 'Components/Game', component: Game, decorators: [withKnobs]}
+const meta: Meta = {
+  title: 'Components/Game',
+  component: Game,
+  decorators: [withKnobs],
+}
 
 const GameDefault = ({gameState}: {gameState: GameState}) => (
   <Game
