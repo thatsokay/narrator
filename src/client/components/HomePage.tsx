@@ -1,21 +1,23 @@
 import React, {useState} from 'react'
 
-import CreateForm from './CreateForm'
-import JoinForm from './JoinForm'
+import StartForm from './StartForm'
 
 interface Props {
   submitForm: (form: {playerName: string; roomId?: string}) => void
 }
 
 const HomePage: React.FC<Props> = ({submitForm}) => {
-  const [showForm, setShowForm] = useState<'create' | 'join'>('create')
-
-  const handleShowFormClickFactory = (form: typeof showForm) => (
+  const [selectedForm, setSelectedForm] = useState<'create' | 'join'>('create')
+  const handleShowFormClickFactory = (form: typeof selectedForm) => (
     event: React.MouseEvent<HTMLAnchorElement>,
   ) => {
     event.preventDefault()
-    setShowForm(form)
+    setSelectedForm(form)
   }
+
+  const [playerName, setPlayerName] = useState('')
+  const [roomId, setRoomId] = useState('')
+  const handleSubmit = () => submitForm({playerName, roomId})
 
   return (
     <>
@@ -24,7 +26,9 @@ const HomePage: React.FC<Props> = ({submitForm}) => {
           id="create-room-form"
           className={
             'btn block border border-grey-200 rounded-r-none no-underline ' +
-            (showForm === 'create' ? 'text-black bg-grey-200' : 'text-white')
+            (selectedForm === 'create'
+              ? 'text-black bg-grey-200'
+              : 'text-white')
           }
           onClick={handleShowFormClickFactory('create')}
           href="#"
@@ -35,7 +39,7 @@ const HomePage: React.FC<Props> = ({submitForm}) => {
           id="join-room-form"
           className={
             'btn block border border-grey-200 rounded-l-none no-underline ' +
-            (showForm === 'join' ? 'text-black bg-grey-200' : 'text-white')
+            (selectedForm === 'join' ? 'text-black bg-grey-200' : 'text-white')
           }
           onClick={handleShowFormClickFactory('join')}
           href="#"
@@ -43,11 +47,13 @@ const HomePage: React.FC<Props> = ({submitForm}) => {
           Join room
         </a>
       </div>
-      {showForm === 'create' ? (
-        <CreateForm submitForm={submitForm} />
-      ) : (
-        <JoinForm submitForm={submitForm} />
-      )}
+      <StartForm
+        handleSubmit={handleSubmit}
+        playerName={{value: playerName, set: setPlayerName}}
+        roomId={
+          selectedForm === 'join' ? {value: roomId, set: setRoomId} : undefined
+        }
+      />
     </>
   )
 }
