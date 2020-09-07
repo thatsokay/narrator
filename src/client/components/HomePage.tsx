@@ -25,7 +25,7 @@ const HomePage: React.FC<Props> = ({submitForm}) => {
         <a
           id="create-room-form"
           className={
-            'btn block border border-grey-200 rounded-r-none no-underline ' +
+            'btn block border border-grey-200 rounded-r-none text-center no-underline ' +
             (selectedForm === 'create'
               ? 'text-black bg-grey-200'
               : 'text-white')
@@ -38,7 +38,7 @@ const HomePage: React.FC<Props> = ({submitForm}) => {
         <a
           id="join-room-form"
           className={
-            'btn block border border-grey-200 rounded-l-none no-underline ' +
+            'btn block border border-grey-200 rounded-l-none text-center no-underline ' +
             (selectedForm === 'join' ? 'text-black bg-grey-200' : 'text-white')
           }
           onClick={handleShowFormClickFactory('join')}
