@@ -26,14 +26,11 @@ const App = () => {
     return () => subscription.unsubscribe()
   }, [socket, gameState$])
 
-  const handleSubmit = (playerName: string, roomId?: string) => (
-    event: React.FormEvent,
-  ) => {
+  const submitForm = (playerName: string, roomId?: string) => {
     /* Takes a player name and optionally a room id and returns an event
      * handler. Creates a socket that emits an event on connection depending on
      * whether a room id was provided.
      */
-    event.preventDefault()
     const socket = socketIO()
     socket.once('connect', () => {
       console.log('connected')
@@ -98,7 +95,7 @@ const App = () => {
             }}
           />
         ) : (
-          <HomePage handleSubmitFactory={handleSubmit} />
+          <HomePage submitForm={submitForm} />
         )}
       </div>
     </>

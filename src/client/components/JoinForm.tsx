@@ -1,18 +1,20 @@
 import React, {useState} from 'react'
 
 interface Props {
-  handleSubmit: (
-    playerName: string,
-    roomId?: string,
-  ) => (event: React.FormEvent) => void
+  submitForm: (playerName: string, roomId?: string) => void
 }
 
-const JoinForm = ({handleSubmit}: Props) => {
+const JoinForm = ({submitForm}: Props) => {
   const [roomId, setRoomId] = useState('')
   const [playerName, setPlayerName] = useState('')
 
   return (
-    <form onSubmit={handleSubmit(playerName, roomId)}>
+    <form
+      onSubmit={event => {
+        event.preventDefault()
+        submitForm(playerName, roomId)
+      }}
+    >
       <label htmlFor="join-player-name">Player name</label>
       <input
         className="w-full mb-6"

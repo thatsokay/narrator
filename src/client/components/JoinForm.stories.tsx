@@ -5,8 +5,6 @@ import JoinForm from './JoinForm'
 
 const meta: Meta = {title: 'Components/JoinForm', component: JoinForm}
 
-export const Index = () => (
-  <JoinForm handleSubmit={() => e => e.preventDefault()} />
-)
+export const Index = () => <JoinForm submitForm={() => {}} />
 
 export default meta

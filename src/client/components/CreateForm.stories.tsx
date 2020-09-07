@@ -5,8 +5,6 @@ import CreateForm from './CreateForm'
 
 const meta: Meta = {title: 'Components/CreateForm', component: CreateForm}
 
-export const Index = () => (
-  <CreateForm handleSubmit={() => e => e.preventDefault()} />
-)
+export const Index = () => <CreateForm submitForm={() => {}} />
 
 export default meta

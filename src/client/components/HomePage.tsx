@@ -1,16 +1,13 @@
-import React, {useState, FormEvent} from 'react'
+import React, {useState} from 'react'
 
 import CreateForm from './CreateForm'
 import JoinForm from './JoinForm'
 
 interface Props {
-  handleSubmitFactory: (
-    playerName: string,
-    roomId?: string,
-  ) => React.EventHandler<FormEvent>
+  submitForm: (playerName: string, roomId?: string) => void
 }
 
-const HomePage: React.FC<Props> = ({handleSubmitFactory}) => {
+const HomePage: React.FC<Props> = ({submitForm}) => {
   const [showForm, setShowForm] = useState<'create' | 'join'>('create')
 
   const handleShowFormClickFactory = (form: typeof showForm) => (
@@ -47,9 +44,9 @@ const HomePage: React.FC<Props> = ({handleSubmitFactory}) => {
         </a>
       </div>
       {showForm === 'create' ? (
-        <CreateForm handleSubmit={handleSubmitFactory} />
+        <CreateForm submitForm={submitForm} />
       ) : (
-        <JoinForm handleSubmit={handleSubmitFactory} />
+        <JoinForm submitForm={submitForm} />
       )}
     </>
   )

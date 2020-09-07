@@ -1,17 +1,18 @@
 import React, {useState} from 'react'
 
 interface Props {
-  handleSubmit: (
-    playerName: string,
-    roomId?: string,
-  ) => (event: React.FormEvent) => void
+  submitForm: (playerName: string, roomId?: string) => void
 }
 
-const CreateForm = ({handleSubmit}: Props) => {
+const CreateForm = ({submitForm}: Props) => {
   const [playerName, setPlayerName] = useState('')
-
   return (
-    <form onSubmit={handleSubmit(playerName)}>
+    <form
+      onSubmit={event => {
+        event.preventDefault()
+        submitForm(playerName)
+      }}
+    >
       <label htmlFor="create-player-name">Player name</label>
       <input
         className="w-full mb-6"

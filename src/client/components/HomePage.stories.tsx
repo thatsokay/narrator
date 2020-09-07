@@ -5,8 +5,6 @@ import HomePage from './HomePage'
 
 const meta: Meta = {title: 'Components/HomePage', component: HomePage}
 
-export const Index = () => (
-  <HomePage handleSubmitFactory={() => e => e.preventDefault()} />
-)
+export const Index = () => <HomePage submitForm={() => {}} />
 
 export default meta
