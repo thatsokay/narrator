@@ -76,7 +76,9 @@ describe('game', () => {
     )
     expect(startState).toMatchObject({
       status: 'firstNight',
-      players: R.fromPairs(R.range(0, 6).map(i => [`foo${i}`, {alive: true}])),
+      players: R.fromPairs(
+        R.range(0, 6).map((i) => [`foo${i}`, {alive: true}]),
+      ),
     })
   })
 
@@ -105,14 +107,14 @@ describe('game', () => {
     const initialState: GameState = {
       status: 'waiting',
       players: R.zipObj(
-        R.range(0, 6).map(i => `${i}`),
+        R.range(0, 6).map((i) => `${i}`),
         [{ready: false}, ...new Array(5).fill({ready: true})],
       ),
       error: null,
     }
     let dispatcher: any = null
-    const reporter: Middleware<GameState, any> = _store => next => {
-      dispatcher = jest.fn(action => next(action))
+    const reporter: Middleware<GameState, any> = (_store) => (next) => {
+      dispatcher = jest.fn((action) => next(action))
       return dispatcher
     }
     const store = applyMiddleware(middleware, reporter)(createStore)(
@@ -133,7 +135,7 @@ describe('game', () => {
       status: 'firstNight',
       awake: 'mafia',
       players: R.zipObj(
-        R.range(0, 6).map(i => `${i}`),
+        R.range(0, 6).map((i) => `${i}`),
         [
           ...new Array(2).fill({alive: true, role: ROLES.mafia}),
           ...new Array(3).fill({alive: true, role: ROLES.villager}),
@@ -178,7 +180,7 @@ describe('game', () => {
     const initialState: GameState = {
       status: 'day',
       players: R.zipObj(
-        R.range(0, 6).map(i => `${i}`),
+        R.range(0, 6).map((i) => `${i}`),
         [
           {alive: true, role: ROLES.mafia},
           {alive: true, role: ROLES.detective},
@@ -247,7 +249,7 @@ describe('game', () => {
         },
       },
     })
-    R.range(2, 6).forEach(i =>
+    R.range(2, 6).forEach((i) =>
       store.dispatch({type: 'ROLE_ACTION', lynch: '5', sender: `${i}`}),
     )
     expect(store.getState()).toMatchObject({

@@ -45,7 +45,7 @@ describe('room', () => {
   test('game start', () => {
     jest.useFakeTimers()
     const sockets = R.range(0, 6)
-      .map(i => room.join(`${i}`, `${i}`))
+      .map((i) => room.join(`${i}`, `${i}`))
       .map(([send$, receive]) => {
         const sender = jest.fn()
         send$.subscribe(sender)

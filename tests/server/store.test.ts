@@ -43,19 +43,19 @@ describe('store', () => {
   })
 
   test('subscription', () => {
-    subscription = store.subscribe(state => states.push(state))
+    subscription = store.subscribe((state) => states.push(state))
     expect(states).toStrictEqual([{count: 0}])
   })
 
   test('dispatch', () => {
-    subscription = store.subscribe(state => states.push(state))
+    subscription = store.subscribe((state) => states.push(state))
     store.dispatch({type: 'INCREMENT'})
     expect(states).toStrictEqual([{count: 0}, {count: 1}])
   })
 
   test('dispatch before subscribing', () => {
     store.dispatch({type: 'INCREMENT'})
-    subscription = store.subscribe(state => states.push(state))
+    subscription = store.subscribe((state) => states.push(state))
     store.dispatch({type: 'INCREMENT'})
     expect(states).toStrictEqual([{count: 1}, {count: 2}])
   })
@@ -64,13 +64,13 @@ describe('store', () => {
     const states2: State[] = []
     const states3: State[] = []
 
-    subscription = store.subscribe(state => states.push(state))
+    subscription = store.subscribe((state) => states.push(state))
     store.dispatch({type: 'INCREMENT'})
 
-    const sub2 = store.subscribe(state => states2.push(state))
+    const sub2 = store.subscribe((state) => states2.push(state))
     store.dispatch({type: 'INCREMENT'})
 
-    const sub3 = store.subscribe(state => states3.push(state))
+    const sub3 = store.subscribe((state) => states3.push(state))
     store.dispatch({type: 'INCREMENT'})
 
     expect(states).toStrictEqual([
@@ -93,7 +93,9 @@ describe('store', () => {
   })
 
   test('middleware', () => {
-    const middleware: Middleware<State, any> = _store => next => action => {
+    const middleware: Middleware<State, any> = (_store) => (next) => (
+      action,
+    ) => {
       next(action)
       next(action)
     }

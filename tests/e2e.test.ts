@@ -14,9 +14,9 @@ describe('e2e', () => {
   beforeAll(async () => {
     server = app.listen(3002)
     browser = await puppeteer.launch()
-    pages = await Promise.all(R.range(0, 6).map(_ => browser.newPage()))
-    pages.map(page => page.setDefaultTimeout(1000))
-    await Promise.all(pages.map(page => page.goto('http://localhost:3002')))
+    pages = await Promise.all(R.range(0, 6).map((_) => browser.newPage()))
+    pages.map((page) => page.setDefaultTimeout(1000))
+    await Promise.all(pages.map((page) => page.goto('http://localhost:3002')))
   })
 
   afterAll(async () => {
@@ -24,11 +24,11 @@ describe('e2e', () => {
     server.close()
   })
 
-  test('start game', async done => {
+  test('start game', async (done) => {
     await (await pages[0].waitFor('#create-player-name')).type('player0\n')
     const roomIdHandle = await pages[0].waitFor('#room-id')
     const roomId = (await roomIdHandle.evaluate(
-      node => node.textContent,
+      (node) => node.textContent,
     )) as string
     expect(roomId.length).toBe(4)
     await Promise.all(
@@ -41,9 +41,9 @@ describe('e2e', () => {
       }),
     )
     await Promise.all(
-      pages.map(async page => {
+      pages.map(async (page) => {
         const statusHandle = await page.waitFor('h2')
-        expect(await statusHandle.evaluate(node => node.textContent)).toBe(
+        expect(await statusHandle.evaluate((node) => node.textContent)).toBe(
           'waiting',
         )
       }),

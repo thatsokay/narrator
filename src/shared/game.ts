@@ -208,7 +208,7 @@ export const reducer: Reducer<GameState, PlainObject> = (
         .concat(new Array(numMafia).fill(ROLES.mafia))
         .concat(new Array(numPlayers - numMafia - 2).fill(ROLES.villager))
         // Produce a player state for each available role
-        .map(role => ({alive: true, role}))
+        .map((role) => ({alive: true, role}))
       shuffle(playerStates)
       return {
         status: 'firstNight',
@@ -290,10 +290,9 @@ export const reducer: Reducer<GameState, PlainObject> = (
 }
 
 const nightRoleOrder = ['mafia', 'detective', 'nurse'] as const
-export const middleware: Middleware<
-  GameState,
-  PlainObject
-> = store => next => action => {
+export const middleware: Middleware<GameState, PlainObject> = (store) => (
+  next,
+) => (action) => {
   const beforeState = store.getState()
   next(action)
   const afterState = store.getState()
@@ -348,11 +347,13 @@ export const middleware: Middleware<
           .filter(({alive, role}) => alive && role.actions.firstNight)
           .map(({role}) => role.name),
       )
-      const aliveRoleOrder = nightRoleOrder.filter(role => aliveRoles.has(role))
+      const aliveRoleOrder = nightRoleOrder.filter((role) =>
+        aliveRoles.has(role),
+      )
       // `findIndex` here should never return -1 because currently awake role
       // cannot be dead
       const wakeNextIndex =
-        aliveRoleOrder.findIndex(role => role === afterState.awake) + 1
+        aliveRoleOrder.findIndex((role) => role === afterState.awake) + 1
       if (wakeNextIndex < aliveRoleOrder.length) {
         setTimeout(
           () =>
@@ -409,7 +410,7 @@ export const countLynchVotes = (gameState: GameState) => {
     .map(({role}) => role.actions.day!.lynch)
   // Use empty string to represent `null` lynch vote
   // Assumes empty string is not a possible player name
-  return R.countBy(x => x || '', votes)
+  return R.countBy((x) => x || '', votes)
 }
 
 /**

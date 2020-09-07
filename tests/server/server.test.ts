@@ -21,7 +21,7 @@ describe('server', () => {
     server.close()
   })
 
-  test('creating room', done => {
+  test('creating room', (done) => {
     client.once('connect', () => {
       client.emit(
         EVENTS.CREATE_ROOM,
@@ -34,7 +34,7 @@ describe('server', () => {
     })
   })
 
-  test('joining non-existent room', done => {
+  test('joining non-existent room', (done) => {
     client.once('connect', () => {
       client.emit(EVENTS.JOIN_ROOM, 'foo', 'foo', (response: EventResponse) => {
         expect(response).toStrictEqual({
@@ -46,9 +46,9 @@ describe('server', () => {
     })
   })
 
-  test('creating multiple rooms', async done => {
+  test('creating multiple rooms', async (done) => {
     await expect(
-      new Promise(resolve => {
+      new Promise((resolve) => {
         client.once('connect', () => {
           client.emit(
             EVENTS.CREATE_ROOM,
@@ -62,7 +62,7 @@ describe('server', () => {
     ).resolves.toBe(true)
 
     await expect(
-      new Promise(resolve => {
+      new Promise((resolve) => {
         client.emit(
           EVENTS.CREATE_ROOM,
           'foo',
@@ -75,9 +75,9 @@ describe('server', () => {
     done()
   })
 
-  test('creating and joining room from single socket', async done => {
+  test('creating and joining room from single socket', async (done) => {
     const response = await new Promise<EventResponse<{roomId: string}>>(
-      resolve => {
+      (resolve) => {
         client.once('connect', () => {
           client.emit(
             EVENTS.CREATE_ROOM,
@@ -96,7 +96,7 @@ describe('server', () => {
     }
 
     await expect(
-      new Promise<EventResponse>(resolve => {
+      new Promise<EventResponse>((resolve) => {
         client.emit(
           EVENTS.JOIN_ROOM,
           'foo',
@@ -110,10 +110,10 @@ describe('server', () => {
     done()
   })
 
-  test('start game', async done => {
+  test('start game', async (done) => {
     // Connect and create room
     const createResponse = await new Promise<EventResponse<{roomId: string}>>(
-      resolve => {
+      (resolve) => {
         client.once('connect', () => {
           client.emit(
             EVENTS.CREATE_ROOM,
@@ -139,7 +139,7 @@ describe('server', () => {
       Promise.all(
         joinSockets.map(
           (socket, i) =>
-            new Promise<boolean>(resolve => {
+            new Promise<boolean>((resolve) => {
               socket.emit(
                 EVENTS.JOIN_ROOM,
                 `foo${i + 1}`,
@@ -157,8 +157,8 @@ describe('server', () => {
     await expect(
       Promise.all(
         [client, ...joinSockets].map(
-          socket =>
-            new Promise<void>(resolve => {
+          (socket) =>
+            new Promise<void>((resolve) => {
               socket.emit(
                 'gameAction',
                 {type: 'READY'},
@@ -176,12 +176,12 @@ describe('server', () => {
       ),
     ).resolves.toStrictEqual(new Array(6).fill(undefined))
 
-    joinSockets.map(socket => socket.close())
+    joinSockets.map((socket) => socket.close())
     done()
   })
 
-  test('invalid create arguments', async done => {
-    await new Promise(resolve => {
+  test('invalid create arguments', async (done) => {
+    await new Promise((resolve) => {
       client.once('connect', () => {
         resolve()
       })
@@ -203,8 +203,8 @@ describe('server', () => {
     done()
   })
 
-  test('invalid join arguments', async done => {
-    await new Promise(resolve => {
+  test('invalid join arguments', async (done) => {
+    await new Promise((resolve) => {
       client.once('connect', () => {
         resolve()
       })

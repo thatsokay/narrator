@@ -7,7 +7,7 @@ module.exports = {
     '@storybook/addon-actions/register',
     '@storybook/addon-knobs/register',
   ],
-  webpackFinal: config => ({
+  webpackFinal: (config) => ({
     ...config,
     resolve: {...config.resolve, extensions: clientConfig.resolve.extensions},
     module: {...config.module, rules: clientConfig.module.rules},

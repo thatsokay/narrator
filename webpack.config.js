@@ -62,7 +62,7 @@ const serverConfig = {
   // https://jlongster.com/Backend-Apps-with-Webpack--Part-I
   externals: fs
     .readdirSync('node_modules')
-    .filter(module => ['.bin'].indexOf(module) === -1)
+    .filter((module) => ['.bin'].indexOf(module) === -1)
     .reduce((acc, module) => {
       acc[module] = `commonjs ${module}`
       return acc

@@ -14,11 +14,11 @@ const registry = newRegistry()
 
 const root = 'build/public'
 app.use(koaStatic(root))
-app.use(async ctx => {
+app.use(async (ctx) => {
   await send(ctx, 'index.html', {root})
 })
 
-io.on('connect', socket => {
+io.on('connect', (socket) => {
   socket.on('disconnect', (reason: string) => {
     console.log(`Socket disconnected due to ${reason}`)
   })
@@ -39,7 +39,7 @@ io.on('connect', socket => {
       return
     }
     respond({success: true, roomId: roomId})
-    send$.subscribe(state => socket.emit('gameState', state))
+    send$.subscribe((state) => socket.emit('gameState', state))
     socket.on('gameAction', receive)
     socket.on('disconnect', () => {
       registry.leave(socket.id)
@@ -65,7 +65,7 @@ io.on('connect', socket => {
         return
       }
       respond({success: true})
-      send$.subscribe(state => socket.emit('gameState', state))
+      send$.subscribe((state) => socket.emit('gameState', state))
       socket.on('gameAction', receive)
       socket.on('disconnect', () => {
         registry.leave(socket.id)

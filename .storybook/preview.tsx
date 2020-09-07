@@ -6,6 +6,6 @@ import 'typeface-pt-serif-caption'
 
 import '../src/client/styles.css'
 
-addDecorator(storyFn => (
+addDecorator((storyFn) => (
   <div className="h-screen bg-surface-0 text-white">{storyFn()}</div>
 ))

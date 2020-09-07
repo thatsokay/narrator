@@ -40,7 +40,7 @@ export const applyMiddleware = <S, A>(...middlewares: Middleware<S, A>[]) => (
   createStore: (reducer: Reducer<S, A>, initialState?: S) => Store<S, A>,
 ) => (reducer: Reducer<S, A>, initialState?: S): Store<S, A> => {
   const store = createStore(reducer, initialState)
-  const patchers = middlewares.map(middleware => middleware(store))
+  const patchers = middlewares.map((middleware) => middleware(store))
   const dispatch = patchers.reduceRight(
     (acc, patcher) => patcher(acc),
     store.dispatch,

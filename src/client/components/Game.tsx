@@ -16,7 +16,7 @@ const useGameState = (gameState$: Observable<GameState>) => {
   // Initialise and subscribe to game state
   const [gameState, setGameState] = useState<GameState>(initialState)
   useEffect(() => {
-    const subscription = gameState$.subscribe(state => setGameState(state))
+    const subscription = gameState$.subscribe((state) => setGameState(state))
     return () => subscription.unsubscribe()
   }, [gameState$])
   return gameState
