@@ -8,7 +8,7 @@
     "build": "NODE_ENV=production webpack --progress --colors --mode=production",
     "watch": "webpack --watch --progress --colors --mode=development",
     "format": "prettier --write '{src,tests,.storybook}/**/*.{ts,tsx,js,jsx}' '*.js'",
-    "storybook": "start-storybook"
+    "storybook": "start-storybook --port 6006 --static-dir public --ci"
   },
   "dependencies": {
     "koa": "^2.8.2",
@@ -28,9 +28,8 @@
   },
   "devDependencies": {
     "@fullhuman/postcss-purgecss": "^2.1.2",
-    "@storybook/addon-actions": "^6.0.21",
+    "@storybook/addon-essentials": "^6.0.21",
     "@storybook/addon-knobs": "^6.0.21",
-    "@storybook/addon-viewport": "^6.0.21",
     "@storybook/react": "^6.0.21",
     "@types/jest": "^24.0.18",
     "@types/koa": "^2.0.50",

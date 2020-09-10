@@ -1,6 +1,6 @@
 import React from 'react'
 import {BehaviorSubject} from 'rxjs'
-import {Meta} from '@storybook/react/types-6-0'
+import {Meta} from '@storybook/react'
 import {action} from '@storybook/addon-actions'
 import {withKnobs, radios} from '@storybook/addon-knobs'
 import * as R from 'ramda'
