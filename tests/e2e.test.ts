@@ -15,7 +15,7 @@ describe('e2e', () => {
     server = app.listen(3002)
     browser = await puppeteer.launch()
     pages = await Promise.all(R.range(0, 6).map((_) => browser.newPage()))
-    pages.map((page) => page.setDefaultTimeout(1000))
+    pages.forEach((page) => page.setDefaultTimeout(5000))
     await Promise.all(pages.map((page) => page.goto('http://localhost:3002')))
   })
 
@@ -25,8 +25,8 @@ describe('e2e', () => {
   })
 
   test('start game', async (done) => {
-    await (await pages[0].waitFor('#create-player-name')).type('player0\n')
-    const roomIdHandle = await pages[0].waitFor('#room-id')
+    await (await pages[0].waitFor('#start-form #player-name')).type('player0\n')
+    const roomIdHandle = await pages[0].waitFor('#game #room-id')
     const roomId = (await roomIdHandle.evaluate(
       (node) => node.textContent,
     )) as string
@@ -34,9 +34,9 @@ describe('e2e', () => {
     await Promise.all(
       pages.slice(1).map(async (page, i) => {
         await (await page.waitFor('#join-room-form')).click()
-        const roomHandle = await page.waitFor('#join-room-id')
+        const roomHandle = await page.waitFor('#start-form #room-id')
         await roomHandle.type(roomId)
-        const nameHandle = await page.waitFor('#join-player-name')
+        const nameHandle = await page.waitFor('#start-form #player-name')
         await nameHandle.type(`player${i + 1}\n`)
       }),
     )

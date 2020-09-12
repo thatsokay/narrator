@@ -17,7 +17,11 @@ const HomePage: React.FC<Props> = ({submitForm}) => {
 
   const [playerName, setPlayerName] = useState('')
   const [roomId, setRoomId] = useState('')
-  const handleSubmit = () => submitForm({playerName, roomId})
+  const handleSubmit = () =>
+    submitForm({
+      playerName,
+      roomId: selectedForm === 'join' ? roomId : undefined,
+    })
 
   return (
     <>

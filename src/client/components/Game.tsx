@@ -70,7 +70,7 @@ const Game = (props: Props) => {
   )
 
   return (
-    <>
+    <div id="game">
       <div className="flex justify-between">
         <h2 className="capitalize text-xl font-medium">
           {gameState.status === 'firstNight' ? 'night' : gameState.status}
@@ -147,7 +147,7 @@ const Game = (props: Props) => {
             )
           })}
       </ul>
-    </>
+    </div>
   )
 }
 

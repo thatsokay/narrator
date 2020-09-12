@@ -27,13 +27,13 @@ interface Props {
 }
 
 const StartForm: React.FC<Props> = ({handleSubmit, playerName, roomId}) => (
-  <form onSubmit={preventDefaultEnhancer(handleSubmit)}>
-    <label htmlFor="create-player-name">Player name</label>
+  <form id="start-form" onSubmit={preventDefaultEnhancer(handleSubmit)}>
+    <label htmlFor="player-name">Player name</label>
     <input
       className="w-full mb-6"
       value={playerName.value}
       onChange={handleChangeFactory(playerName.set)}
-      id="create-player-name"
+      id="player-name"
       type="text"
       name="player-name"
       maxLength={12}
