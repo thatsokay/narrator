@@ -181,7 +181,7 @@ describe('server', () => {
   })
 
   test('invalid create arguments', async (done) => {
-    await new Promise((resolve) => {
+    await new Promise<void>((resolve) => {
       client.once('connect', () => {
         resolve()
       })
@@ -204,7 +204,7 @@ describe('server', () => {
   })
 
   test('invalid join arguments', async (done) => {
-    await new Promise((resolve) => {
+    await new Promise<void>((resolve) => {
       client.once('connect', () => {
         resolve()
       })

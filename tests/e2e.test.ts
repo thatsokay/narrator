@@ -25,8 +25,10 @@ describe('e2e', () => {
   })
 
   test('start game', async (done) => {
-    await (await pages[0].waitFor('#start-form #player-name')).type('player0\n')
-    const roomIdHandle = await pages[0].waitFor('#game #room-id')
+    await (await pages[0]!.waitFor('#start-form #player-name')).type(
+      'player0\n',
+    )
+    const roomIdHandle = await pages[0]!.waitFor('#game #room-id')
     const roomId = (await roomIdHandle.evaluate(
       (node) => node.textContent,
     )) as string
