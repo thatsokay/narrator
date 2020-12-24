@@ -55,7 +55,6 @@ const clientConfig = {
 const serverConfig = {
   target: 'node',
   node: {
-    console: false,
     __dirname: false,
   },
   // https://stackoverflow.com/a/30709692

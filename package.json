@@ -5,8 +5,8 @@
   "scripts": {
     "start": "nodemon --watch build/server.js build/server.js",
     "test": "jest",
-    "build": "NODE_ENV=production webpack --progress --colors --mode=production",
-    "watch": "webpack --watch --progress --colors --mode=development",
+    "build": "NODE_ENV=production webpack --progress --color --mode=production",
+    "watch": "webpack --watch --progress --color --mode=development",
     "format": "prettier --write '{src,tests,.storybook}/**/*.{ts,tsx,js,jsx}' '*.js'",
     "storybook": "start-storybook --port 6006 --static-dir public --ci"
   },
@@ -52,7 +52,7 @@
     "ts-loader": "^6.2.0",
     "ts-node": "^8.4.1",
     "typescript": "^4.0.2",
-    "webpack": "^4.44.1",
+    "webpack": "^5.11.0",
     "webpack-cli": "^3.3.12"
   },
   "prettier": {
