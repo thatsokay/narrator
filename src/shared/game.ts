@@ -5,7 +5,7 @@ import {Reducer, Middleware} from '../server/store'
 
 type Phase<S extends string, P, T extends object = {}> = {
   status: S
-  players: Dict<P>
+  players: Record<string, P>
   error: string | null
 } & T
 
@@ -28,7 +28,7 @@ type Night = Phase<
 
 export type GameState = Waiting | Day | Night
 
-type PlainObject = Dict<unknown>
+type PlainObject = Record<string, unknown>
 
 export interface Action extends PlainObject {
   type: string
@@ -56,8 +56,8 @@ const shuffle = <T>(xs: T[]) => {
    */
   for (let i = xs.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1))
-    const temp = xs[i]
-    xs[i] = xs[j]
+    const temp = xs[i]!
+    xs[i] = xs[j]!
     xs[j] = temp
   }
 }
@@ -357,7 +357,9 @@ export const middleware: Middleware<GameState, PlainObject> = (store) => (
       if (wakeNextIndex < aliveRoleOrder.length) {
         setTimeout(
           () =>
-            next({type: `WAKE_${aliveRoleOrder[wakeNextIndex].toUpperCase()}`}),
+            next({
+              type: `WAKE_${aliveRoleOrder[wakeNextIndex]!.toUpperCase()}`,
+            }),
           5000,
         )
       } else {

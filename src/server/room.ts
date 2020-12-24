@@ -3,7 +3,7 @@ import {reducer, middleware, isPlainObject} from '../shared/game'
 
 export const newRoom = (_roomId: string) => {
   let store = applyMiddleware(middleware)(createStore)(reducer)
-  const sockets: Dict<string> = {}
+  const sockets: Record<string, string> = {}
 
   const join = (socketId: string, playerName: string) => {
     if (sockets[socketId]) {
