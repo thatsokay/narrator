@@ -1,16 +1,19 @@
 @tailwind base;
 @tailwind components;
-
-input {
-  @apply px-1 bg-transparent border-b border-grey-400 rounded-xs
-}
-
-label {
-  @apply px-1 text-xs text-grey-400 font-label uppercase
-}
-
-.btn {
-  @apply px-4 py-1 rounded-xs text-sm font-label uppercase
-}
-
 @tailwind utilities;
+
+@layer base {
+  input {
+    @apply px-1 bg-transparent border-b border-grey-400 rounded-xs;
+  }
+
+  label {
+    @apply px-1 text-xs text-grey-400 font-label uppercase;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply px-4 py-1 rounded-xs text-sm font-label uppercase;
+  }
+}
