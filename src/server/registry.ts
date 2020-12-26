@@ -3,7 +3,7 @@ import {newRoom, Room} from './room'
 const randomRoomId = (length: number) => {
   /* Generates a random string of capital letters of given length.
    */
-  let chars = []
+  const chars = []
   for (let i = 0; i < length; i++) {
     chars.push('ABCDEFGHIJKLMNOPQRSTUVWXYZ'.charAt(Math.random() * 26))
   }
@@ -20,7 +20,7 @@ export const newRegistry = () => {
    */
   const createRoom = () => {
     let roomId = randomRoomId(4)
-    while (rooms[roomId] !== undefined) {
+    while (roomId in rooms) {
       roomId = randomRoomId(4)
     }
     rooms[roomId] = newRoom(roomId)
@@ -31,7 +31,7 @@ export const newRegistry = () => {
    * Adds a player to the room with a given room id if it exists.
    */
   const joinRoom = (socketId: string, playerName: string, roomId: string) => {
-    if (sockets[socketId] !== undefined) {
+    if (socketId in sockets) {
       console.error(socketId, 'attempted to join room when already registered')
       throw 'Already in a room'
     }

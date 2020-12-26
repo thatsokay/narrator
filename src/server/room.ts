@@ -2,11 +2,11 @@ import {createStore, applyMiddleware} from './store'
 import {reducer, middleware, isPlainObject} from '../shared/game'
 
 export const newRoom = (_roomId: string) => {
-  let store = applyMiddleware(middleware)(createStore)(reducer)
+  const store = applyMiddleware(middleware)(createStore)(reducer)
   const sockets: Record<string, string> = {}
 
   const join = (socketId: string, playerName: string) => {
-    if (sockets[socketId]) {
+    if (socketId in sockets) {
       throw 'Socket already in room'
     }
     if (Object.values(sockets).includes(playerName)) {
