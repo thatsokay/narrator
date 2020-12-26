@@ -49,11 +49,12 @@ export const isPlainObject = (obj: any): obj is PlainObject => {
 
 const isAction = (action: PlainObject): action is Action =>
   typeof action.type === 'string' &&
-  (typeof action.sender === 'string' || typeof action.sender === 'undefined')
+  (typeof action.sender === 'string' || action.sender === undefined)
 
+/**
+ * Fisher-Yates shuffles an array in place.
+ */
 const shuffle = <T>(xs: T[]) => {
-  /* Fisher-Yates shuffles an array in place.
-   */
   for (let i = xs.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1))
     const temp = xs[i]!
@@ -82,7 +83,7 @@ const playerReducer: Reducer<GameState, Action> = (
     case 'waiting': {
       switch (action.type) {
         case 'JOIN': {
-          if (state.players[action.sender]) {
+          if (action.sender in state.players) {
             return {
               ...state,
               error: `Player name, ${action.sender}, is already taken`,
@@ -92,7 +93,7 @@ const playerReducer: Reducer<GameState, Action> = (
           return R.assocPath(['players', action.sender], {ready: false}, state)
         }
         case 'LEAVE': {
-          if (!state.players[action.sender]) {
+          if (!(action.sender in state.players)) {
             return {
               ...state,
               error: `Player, ${action.sender}, does not exist in this game`,
