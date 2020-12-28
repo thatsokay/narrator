@@ -1,13 +1,9 @@
 import R from 'ramda'
 
-import {
-  GameState,
-  reducer,
-  isPlainObject,
-  middleware,
-} from '../../src/shared/game'
+import {GameState, reducer, middleware} from '../../src/shared/game/reducer'
 import {ROLES} from '../../src/shared/roles'
 import {createStore, applyMiddleware, Middleware} from '../../src/server/store'
+import {RootAction} from '../../src/shared/game/actions'
 
 const initialState = Object.freeze(reducer())
 
@@ -16,19 +12,8 @@ describe('game', () => {
     jest.useFakeTimers()
   })
 
-  test('plain object type guard', () => {
-    expect(isPlainObject({})).toBe(true)
-    expect(isPlainObject(new Object())).toBe(true)
-    expect(isPlainObject(null)).toBe(false)
-    expect(isPlainObject(1)).toBe(false)
-    expect(isPlainObject([1, 2, 3])).toBe(false)
-    expect(isPlainObject(Object.create(null))).toBe(false)
-    expect(isPlainObject(new Date())).toBe(false)
-    expect(isPlainObject(Object.getPrototypeOf({}))).toBe(false)
-  })
-
   test('player joining', () => {
-    const joinState = reducer(initialState, {type: 'JOIN', sender: 'foo'})
+    const joinState = reducer(initialState, {type: 'room/join', sender: 'foo'})
     expect(joinState).toStrictEqual({
       ...initialState,
       players: {foo: {ready: false}},
@@ -36,13 +21,13 @@ describe('game', () => {
   })
 
   test('player leaving', () => {
-    const joinState = reducer(initialState, {type: 'JOIN', sender: 'foo'})
-    const leaveState = reducer(joinState, {type: 'LEAVE', sender: 'foo'})
+    const joinState = reducer(initialState, {type: 'room/join', sender: 'foo'})
+    const leaveState = reducer(joinState, {type: 'room/leave', sender: 'foo'})
     expect(leaveState).toStrictEqual(initialState)
   })
 
   test('non-existent player leaving', () => {
-    const newState = reducer(initialState, {type: 'LEAVE', sender: 'foo'})
+    const newState = reducer(initialState, {type: 'room/leave', sender: 'foo'})
     expect(newState).toStrictEqual({
       ...initialState,
       error: `Player, foo, does not exist in this game`,
@@ -51,9 +36,12 @@ describe('game', () => {
   })
 
   test('player joining with existing name', () => {
-    const firstJoinState = reducer(initialState, {type: 'JOIN', sender: 'foo'})
+    const firstJoinState = reducer(initialState, {
+      type: 'room/join',
+      sender: 'foo',
+    })
     const secondJoinState = reducer(firstJoinState, {
-      type: 'JOIN',
+      type: 'room/join',
       sender: 'foo',
     })
     expect(secondJoinState).toStrictEqual({
@@ -69,8 +57,8 @@ describe('game', () => {
     const startState = R.range(0, 6).reduce(
       (state, i) =>
         [
-          {type: 'JOIN', sender: `foo${i}`},
-          {type: 'READY', sender: `foo${i}`},
+          {type: 'room/join' as const, sender: `foo${i}`},
+          {type: 'waiting/ready' as const, sender: `foo${i}`},
         ].reduce(reducer, state),
       initialState,
     )
@@ -83,19 +71,10 @@ describe('game', () => {
   })
 
   test('invalid action', () => {
-    const invalidType = reducer(initialState, {type: 1, sender: 'foo'})
-    expect(invalidType).toStrictEqual({
-      ...initialState,
-      error: 'Invalid action',
+    const unknownType = reducer(initialState, {
+      type: 'asdf' as any,
+      sender: 'foo',
     })
-    expect(invalidType.players).toBe(initialState.players)
-    const invalidSender = reducer(initialState, {type: 'JOIN', sender: 1})
-    expect(invalidSender).toStrictEqual({
-      ...initialState,
-      error: 'Invalid action',
-    })
-    expect(invalidSender.players).toBe(initialState.players)
-    const unknownType = reducer(initialState, {type: 'ASDF', sender: 'foo'})
     expect(unknownType).toStrictEqual({
       ...initialState,
       error: 'Unknown action type',
@@ -112,8 +91,8 @@ describe('game', () => {
       ),
       error: null,
     }
-    let dispatcher: any = null
-    const reporter: Middleware<GameState, any> = (_store) => (next) => {
+    let dispatcher: any
+    const reporter: Middleware<GameState, RootAction> = (_store) => (next) => {
       dispatcher = jest.fn((action) => next(action))
       return dispatcher
     }
@@ -121,13 +100,13 @@ describe('game', () => {
       reducer,
       initialState,
     )
-    store.dispatch({type: 'READY', sender: '0'})
+    store.dispatch({type: 'waiting/ready', sender: '0'})
     expect(store.getState().status).toBe('firstNight')
     expect(dispatcher).toHaveBeenCalledTimes(2)
-    expect(dispatcher).toHaveBeenNthCalledWith(2, {type: 'START_GAME'})
+    expect(dispatcher).toHaveBeenNthCalledWith(2, {type: 'game/start'})
     jest.runAllTimers()
     expect(dispatcher).toHaveBeenCalledTimes(3)
-    expect(dispatcher).toHaveBeenNthCalledWith(3, {type: 'WAKE_MAFIA'})
+    expect(dispatcher).toHaveBeenNthCalledWith(3, {type: 'game/wake/mafia'})
   })
 
   test('first night', () => {
@@ -148,7 +127,7 @@ describe('game', () => {
       reducer,
       initialState,
     )
-    store.dispatch({type: 'ROLE_ACTION', roleAction: 'inform', sender: '0'})
+    store.dispatch({type: 'night/inform', sender: '0'})
     expect(store.getState()).toMatchObject({
       status: 'firstNight',
       awake: 'mafia',
@@ -157,7 +136,7 @@ describe('game', () => {
         '1': {role: {actions: {firstNight: {completed: false}}}},
       },
     })
-    store.dispatch({type: 'ROLE_ACTION', roleAction: 'inform', sender: '1'})
+    store.dispatch({type: 'night/inform', sender: '1'})
     expect(store.getState()).toMatchObject({
       status: 'firstNight',
       awake: null,
@@ -194,7 +173,7 @@ describe('game', () => {
       reducer,
       initialState,
     )
-    store.dispatch({type: 'ROLE_ACTION', lynch: '1', sender: '0'})
+    store.dispatch({type: 'day/lynch', lynch: '1', sender: '0'})
     expect(store.getState()).toMatchObject({
       status: 'day',
       players: {
@@ -214,7 +193,7 @@ describe('game', () => {
       },
     })
     // Test null vote
-    store.dispatch({type: 'ROLE_ACTION', lynch: null, sender: '1'})
+    store.dispatch({type: 'day/lynch', lynch: null, sender: '1'})
     expect(store.getState()).toMatchObject({
       status: 'day',
       players: {
@@ -232,7 +211,7 @@ describe('game', () => {
       },
     })
     // Test invalid lynch target vote
-    store.dispatch({type: 'ROLE_ACTION', lynch: 'x', sender: '2'})
+    store.dispatch({type: 'day/lynch', lynch: 'x', sender: '2'})
     expect(store.getState()).toMatchObject({
       status: 'day',
       players: {
@@ -250,7 +229,7 @@ describe('game', () => {
       },
     })
     R.range(2, 6).forEach((i) =>
-      store.dispatch({type: 'ROLE_ACTION', lynch: '5', sender: `${i}`}),
+      store.dispatch({type: 'day/lynch', lynch: '5', sender: `${i}`}),
     )
     expect(store.getState()).toMatchObject({
       status: 'night',

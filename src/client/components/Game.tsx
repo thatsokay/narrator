@@ -3,11 +3,11 @@ import {Observable} from 'rxjs'
 
 import {
   GameState,
-  Action,
   initialState,
   countLynchVotes,
   countVoterPopulation,
-} from '../../shared/game'
+} from '../../shared/game/reducer'
+import {ClientAction} from '../../shared/game/actions'
 
 /**
  * Subscribes to the given observable and returns the latest game state.
@@ -28,7 +28,7 @@ const useGameState = (gameState$: Observable<GameState>) => {
  */
 const useLynchVoteState = (
   gameState: GameState,
-  sendAction: (action: Action) => void,
+  sendAction: (action: ClientAction) => void,
 ) => {
   // Player that this client is voting to kill.
   // `null` is a vote to lynch no-one, `undefined` is no vote.
@@ -39,7 +39,7 @@ const useLynchVoteState = (
   // Send action to server on vote change.
   useEffect(() => {
     if (lynchVote !== undefined) {
-      sendAction({type: 'ROLE_ACTION', lynch: lynchVote})
+      sendAction({type: 'day/lynch', lynch: lynchVote})
     }
   }, [lynchVote, sendAction])
   return lynchVoteState
@@ -49,7 +49,7 @@ interface Props {
   playerName: string
   roomId: string
   gameState$: Observable<GameState>
-  sendAction: (action: Action) => void
+  sendAction: (action: ClientAction) => void
 }
 
 const Game = (props: Props) => {
@@ -157,7 +157,7 @@ interface ActionableProps extends Omit<Props, 'gameState$'> {
 
 const ReadyActionable = ({gameState, sendAction}: ActionableProps) =>
   gameState.status === 'waiting' ? (
-    <button onClick={() => sendAction({type: 'READY'})}>Ready</button>
+    <button onClick={() => sendAction({type: 'waiting/ready'})}>Ready</button>
   ) : (
     <></>
   )
@@ -170,7 +170,7 @@ const InformActionable = ({
   gameState.status === 'firstNight' &&
   gameState.players[playerName]?.role.name === gameState.awake &&
   gameState.players[playerName]?.role.actions.firstNight?.name === 'inform' ? (
-    <button onClick={() => sendAction({type: 'ROLE_ACTION'})}>Inform</button>
+    <button onClick={() => sendAction({type: 'night/inform'})}>Inform</button>
   ) : (
     <></>
   )

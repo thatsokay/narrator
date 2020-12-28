@@ -1,7 +1,8 @@
 import * as R from 'ramda'
 
-import {Role, RoleName, ROLES} from './roles'
-import {Reducer, Middleware} from '../server/store'
+import {RootAction, PlayerAction} from './actions'
+import {Role, RoleName, ROLES} from '../roles'
+import {Reducer, Middleware} from '../../server/store'
 
 type Phase<S extends string, P, T extends object = {}> = {
   status: S
@@ -28,29 +29,6 @@ type Night = Phase<
 
 export type GameState = Waiting | Day | Night
 
-type PlainObject = Record<string, unknown>
-
-export interface Action extends PlainObject {
-  type: string
-  sender?: string
-}
-
-// https://github.com/reduxjs/redux/blob/master/src/utils/isPlainObject.ts
-// See also:
-// https://github.com/char0n/ramda-adjunct/blob/master/src/isPlainObj.js
-export const isPlainObject = (obj: any): obj is PlainObject => {
-  if (typeof obj !== 'object' || obj === null) {
-    return false
-  }
-
-  const proto = Object.getPrototypeOf(obj)
-  return !!proto && Object.getPrototypeOf(proto) === null
-}
-
-const isAction = (action: PlainObject): action is Action =>
-  typeof action.type === 'string' &&
-  (typeof action.sender === 'string' || action.sender === undefined)
-
 /**
  * Fisher-Yates shuffles an array in place.
  */
@@ -69,20 +47,17 @@ export const initialState: GameState = {
   error: null,
 }
 
-const playerReducer: Reducer<GameState, Action> = (
+const playerReducer: Reducer<GameState, PlayerAction> = (
   state = initialState,
   action,
 ) => {
   if (action === undefined) {
     return state
   }
-  if (action.sender === undefined) {
-    return state
-  }
   switch (state.status) {
     case 'waiting': {
       switch (action.type) {
-        case 'JOIN': {
+        case 'room/join': {
           if (action.sender in state.players) {
             return {
               ...state,
@@ -92,7 +67,7 @@ const playerReducer: Reducer<GameState, Action> = (
           // XXX: `assocPath` can produce invalid state
           return R.assocPath(['players', action.sender], {ready: false}, state)
         }
-        case 'LEAVE': {
+        case 'room/leave': {
           if (!(action.sender in state.players)) {
             return {
               ...state,
@@ -102,7 +77,7 @@ const playerReducer: Reducer<GameState, Action> = (
           // XXX: `dissocPath` can produce invalid state
           return R.dissocPath(['players', action.sender], state)
         }
-        case 'READY': {
+        case 'waiting/ready': {
           if (state.players[action.sender]!.ready) {
             // Don't change player state if already ready
             return state
@@ -125,7 +100,7 @@ const playerReducer: Reducer<GameState, Action> = (
       }
       switch (state.awake) {
         case 'mafia': {
-          if (action.type !== 'ROLE_ACTION') {
+          if (action.type !== 'night/inform') {
             // TODO: Error message
             return state
           }
@@ -150,7 +125,7 @@ const playerReducer: Reducer<GameState, Action> = (
       }
     }
     case 'day': {
-      if (action.type !== 'ROLE_ACTION') {
+      if (action.type !== 'day/lynch') {
         // TODO: Error message
         return state
       }
@@ -182,7 +157,7 @@ const playerReducer: Reducer<GameState, Action> = (
   }
 }
 
-export const reducer: Reducer<GameState, PlainObject> = (
+export const reducer: Reducer<GameState, RootAction> = (
   state = initialState,
   action,
 ) => {
@@ -190,17 +165,11 @@ export const reducer: Reducer<GameState, PlainObject> = (
   if (action === undefined) {
     return cleanState
   }
-  if (!isAction(action)) {
-    return {
-      ...cleanState,
-      error: 'Invalid action',
-    }
-  }
-  if (action.sender !== undefined) {
+  if ('sender' in action) {
     return playerReducer(cleanState, action)
   }
   switch (action.type) {
-    case 'START_GAME': {
+    case 'game/start': {
       const numPlayers = Object.keys(cleanState.players).length
       // Gives 1 mafia for 6 players, 2 at 8, 3 at 12, and 4 at 18
       const numMafia = Math.floor(Math.sqrt(numPlayers - 5.75) + 0.5) || 1
@@ -218,19 +187,19 @@ export const reducer: Reducer<GameState, PlainObject> = (
         awake: null,
       }
     }
-    case 'SLEEP': {
+    case 'game/sleep': {
       return {
         ...cleanState,
         awake: null,
       }
     }
-    case 'WAKE_MAFIA': {
+    case 'game/wake/mafia': {
       return {
         ...cleanState,
         awake: 'mafia',
       }
     }
-    case 'PHASE_DAY': {
+    case 'game/phase/day': {
       if (cleanState.status !== 'firstNight' && cleanState.status !== 'night') {
         return cleanState
       }
@@ -253,7 +222,7 @@ export const reducer: Reducer<GameState, PlainObject> = (
         status: 'day',
       }
     }
-    case 'PHASE_NIGHT': {
+    case 'game/phase/night': {
       if (cleanState.status !== 'day') {
         return cleanState
       }
@@ -275,7 +244,7 @@ export const reducer: Reducer<GameState, PlainObject> = (
         awake: null,
       }
     }
-    case 'LYNCH': {
+    case 'game/lynch': {
       if (typeof action.lynch !== 'string') {
         return cleanState
       }
@@ -291,7 +260,7 @@ export const reducer: Reducer<GameState, PlainObject> = (
 }
 
 const nightRoleOrder = ['mafia', 'detective', 'nurse'] as const
-export const middleware: Middleware<GameState, PlainObject> = (store) => (
+export const middleware: Middleware<GameState, RootAction> = (store) => (
   next,
 ) => (action) => {
   const beforeState = store.getState()
@@ -300,7 +269,7 @@ export const middleware: Middleware<GameState, PlainObject> = (store) => (
 
   switch (beforeState.status) {
     case 'waiting': {
-      if (action.type !== 'READY') {
+      if (action.type !== 'waiting/ready') {
         return
       }
       if (
@@ -311,12 +280,12 @@ export const middleware: Middleware<GameState, PlainObject> = (store) => (
         return
       }
       // Everyone's ready. Let's go.
-      next({type: 'START_GAME'})
-      setTimeout(() => next({type: 'WAKE_MAFIA'}), 5000)
+      next({type: 'game/start'})
+      setTimeout(() => next({type: 'game/wake/mafia'}), 5000)
       return
     }
     case 'firstNight': {
-      if (action.type !== 'ROLE_ACTION') {
+      if (action.type !== 'night/inform') {
         return
       }
       if (beforeState.status !== 'firstNight') {
@@ -331,7 +300,7 @@ export const middleware: Middleware<GameState, PlainObject> = (store) => (
       if (afterState.awake === null) {
         return
       }
-      const phaseComplete = !Object.values(afterState.players).find(
+      const phaseComplete = !Object.values(afterState.players).some(
         // Returns true if there exists a living, awake player that has not
         // completed their role action
         ({alive, role}) =>
@@ -342,7 +311,7 @@ export const middleware: Middleware<GameState, PlainObject> = (store) => (
       if (!phaseComplete) {
         return
       }
-      next({type: 'SLEEP'})
+      next({type: 'game/sleep'})
       const aliveRoles = new Set(
         Object.values(afterState.players)
           .filter(({alive, role}) => alive && role.actions.firstNight)
@@ -356,20 +325,16 @@ export const middleware: Middleware<GameState, PlainObject> = (store) => (
       const wakeNextIndex =
         aliveRoleOrder.findIndex((role) => role === afterState.awake) + 1
       if (wakeNextIndex < aliveRoleOrder.length) {
-        setTimeout(
-          () =>
-            next({
-              type: `WAKE_${aliveRoleOrder[wakeNextIndex]!.toUpperCase()}`,
-            }),
-          5000,
-        )
+        setTimeout(() => next({
+          type: `game/wake/${aliveRoleOrder[wakeNextIndex]!}` as `game/wake/${'mafia' | 'detective' | 'nurse'}`,
+        }), 5000)
       } else {
-        setTimeout(() => next({type: 'PHASE_DAY'}), 5000)
+        setTimeout(() => next({type: 'game/phase/day'}), 5000)
       }
       return
     }
     case 'day': {
-      if (action.type !== 'ROLE_ACTION') {
+      if (action.type !== 'day/lynch') {
         return
       }
       if (afterState.status !== 'day') {
@@ -384,10 +349,10 @@ export const middleware: Middleware<GameState, PlainObject> = (store) => (
         return
       }
       if (lynch) {
-        next({type: 'LYNCH', lynch})
+        next({type: 'game/lynch', lynch})
       }
-      next({type: 'PHASE_NIGHT'})
-      setTimeout(() => next({type: 'WAKE_MAFIA'}), 5000)
+      next({type: 'game/phase/night'})
+      setTimeout(() => next({type: 'game/wake/mafia'}), 5000)
       return
     }
     default: {

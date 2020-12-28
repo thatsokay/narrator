@@ -4,7 +4,7 @@ import R from 'ramda'
 
 import {EVENTS} from '../../src/shared/constants'
 import {EventResponse} from '../../src/shared/types'
-import {GameState} from '../../src/shared/game'
+import {GameState} from '../../src/shared/game/reducer'
 import app from '../../src/server/server'
 
 describe('server', () => {

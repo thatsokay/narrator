@@ -7,7 +7,8 @@ import HomePage from './HomePage'
 import Game from './Game'
 import {EVENTS} from '../../shared/constants'
 import {EventResponse} from '../../shared/types'
-import {GameState, Action, initialState} from '../../shared/game'
+import {GameState, initialState} from '../../shared/game/reducer'
+import {ClientAction} from '../../shared/game/actions'
 
 const App = () => {
   const [playerName, setPlayerName] = useState('')
@@ -97,7 +98,8 @@ const App = () => {
               playerName,
               roomId,
               gameState$,
-              sendAction: (action: Action) => socket.emit('gameAction', action),
+              sendAction: (action: ClientAction) =>
+                socket.emit('gameAction', action),
             }}
           />
         ) : (

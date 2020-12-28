@@ -1,5 +1,6 @@
 import {createStore, applyMiddleware} from './store'
-import {reducer, middleware, isPlainObject} from '../shared/game'
+import {reducer, middleware} from '../shared/game/reducer'
+import {clientAction} from '../shared/game/actions'
 
 export const newRoom = (_roomId: string) => {
   const store = applyMiddleware(middleware)(createStore)(reducer)
@@ -12,7 +13,7 @@ export const newRoom = (_roomId: string) => {
     if (Object.values(sockets).includes(playerName)) {
       throw 'Player name is already taken'
     }
-    store.dispatch({type: 'JOIN', sender: playerName})
+    store.dispatch({type: 'room/join', sender: playerName})
     const state = store.getState()
     if (state.error) {
       // Should be unreachable
@@ -22,7 +23,7 @@ export const newRoom = (_roomId: string) => {
 
     const send$ = store.state$
     const receive = (action: unknown) => {
-      if (isPlainObject(action)) {
+      if (clientAction.guard(action)) {
         store.dispatch({...action, sender: playerName})
       }
     }
@@ -30,10 +31,10 @@ export const newRoom = (_roomId: string) => {
   }
 
   const leave = (socketId: string) => {
-    if (!sockets[socketId]) {
+    if (!(socketId in sockets)) {
       throw 'Socket not in room'
     }
-    store.dispatch({type: 'LEAVE', sender: sockets[socketId]})
+    store.dispatch({type: 'room/leave', sender: sockets[socketId]!})
     const state = store.getState()
     if (state.error) {
       // Should be unreachable

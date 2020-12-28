@@ -57,7 +57,7 @@ describe('room', () => {
       ),
     )
 
-    sockets.forEach(([_, receive]) => receive({type: 'READY'}))
+    sockets.forEach(([_, receive]) => receive({type: 'waiting/ready'}))
     sockets.forEach(([sender, _]) =>
       expect(sender).toHaveBeenLastCalledWith(
         expect.objectContaining({status: 'firstNight', awake: null}),
