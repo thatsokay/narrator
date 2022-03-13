@@ -24,32 +24,35 @@ describe('e2e', () => {
     server.close()
   })
 
-  test('start game', async (done) => {
-    await (await pages[0]!.waitFor('#start-form #player-name')).type(
-      'player0\n',
+  test('start game', async () => {
+    const playerNameHandle = await pages[0]!.waitForSelector(
+      '#start-form #player-name',
     )
-    const roomIdHandle = await pages[0]!.waitFor('#game #room-id')
-    const roomId = (await roomIdHandle.evaluate(
+    await playerNameHandle?.type('player0\n')
+    const roomIdHandle = await pages[0]!.waitForSelector('#game #room-id')
+    const roomId = (await roomIdHandle?.evaluate(
       (node) => node.textContent,
     )) as string
     expect(roomId.length).toBe(4)
     await Promise.all(
       pages.slice(1).map(async (page, i) => {
-        await (await page.waitFor('#join-room-form')).click()
-        const roomHandle = await page.waitFor('#start-form #room-id')
-        await roomHandle.type(roomId)
-        const nameHandle = await page.waitFor('#start-form #player-name')
-        await nameHandle.type(`player${i + 1}\n`)
+        const joinRoomHandle = await page.waitForSelector('#join-room-form')
+        await joinRoomHandle?.click()
+        const roomHandle = await page.waitForSelector('#start-form #room-id')
+        await roomHandle?.type(roomId)
+        const nameHandle = await page.waitForSelector(
+          '#start-form #player-name',
+        )
+        await nameHandle?.type(`player${i + 1}\n`)
       }),
     )
     await Promise.all(
       pages.map(async (page) => {
-        const statusHandle = await page.waitFor('h2')
-        expect(await statusHandle.evaluate((node) => node.textContent)).toBe(
+        const statusHandle = await page.waitForSelector('h2')
+        expect(await statusHandle?.evaluate((node) => node.textContent)).toBe(
           'waiting',
         )
       }),
     )
-    done()
   })
 })

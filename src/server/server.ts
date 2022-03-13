@@ -2,14 +2,14 @@ import http from 'http'
 import Koa from 'koa'
 import koaStatic from 'koa-static'
 import send from 'koa-send'
-import socketIO from 'socket.io'
+import {Server} from 'socket.io'
 import {Observable} from 'rxjs'
 
 import {newRegistry} from './registry'
 import {EVENTS} from '../shared/constants'
 
 const app = new Koa()
-const io = socketIO()
+const io = new Server()
 const registry = newRegistry()
 
 const root = 'build/public'

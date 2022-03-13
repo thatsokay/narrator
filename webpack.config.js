@@ -41,11 +41,8 @@ const clientConfig = {
       },
       {
         test: /\.woff2?$/i,
-        loader: 'file-loader',
-        options: {
-          outputPath: 'fonts',
-          name: '[name].[ext]',
-        },
+        type: 'asset/resource',
+        generator: {filename: 'fonts/[name].[ext]'},
       },
     ],
   },

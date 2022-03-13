@@ -1,5 +1,5 @@
 import {Server} from 'http'
-import socketIOClient from 'socket.io-client'
+import {type Socket, io} from 'socket.io-client'
 import R from 'ramda'
 
 import {EVENTS} from '../../src/shared/constants'
@@ -9,11 +9,11 @@ import app from '../../src/server/server'
 
 describe('server', () => {
   let server: Server
-  let client: SocketIOClient.Socket
+  let client: Socket
 
   beforeEach(() => {
     server = app.listen(3001)
-    client = socketIOClient('localhost:3001')
+    client = io('http://localhost:3001')
   })
 
   afterEach(() => {
@@ -46,7 +46,7 @@ describe('server', () => {
     })
   })
 
-  test('creating multiple rooms', async (done) => {
+  test('creating multiple rooms', async () => {
     await expect(
       new Promise((resolve) => {
         client.once('connect', () => {
@@ -72,10 +72,9 @@ describe('server', () => {
         )
       }),
     ).resolves.toStrictEqual({success: false, reason: 'Already in a room'})
-    done()
   })
 
-  test('creating and joining room from single socket', async (done) => {
+  test('creating and joining room from single socket', async () => {
     const response = await new Promise<EventResponse<{roomId: string}>>(
       (resolve) => {
         client.once('connect', () => {
@@ -91,7 +90,6 @@ describe('server', () => {
     )
     expect(response.success).toBe(true)
     if (!response.success) {
-      done()
       return
     }
 
@@ -107,10 +105,9 @@ describe('server', () => {
         )
       }),
     ).resolves.toStrictEqual({success: false, reason: 'Already in a room'})
-    done()
   })
 
-  test('start game', async (done) => {
+  test('start game', async () => {
     // Connect and create room
     const createResponse = await new Promise<EventResponse<{roomId: string}>>(
       (resolve) => {
@@ -127,13 +124,12 @@ describe('server', () => {
     )
     expect(createResponse.success).toBe(true)
     if (!createResponse.success) {
-      done()
       return
     }
 
     // 5 more connection join room
     const joinSockets = R.range(0, 5).map(() =>
-      socketIOClient('localhost:3001'),
+      io('http://localhost:3001'),
     )
     await expect(
       Promise.all(
@@ -177,10 +173,9 @@ describe('server', () => {
     ).resolves.toStrictEqual(new Array(6).fill(undefined))
 
     joinSockets.map((socket) => socket.close())
-    done()
   })
 
-  test('invalid create arguments', async (done) => {
+  test('invalid create arguments', async () => {
     await new Promise<void>((resolve) => {
       client.once('connect', () => {
         resolve()
@@ -200,10 +195,9 @@ describe('server', () => {
         }, 500)
       }),
     ).rejects.toBe('too slow')
-    done()
   })
 
-  test('invalid join arguments', async (done) => {
+  test('invalid join arguments', async () => {
     await new Promise<void>((resolve) => {
       client.once('connect', () => {
         resolve()
@@ -224,6 +218,5 @@ describe('server', () => {
         }, 500)
       }),
     ).rejects.toBe('too slow')
-    done()
   })
 })

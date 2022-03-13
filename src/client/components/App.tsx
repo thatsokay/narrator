@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react'
-import socketIO from 'socket.io-client'
+import {type Socket, io} from 'socket.io-client'
 import {BehaviorSubject, fromEvent} from 'rxjs'
 
 import AppBar from './AppBar'
@@ -13,7 +13,7 @@ import {ClientAction} from '../../shared/game/actions'
 const App = () => {
   const [playerName, setPlayerName] = useState('')
   const [roomId, setRoomId] = useState('')
-  const [socket, setSocket] = useState<SocketIOClient.Socket | null>(null)
+  const [socket, setSocket] = useState<Socket | null>(null)
   const [inRoom, setInRoom] = useState(false)
   const [gameState$] = useState(new BehaviorSubject(initialState))
 
@@ -38,7 +38,7 @@ const App = () => {
      * handler. Creates a socket that emits an event on connection depending on
      * whether a room id was provided.
      */
-    const socket = socketIO()
+    const socket = io()
     socket.once('connect', () => {
       console.log('connected')
       if (roomId === undefined) {
