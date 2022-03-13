@@ -157,7 +157,7 @@ describe('server', () => {
             new Promise<void>((resolve) => {
               socket.emit(
                 'gameAction',
-                {type: 'READY'},
+                {type: 'waiting/ready'},
                 (response: EventResponse) => {
                   expect(response.success).toBe(true)
                 },
