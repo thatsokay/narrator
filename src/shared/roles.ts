@@ -1,150 +1,123 @@
-export interface RoleBase {
-  name: RoleName
-  description: string
-  side: 'mafia' | 'village' // Which side they win with
-  appearsAs: 'mafia' | 'village' // Side revealed on 'see' actions
-  actions: RoleActions<any, any, any>
-}
+import {DeepReadonly} from './types'
 
 export type RoleName = 'villager' | 'mafia' | 'detective' | 'nurse'
 
 type PhaseActionType =
-  | 'inform' // Reveal role to others at night
   | 'lynch' // Vote to lynch target at day
   | 'kill' // Vote to kill target at night
-  | 'investigate' // Reveal a target's `appearAs`
+  | 'investigate' // Reveal a target's `side`
   | 'heal' // Prevent a kill on target
 
-type PhaseActionName = {name: PhaseActionType}
-
-type PhaseAction<T extends PhaseActionName> = {
-  completed: boolean
-} & T
-
-interface RoleActions<
-  F extends PhaseActionName | never,
-  D extends PhaseActionName | never,
-  N extends PhaseActionName | never
-> {
-  /* Want to:
-   * - specify that certain fields never have a value
-   * - use optional chaining on arbitrary RoleActions
-   *   (eg. `actions?.day?.name` on `RoleAction<never, never, never>`)
-   * - set RoleActions to an empty object without explicitly specifying each
-   *   property as undefined
-   */
-  firstNight?: F extends never ? never : PhaseAction<F>
-  day?: D extends never ? never : PhaseAction<D>
-  night?: N extends never ? never : PhaseAction<N>
+export interface RoleBase {
+  name: RoleName
+  side: 'mafia' | 'village' // Which side they win with
+  actions: {day?: PhaseActionType; night?: PhaseActionType}
 }
-
-type Inform = {name: 'inform'}
-type Lynch = {name: 'lynch'; lynch: string | null}
-type Kill = {name: 'kill'; kill: string}
-type Investigate = {name: 'investigate'; investigate: string}
-type Heal = {name: 'heal'; heal: string}
 
 interface Villager extends RoleBase {
   name: 'villager'
-  description: string
   side: 'village'
-  appearsAs: 'village'
-  actions: RoleActions<never, Lynch, never>
+  actions: {
+    day: 'lynch'
+    night?: never
+  }
 }
 
 interface Mafia extends RoleBase {
   name: 'mafia'
-  description: string
   side: 'mafia'
-  appearsAs: 'mafia'
-  actions: RoleActions<Inform, Lynch, Kill>
+  actions: {
+    day: 'lynch'
+    night: 'kill'
+  }
 }
 
 interface Detective extends RoleBase {
   name: 'detective'
-  description: string
   side: 'village'
-  appearsAs: 'village'
-  actions: RoleActions<never, Lynch, Investigate>
+  actions: {
+    day: 'lynch'
+    night: 'investigate'
+  }
 }
 
 interface Nurse extends RoleBase {
   name: 'nurse'
-  description: string
   side: 'village'
-  appearsAs: 'village'
-  actions: RoleActions<never, Lynch, Heal>
+  actions: {
+    day: 'lynch'
+    night: 'heal'
+  }
 }
 
 export type Role = Villager | Mafia | Detective | Nurse
 
-export const ROLES = {
+export const ROLES: DeepReadonly<{[T in RoleName]: Role & {name: T}}> = {
   villager: {
     name: 'villager',
-    description: '',
     side: 'village',
-    appearsAs: 'village',
     actions: {
-      day: {
-        completed: false,
-        name: 'lynch',
-        lynch: null,
-      },
+      day: 'lynch',
     },
-  } as Villager,
+  },
   mafia: {
     name: 'mafia',
-    description: '',
     side: 'mafia',
-    appearsAs: 'mafia',
     actions: {
-      firstNight: {
-        completed: false,
-        name: 'inform',
-      },
-      day: {
-        completed: false,
-        name: 'lynch',
-        lynch: null,
-      },
-      night: {
-        completed: false,
-        name: 'kill',
-      },
+      day: 'lynch',
+      night: 'kill',
     },
-  } as Mafia,
+  },
   detective: {
     name: 'detective',
-    description: '',
     side: 'village',
-    appearsAs: 'village',
     actions: {
-      day: {
-        completed: false,
-        name: 'lynch',
-        lynch: null,
-      },
-      night: {
-        completed: false,
-        name: 'investigate',
-      },
+      day: 'lynch',
+      night: 'investigate',
     },
-  } as Detective,
+  },
   nurse: {
     name: 'nurse',
-    description: '',
     side: 'village',
-    appearsAs: 'village',
     actions: {
-      day: {
-        completed: false,
-        name: 'lynch',
-        lynch: null,
-      },
-      night: {
-        completed: false,
-        name: 'heal',
-      },
+      day: 'lynch',
+      night: 'heal',
     },
-  } as Nurse,
-} as const
+  },
+}
+
+export interface PhaseActionStates extends Record<PhaseActionType, {}> {
+  lynch: {
+    lynch: string | null
+  }
+  kill: {
+    kill: string
+  }
+  investigate: {
+    investigate: string
+  }
+  heal: {
+    heal: string
+  }
+}
+
+type PhaseActionState<T extends PhaseActionType | undefined> =
+  T extends keyof PhaseActionStates ? PhaseActionStates[T] : undefined
+
+type RoleActionState<TRole extends Role> = {
+  day?: PhaseActionState<TRole['actions']['day']>
+  night?: PhaseActionState<TRole['actions']['night']>
+}
+
+type RoleState<TRole extends Role> = {
+  name: TRole['name']
+  actionStates: RoleActionState<TRole>
+}
+
+export type RoleActionStates = {
+  [TRole in Role as TRole['name']]: RoleActionState<TRole>
+}
+
+export type RoleStates = {
+  [TRole in Role as TRole['name']]: RoleState<TRole>
+}

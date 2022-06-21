@@ -163,7 +163,7 @@ describe('server', () => {
                 },
               )
               socket.on('gameState', (state: GameState) => {
-                if (state.status === 'firstNight') {
+                if (state.status === 'night') {
                   resolve()
                 }
               })

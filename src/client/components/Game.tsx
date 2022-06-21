@@ -72,9 +72,7 @@ const Game = (props: Props) => {
   return (
     <div id="game">
       <div className="flex justify-between">
-        <h2 className="capitalize text-xl font-medium">
-          {gameState.status === 'firstNight' ? 'night' : gameState.status}
-        </h2>
+        <h2 className="capitalize text-xl font-medium">{gameState.status}</h2>
         <h2 id="room-id" className="text-xl font-medium">
           {props.roomId}
         </h2>
@@ -86,13 +84,12 @@ const Game = (props: Props) => {
           </span>
         </div>
       )}
-      {(gameState.status === 'firstNight' || gameState.status === 'night') && (
+      {gameState.status === 'night' && (
         <p>
           Awake:{' '}
           <span className="capitalize">{gameState.awake ?? 'nobody'}</span>
         </p>
       )}
-      <InformActionable {...{...props, gameState}} />
       <ReadyActionable {...{...props, gameState}} />
       <ul>
         {gameState.status === 'waiting' &&
@@ -158,19 +155,6 @@ interface ActionableProps extends Omit<Props, 'gameState$'> {
 const ReadyActionable = ({gameState, sendAction}: ActionableProps) =>
   gameState.status === 'waiting' ? (
     <button onClick={() => sendAction({type: 'waiting/ready'})}>Ready</button>
-  ) : (
-    <></>
-  )
-
-const InformActionable = ({
-  gameState,
-  playerName,
-  sendAction,
-}: ActionableProps) =>
-  gameState.status === 'firstNight' &&
-  gameState.players[playerName]?.role.name === gameState.awake &&
-  gameState.players[playerName]?.role.actions.firstNight?.name === 'inform' ? (
-    <button onClick={() => sendAction({type: 'night/inform'})}>Inform</button>
   ) : (
     <></>
   )

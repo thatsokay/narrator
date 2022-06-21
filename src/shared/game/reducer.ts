@@ -1,28 +1,29 @@
 import * as R from 'ramda'
 
 import {RootAction, PlayerAction} from './actions'
-import {Role, RoleName, ROLES} from '../roles'
+import {RoleName, RoleStates, ROLES} from '../roles'
 import {Reducer, Middleware} from '../../server/store'
 
-type Phase<S extends string, P, T extends object = {}> = {
-  status: S
-  players: Record<string, P>
-  error: string | null
-} & T
+type Phase<TStatus extends string, TPlayerState, TFields extends object = {}> =
+  {
+    status: TStatus
+    players: Record<string, TPlayerState>
+    error: string | null
+  } & TFields
 
 type Waiting = Phase<'waiting', {ready: boolean}>
 type Day = Phase<
   'day',
   {
     alive: boolean
-    role: Role
+    role: RoleStates[keyof RoleStates]
   }
 >
 type Night = Phase<
-  'firstNight' | 'night',
+  'night',
   {
     alive: boolean
-    role: Role
+    role: RoleStates[keyof RoleStates]
   },
   {awake: RoleName | null}
 >
@@ -93,37 +94,6 @@ const playerReducer: Reducer<GameState, PlayerAction> = (
         }
       }
     }
-    case 'firstNight': {
-      if (state.players[action.sender]!.role.name !== state.awake) {
-        // TODO: Error message
-        return state
-      }
-      switch (state.awake) {
-        case 'mafia': {
-          if (action.type !== 'night/inform') {
-            // TODO: Error message
-            return state
-          }
-          // XXX: `assocPath` can produce invalid state
-          return R.assocPath(
-            [
-              'players',
-              action.sender,
-              'role',
-              'actions',
-              'firstNight',
-              'completed',
-            ],
-            true,
-            state,
-          )
-        }
-        default: {
-          // TODO: Other awake states
-          return state
-        }
-      }
-    }
     case 'day': {
       if (action.type !== 'day/lynch') {
         // TODO: Error message
@@ -133,22 +103,16 @@ const playerReducer: Reducer<GameState, PlayerAction> = (
         // TODO: Error message
         return state
       }
-      if (action.lynch !== null && !state.players[action.lynch]) {
+      if (action.lynch !== null && !(action.lynch in state.players)) {
         // TODO: Error message
         return state
       }
-      return R.pipe(
-        // XXX: `assocPath` can produce invalid state
-        R.assocPath<string | null, GameState>(
-          ['players', action.sender, 'role', 'actions', 'day', 'lynch'],
-          action.lynch,
-        ),
-        // XXX: `assocPath` can produce invalid state
-        R.assocPath<boolean, GameState>(
-          ['players', action.sender, 'role', 'actions', 'day', 'completed'],
-          true,
-        ),
-      )(state)
+      // XXX: `assocPath` can produce invalid state
+      return R.assocPath<string | null, GameState>(
+        ['players', action.sender, 'role', 'actionStates', 'day', 'lynch'],
+        action.lynch,
+        state,
+      )
     }
     default: {
       // TODO: Other phases
@@ -173,15 +137,23 @@ export const reducer: Reducer<GameState, RootAction> = (
       const numPlayers = Object.keys(cleanState.players).length
       // Gives 1 mafia for 6 players, 2 at 8, 3 at 12, and 4 at 18
       const numMafia = Math.floor(Math.sqrt(numPlayers - 5.75) + 0.5) || 1
-      // Create array of available roles
-      const playerStates = [ROLES.detective, ROLES.nurse]
-        .concat(new Array(numMafia).fill(ROLES.mafia))
-        .concat(new Array(numPlayers - numMafia - 2).fill(ROLES.villager))
-        // Produce a player state for each available role
-        .map((role) => ({alive: true, role}))
+      // Create array of available role states
+      const availableRoles: RoleName[] = (['detective', 'nurse'] as const)
+        .concat(new Array(numMafia).fill('mafia'))
+        .concat(new Array(numPlayers - numMafia - 2).fill('villager'))
+      // Produce a player state for each available role
+      const playerStates: Night['players'][string][] = availableRoles.map(
+        (roleName): Night['players'][string] => ({
+          alive: true,
+          role: {
+            name: roleName,
+            actionStates: {},
+          },
+        }),
+      )
       shuffle(playerStates)
       return {
-        status: 'firstNight',
+        status: 'night',
         players: R.zipObj(Object.keys(cleanState.players), playerStates),
         error: null,
         awake: null,
@@ -200,44 +172,37 @@ export const reducer: Reducer<GameState, RootAction> = (
       }
     }
     case 'game/phase/day': {
-      if (cleanState.status !== 'firstNight' && cleanState.status !== 'night') {
+      if (cleanState.status !== 'night') {
         return cleanState
       }
       const {awake, ...dayState} = cleanState
       // Reset role action completed state
-      const newState = Object.entries(dayState.players)
-        .filter(([_, player]) => player.role.actions.firstNight)
-        .reduce(
-          (state, [name, _]) =>
-            // XXX: `assocPath` can produce invalid state
-            R.assocPath(
-              ['players', name, 'role', 'actions', 'firstNight', 'completed'],
-              false,
-              state,
-            ),
-          dayState,
-        )
-      return {
-        ...newState,
-        status: 'day',
-      }
+      const newState: Day = Object.keys(dayState.players).reduce(
+        (state, playerName) =>
+          // XXX: `assocPath` can produce invalid state
+          R.assocPath(
+            ['players', playerName, 'role', 'actionStates'],
+            {},
+            state,
+          ),
+        {...dayState, status: 'day'},
+      )
+      return newState
     }
     case 'game/phase/night': {
       if (cleanState.status !== 'day') {
         return cleanState
       }
-      const newState = Object.entries(cleanState.players)
-        .filter(([_, player]) => player.role.actions.day)
-        .reduce(
-          (state, [name, _]) =>
-            // XXX: `assocPath` can produce invalid state
-            R.assocPath(
-              ['players', name, 'role', 'actions', 'day', 'completed'],
-              false,
-              state,
-            ),
-          cleanState,
-        )
+      const newState: Night = Object.keys(cleanState.players).reduce(
+        (state, playerName) =>
+          // XXX: `assocPath` can produce invalid state
+          R.assocPath(
+            ['players', playerName, 'role', 'actionStates'],
+            {},
+            state,
+          ),
+        {...cleanState, status: 'night', awake: null},
+      )
       return {
         ...newState,
         status: 'night',
@@ -259,112 +224,63 @@ export const reducer: Reducer<GameState, RootAction> = (
   }
 }
 
-const nightRoleOrder = ['mafia', 'detective', 'nurse'] as const
-export const middleware: Middleware<GameState, RootAction> = (store) => (
-  next,
-) => (action) => {
-  const beforeState = store.getState()
-  next(action)
-  const afterState = store.getState()
+export const middleware: Middleware<GameState, RootAction> =
+  (store) => (next) => (action) => {
+    const beforeState = store.getState()
+    next(action)
+    const afterState = store.getState()
 
-  switch (beforeState.status) {
-    case 'waiting': {
-      if (action.type !== 'waiting/ready') {
+    switch (beforeState.status) {
+      case 'waiting': {
+        if (action.type !== 'waiting/ready') {
+          return
+        }
+        if (
+          Object.keys(afterState.players).length < 6 ||
+          Object.values(afterState.players).find(({ready}) => !ready)
+        ) {
+          // Not enough players or a player isn't ready
+          return
+        }
+        // Everyone's ready. Let's go.
+        next({type: 'game/start'})
+        setTimeout(() => next({type: 'game/wake/mafia'}), 5000)
         return
       }
-      if (
-        Object.keys(afterState.players).length < 6 ||
-        Object.values(afterState.players).find(({ready}) => !ready)
-      ) {
-        // Not enough players or a player isn't ready
+      case 'day': {
+        if (action.type !== 'day/lynch') {
+          return
+        }
+        if (afterState.status !== 'day') {
+          return
+        }
+        const lynchVoteCounts = countLynchVotes(afterState)
+        const voterPopulation = countVoterPopulation(afterState)
+        const [lynch, count] = Object.entries(lynchVoteCounts).reduce(
+          R.maxBy<[string, number]>(([_, votes]) => votes),
+        )
+        if (count <= voterPopulation / 2) {
+          return
+        }
+        if (lynch) {
+          next({type: 'game/lynch', lynch})
+        }
+        next({type: 'game/phase/night'})
+        setTimeout(() => next({type: 'game/wake/mafia'}), 5000)
         return
       }
-      // Everyone's ready. Let's go.
-      next({type: 'game/start'})
-      setTimeout(() => next({type: 'game/wake/mafia'}), 5000)
-      return
-    }
-    case 'firstNight': {
-      if (action.type !== 'night/inform') {
+      default: {
         return
       }
-      if (beforeState.status !== 'firstNight') {
-        return
-      }
-      if (beforeState.awake === null) {
-        return
-      }
-      if (afterState.status !== 'firstNight') {
-        return
-      }
-      if (afterState.awake === null) {
-        return
-      }
-      const phaseComplete = !Object.values(afterState.players).some(
-        // Returns true if there exists a living, awake player that has not
-        // completed their role action
-        ({alive, role}) =>
-          alive &&
-          role.name === afterState.awake &&
-          !role.actions.firstNight?.completed,
-      )
-      if (!phaseComplete) {
-        return
-      }
-      next({type: 'game/sleep'})
-      const aliveRoles = new Set(
-        Object.values(afterState.players)
-          .filter(({alive, role}) => alive && role.actions.firstNight)
-          .map(({role}) => role.name),
-      )
-      const aliveRoleOrder = nightRoleOrder.filter((role) =>
-        aliveRoles.has(role),
-      )
-      // `findIndex` here should never return -1 because currently awake role
-      // cannot be dead
-      const wakeNextIndex =
-        aliveRoleOrder.findIndex((role) => role === afterState.awake) + 1
-      if (wakeNextIndex < aliveRoleOrder.length) {
-        setTimeout(() => next({
-          type: `game/wake/${aliveRoleOrder[wakeNextIndex]!}` as `game/wake/${'mafia' | 'detective' | 'nurse'}`,
-        }), 5000)
-      } else {
-        setTimeout(() => next({type: 'game/phase/day'}), 5000)
-      }
-      return
-    }
-    case 'day': {
-      if (action.type !== 'day/lynch') {
-        return
-      }
-      if (afterState.status !== 'day') {
-        return
-      }
-      const lynchVoteCounts = countLynchVotes(afterState)
-      const voterPopulation = countVoterPopulation(afterState)
-      const [lynch, count] = Object.entries(lynchVoteCounts).reduce(
-        R.maxBy<[string, number]>(([_, votes]) => votes),
-      )
-      if (count <= voterPopulation / 2) {
-        return
-      }
-      if (lynch) {
-        next({type: 'game/lynch', lynch})
-      }
-      next({type: 'game/phase/night'})
-      setTimeout(() => next({type: 'game/wake/mafia'}), 5000)
-      return
-    }
-    default: {
-      return
     }
   }
-}
 
 /**
  * Returns an object mapping player names to the number of lynch votes for them.
  */
-export const countLynchVotes = (gameState: GameState) => {
+export const countLynchVotes = (
+  gameState: GameState,
+): Record<string, number> => {
   if (gameState.status !== 'day') {
     return {}
   }
@@ -372,13 +288,14 @@ export const countLynchVotes = (gameState: GameState) => {
     .filter(
       ({alive, role}) =>
         alive &&
-        role.actions.day?.name === 'lynch' &&
-        role.actions.day?.completed,
+        // role.actionStates.day?.name === 'lynch' &&
+        ROLES[role.name].actions.day === 'lynch' &&
+        role.actionStates.day?.lynch,
     )
-    .map(({role}) => role.actions.day!.lynch)
+    .map(({role}) => role.actionStates.day!.lynch)
   // Use empty string to represent `null` lynch vote
   // Assumes empty string is not a possible player name
-  return R.countBy((x) => x || '', votes)
+  return R.countBy((x) => x ?? '', votes)
 }
 
 /**
@@ -387,6 +304,6 @@ export const countLynchVotes = (gameState: GameState) => {
 export const countVoterPopulation = (gameState: GameState) =>
   gameState.status === 'day'
     ? Object.values(gameState.players).filter(
-        ({alive, role}) => alive && role.actions.day?.name === 'lynch',
+        ({alive, role}) => alive && ROLES[role.name].actions.day === 'lynch',
       ).length
     : 0

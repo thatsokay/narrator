@@ -37,45 +37,6 @@ export const Waiting = () => {
   return <GameDefault gameState={gameState} />
 }
 
-export const FirstNight = () => {
-  const playerRole = radios(
-    'Player role',
-    {
-      Villager: 'villager',
-      Mafia: 'mafia',
-      Detective: 'detective',
-      Nurse: 'nurse',
-    },
-    'mafia',
-  )
-  const awake = radios(
-    'Awake',
-    {
-      Nobody: 'null', // Radio deselects if value is null
-      Mafia: 'mafia',
-    },
-    'mafia',
-  )
-  const roles = [
-    ROLES[playerRole],
-    ROLES.villager,
-    ROLES.villager,
-    ROLES.detective,
-    ROLES.nurse,
-    ROLES.mafia,
-  ]
-  const players = R.fromPairs(
-    roles.map((role, i) => [`player${i}`, {alive: true, role}]),
-  )
-  const gameState: GameState = {
-    status: 'firstNight',
-    players,
-    error: null,
-    awake: awake === 'null' ? null : awake,
-  }
-  return <GameDefault gameState={gameState} />
-}
-
 export const Day = () => {
   const playerRole = radios(
     'Player role',

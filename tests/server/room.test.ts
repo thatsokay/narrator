@@ -60,14 +60,14 @@ describe('room', () => {
     sockets.forEach(([_, receive]) => receive({type: 'waiting/ready'}))
     sockets.forEach(([sender, _]) =>
       expect(sender).toHaveBeenLastCalledWith(
-        expect.objectContaining({status: 'firstNight', awake: null}),
+        expect.objectContaining({status: 'night', awake: null}),
       ),
     )
 
     jest.runAllTimers()
     sockets.forEach(([sender, _]) =>
       expect(sender).toHaveBeenLastCalledWith(
-        expect.objectContaining({status: 'firstNight', awake: 'mafia'}),
+        expect.objectContaining({status: 'night', awake: 'mafia'}),
       ),
     )
   })
