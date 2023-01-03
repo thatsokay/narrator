@@ -27,9 +27,9 @@
     "typeface-pt-serif-caption": "0.0.72"
   },
   "devDependencies": {
-    "@storybook/addon-essentials": "^6.4.19",
+    "@storybook/addon-essentials": "^6.5.15",
     "@storybook/addon-knobs": "^6.0.21",
-    "@storybook/react": "^6.4.19",
+    "@storybook/react": "^6.5.15",
     "@types/jest": "^27.4.1",
     "@types/koa": "^2.13.4",
     "@types/koa-send": "^4.1.3",
