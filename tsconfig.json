@@ -14,11 +14,6 @@
     "noUncheckedIndexedAccess": true,
     "jsx": "react"
   },
-  "include": [
-    "src/client/index.tsx",
-    "src/server/index.ts"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "include": ["src"],
+  "exclude": ["node_modules"]
 }

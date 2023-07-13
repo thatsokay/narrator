@@ -11,6 +11,11 @@ export interface Store<S, A> {
   getState: () => S
 }
 
+export type StoreCreator<S, A> = (
+  reducer: Reducer<S, A>,
+  initialState?: S,
+) => Store<S, A>
+
 export const createStore = <S, A>(
   reducer: Reducer<S, A>,
   initialState?: S,
@@ -36,20 +41,21 @@ export type Middleware<S, A> = (
  * Takes a series of middlewares, then a createStore function, and returns a new
  * createStore function patched with the middlewares.
  */
-export const applyMiddleware = <S, A>(...middlewares: Middleware<S, A>[]) => (
-  createStore: (reducer: Reducer<S, A>, initialState?: S) => Store<S, A>,
-) => (reducer: Reducer<S, A>, initialState?: S): Store<S, A> => {
-  const store = createStore(reducer, initialState)
-  const patchers = middlewares.map((middleware) => middleware(store))
-  const dispatch = patchers.reduceRight(
-    (acc, patcher) => patcher(acc),
-    store.dispatch,
-  )
-  const dispatch$ = new Subject<A>()
-  dispatch$.subscribe(dispatch)
-  // TODO: Replace store.dispatch so that it can be used by middlewares
-  return {
-    ...store,
-    dispatch: (action: A) => dispatch$.next(action),
+export const applyMiddleware =
+  <S, A>(...middlewares: Middleware<S, A>[]) =>
+  (createStore: StoreCreator<S, A>): StoreCreator<S, A> =>
+  (reducer, initialState): Store<S, A> => {
+    const store = createStore(reducer, initialState)
+    const patchers = middlewares.map((middleware) => middleware(store))
+    const dispatch = patchers.reduceRight(
+      (acc, patcher) => patcher(acc),
+      store.dispatch,
+    )
+    const dispatch$ = new Subject<A>()
+    dispatch$.subscribe(dispatch)
+    // TODO: Replace store.dispatch so that it can be used by middlewares
+    return {
+      ...store,
+      dispatch: (action: A) => dispatch$.next(action),
+    }
   }
-}
